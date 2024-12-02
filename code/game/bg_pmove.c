@@ -700,13 +700,13 @@ static qboolean PM_CheckJump( void ) {
 	// Total stamina count is 20000
 		if (g_realism.value) {
 		   if ((pm->ps->sprintTime < 15000) && (pm->ps->sprintTime > 10000)) {
-		                pm->ps->velocity[2] = 220;
+		                pm->ps->velocity[2] = 260;
 		   } else if ((pm->ps->sprintTime < 10000) && (pm->ps->sprintTime > 5000)) {
-		                pm->ps->velocity[2] = 200;
+		                pm->ps->velocity[2] = 250;
 		   } else if ((pm->ps->sprintTime < 5000) && (pm->ps->sprintTime >= 0)) {
-					    pm->ps->velocity[2] = 180;
+					    pm->ps->velocity[2] = 230;
 		   } else { 
-		                pm->ps->velocity[2] = 240; // basically first jump
+		                pm->ps->velocity[2] = 270; // basically first jump
 		   }
 		} else {
 			            pm->ps->velocity[2] = 270; // no realism
@@ -715,13 +715,13 @@ static qboolean PM_CheckJump( void ) {
 	#ifdef CGAMEDLL
 		if (cg_realism.value) {
 		   if ((pm->ps->sprintTime < 15000) && (pm->ps->sprintTime > 10000)) {
-		                pm->ps->velocity[2] = 220;
+		                pm->ps->velocity[2] = 260;
 		   } else if ((pm->ps->sprintTime < 10000) && (pm->ps->sprintTime > 5000)) {
-		                pm->ps->velocity[2] = 200;
+		                pm->ps->velocity[2] = 250;
 		   } else if ((pm->ps->sprintTime < 5000) && (pm->ps->sprintTime >= 0)) {
-					    pm->ps->velocity[2] = 180;
+					    pm->ps->velocity[2] = 230;
 		   } else { 
-		                pm->ps->velocity[2] = 240; // basically first jump
+		                pm->ps->velocity[2] = 270; // basically first jump
 		   }
 		} else {
 			            pm->ps->velocity[2] = 270; // no realism
@@ -2540,8 +2540,38 @@ static void PM_ReloadClip( int weapon ) {
 	ammoreserve = pm->ps->ammo[ BG_FindAmmoForWeapon( weapon )];
 	ammoclip    = pm->ps->ammoclip[BG_FindClipForWeapon( weapon )];
 
-	ammomove = ammoTable[weapon].maxclip - ammoclip;
-      // Jaymod
+	// ammomove = ammoTable[weapon].maxclip - ammoclip;
+    // +++
+	// one bullet in chamber --- .weapons file need change maxclip to maxclip + 1
+	switch ( weapon ) {
+		case WP_LUGER:
+		case WP_SILENCER:
+		case WP_P38:
+		case WP_DELISLE:
+		case WP_DELISLESCOPE:
+		// Their reloading animations below have not been adapted yet
+		// case WP_COLT:
+		// case WP_AKIMBO:
+		// case WP_TT33:
+		// case WP_DUAL_TT33:
+		// case WP_MAUSER:
+		// case WP_SNIPER:
+		// case WP_SNIPERRIFLE:
+		// case WP_SNOOPERSCOPE:
+		// case WP_G43:
+			if ( ammoclip == 0 ) {
+				ammomove = ammoTable[weapon].maxclip - 1;
+			} else {
+				ammomove = ammoTable[weapon].maxclip - ammoclip;
+			}
+			break;
+		default:
+			ammomove = ammoTable[weapon].maxclip - ammoclip;
+			break;
+	}
+	  
+	  
+	// Jaymod
 	if ( !pm->ps->aiChar) { 
 	if( weapon == WP_M97 || weapon == WP_AUTO5 ) {
 		ammomove = 1;
@@ -3486,7 +3516,7 @@ static void PM_Weapon( void ) {
 	// unable to use weapon while sprinting
 	#ifdef GAMEDLL
 	if (!delayedFire && g_realism.value ) {
-			if ( ( pm->ps->pm_flags & PMF_SPRINTING ) ){
+			if ( ( pm->ps->pm_flags & PMF_SPRINTING ) && ( pm->ps->sprintTime > 0 ) ) {
 			if ( pm->ps->weaponstate != WEAPON_SPRINT_IN ) {
 				pm->ps->weaponstate = WEAPON_SPRINT_IN;
 				PM_StartWeaponAnim(PM_SprintInAnimForWeapon(pm->ps->weapon));
@@ -3513,7 +3543,7 @@ static void PM_Weapon( void ) {
 	#ifdef CGAMEDLL
 	if ( !delayedFire && cg_realism.value ) {
 
-		if ( ( pm->ps->pm_flags & PMF_SPRINTING ) ){
+		if ( ( pm->ps->pm_flags & PMF_SPRINTING ) && ( pm->ps->sprintTime > 0 ) ) {
 			if ( pm->ps->weaponstate != WEAPON_SPRINT_IN ) {
 				pm->ps->weaponstate = WEAPON_SPRINT_IN;
 				PM_StartWeaponAnim(PM_SprintInAnimForWeapon(pm->ps->weapon));
@@ -3573,7 +3603,7 @@ static void PM_Weapon( void ) {
 	}
 
 	// player is leaning - no fire
-	if ( pm->ps->leanf != 0 && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_DYNAMITE ) {
+	if ( pm->ps->leanf != 0 && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_DYNAMITE && pm->ps->weapon != WP_KNIFE ) {
 		return;
 	}
 
@@ -4522,14 +4552,14 @@ void PM_LadderMove( void ) {
 		} else { // player speed
 	            #ifdef GAMEDLL
 				if (g_realism.value) {
-			    wishvel[2] = 0.7 * upscale * scale * (float)pm->cmd.forwardmove;
+			    wishvel[2] = 0.8 * upscale * scale * (float)pm->cmd.forwardmove;
 		        } else {
 			    wishvel[2] = 0.9 * upscale * scale * (float)pm->cmd.forwardmove;
 		        }
 				#endif
 				 #ifdef CGAMEDLL
 				if (cg_realism.value) {
-			    wishvel[2] = 0.7 * upscale * scale * (float)pm->cmd.forwardmove;
+			    wishvel[2] = 0.8 * upscale * scale * (float)pm->cmd.forwardmove;
 		        } else {
 			    wishvel[2] = 0.9 * upscale * scale * (float)pm->cmd.forwardmove;
 		        }
@@ -4590,9 +4620,7 @@ PM_Sprint
 void PM_Sprint( void ) {
 	if (    ( pm->cmd.buttons & BUTTON_SPRINT ) &&
 			( pm->cmd.forwardmove || pm->cmd.rightmove ) &&
-			!( pm->ps->pm_flags & PMF_DUCKED ) &&
-			( !pm->waterlevel )
-			) {
+			!( pm->ps->pm_flags & PMF_DUCKED ) ) {
 
 		if ( pm->ps->powerups[PW_NOFATIGUE] ) {    // take time from powerup before taking it from sprintTime
 			pm->ps->powerups[PW_NOFATIGUE] -= 2000 * pml.frametime; 

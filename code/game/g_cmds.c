@@ -290,12 +290,23 @@ void Cmd_Give_f( gentity_t *ent ) {
 		}
 	}
 
+	// +++
 	if ( give_all || Q_stricmp( name, "weapons" ) == 0 ) {
 		//ent->client->ps.weapons[0] = (1 << (WP_MONSTER_ATTACK1)) - 1 - (1<<WP_NONE);	//----(SA)	gives the cross now as well
 
 		//(SA) we really don't want to give anything beyond WP_HOLYCROSS
+		/*
 		for ( i = 0; i <= WP_HOLYCROSS; i++ )
 			COM_BitSet( ent->client->ps.weapons, i );
+		*/
+
+		// dont give the unusable weapons
+		for ( i = 0; i <= WP_HOLYCROSS; i++ ) {
+			if ( i != WP_DAGGER && i != WP_P38 && i != WP_M30 && i != WP_HDM && i != WP_HOLYCROSS ) {
+				COM_BitSet( ent->client->ps.weapons, i );
+			}
+		}
+
 
 //		for (i=0; i<WP_NUM_WEAPONS; i++) {
 //			switch (i) {

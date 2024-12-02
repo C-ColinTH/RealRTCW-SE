@@ -1606,7 +1606,10 @@ static void CG_Text_Paint_Limit( float *maxX, float x, float y, int font, float 
 			fnt = &cgDC.Assets.smallFont;
 		} else if ( font == UI_FONT_HANDWRITING ) {
 			fnt = &cgDC.Assets.handwritingFont;
+		} else if ( font == UI_FONT_FREE ) {		// +++
+			fnt = &cgDC.Assets.freefont;
 		}
+		
 		useScale = scale * fnt->glyphScale;
 		trap_R_SetColor( color );
 		len = strlen( text );

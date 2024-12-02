@@ -31,6 +31,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
+#include "c_mylib.h"
 
 //----(SA) added to make it easier to raise/lower our statsubar by only changing one thing
 #define STATUSBARHEIGHT 452
@@ -72,6 +73,8 @@ int CG_Text_Width( const char *text, int font, float scale, int limit ) {
 		fnt = &cgDC.Assets.smallFont;
 	} else if ( font == UI_FONT_HANDWRITING ) {
 		fnt = &cgDC.Assets.handwritingFont;
+	} else if ( font == UI_FONT_FREE ) {		// +++
+		fnt = &cgDC.Assets.freefont;
 	}
 
 	useScale = scale * fnt->glyphScale;
@@ -117,6 +120,8 @@ int CG_Text_Height( const char *text, int font, float scale, int limit ) {
 		fnt = &cgDC.Assets.smallFont;
 	} else if ( font == UI_FONT_HANDWRITING ) {
 		fnt = &cgDC.Assets.handwritingFont;
+	} else if ( font == UI_FONT_FREE ) {		// +++
+		fnt = &cgDC.Assets.freefont;
 	}
 
 	useScale = scale * fnt->glyphScale;
@@ -171,6 +176,8 @@ void CG_Text_Paint( float x, float y, int font, float scale, vec4_t color, const
 		fnt = &cgDC.Assets.smallFont;
 	} else if ( font == UI_FONT_HANDWRITING ) {
 		fnt = &cgDC.Assets.handwritingFont;
+	} else if ( font == UI_FONT_FREE ) {		// +++
+		fnt = &cgDC.Assets.freefont;
 	}
 
 	useScale = scale * fnt->glyphScale;
@@ -1310,8 +1317,15 @@ static void CG_DrawLowerRight( void ) {
 CG_DrawCheckpointString
 ===================
 */
+// XXX
 static void CG_DrawCheckpointString ( void ) {
 	float    *color;
+
+	qhandle_t image = 0;
+	//float axis_x, axis_y, width = 200.0, height = 20.0;
+	float width = 200.0, height = 20.0;
+	const char** translated;
+
 
 	color = CG_FadeColor( cg.checkpointTime, CHECKPOINT_PASSED_TIME );
 
@@ -1321,10 +1335,18 @@ static void CG_DrawCheckpointString ( void ) {
 
 	trap_R_SetColor( color );
 
-	if ( cg_drawCheckpoint.integer == 1 ) 
-	{
-	CG_DrawStringExt2( -25, 100, CG_translateString( "checkpointsaved" ), color, qfalse, qtrue, 10, 10, 0 );
+	if ( cg_drawCheckpoint.integer == 1 ) {
+		// +++
+		image = trap_R_RegisterShaderNoMip( "gfx/2d/checkpointsavedHint" );
+		if ( image ) {
+			CG_DrawPic( -22, 100, width, height, image );	// -15
+		} else {
+			translated = SE_CG_translateString( "checkpointsaved" );
+			CG_DrawStringExt2( -25, 100, translated[0], color, qfalse, qtrue, 10, 10, 0 );
+		}
 	}
+
+	trap_R_SetColor( NULL );
 
 }
 
@@ -1333,8 +1355,15 @@ static void CG_DrawCheckpointString ( void ) {
 CG_DrawGameSavedString
 ===================
 */
+// XXX
 static void CG_DrawGameSavedString ( void ) {
 	float    *color;
+
+	qhandle_t image = 0;
+	//float axis_x, axis_y, width = 200.0, height = 20.0;
+	float width = 200.0, height = 20.0;
+	const char** translated;
+
 
 	color = CG_FadeColor( cg.gameSavedTime, GAME_SAVED_TIME );
 
@@ -1344,7 +1373,16 @@ static void CG_DrawGameSavedString ( void ) {
 
 	trap_R_SetColor( color );
 
-	CG_DrawStringExt2( -25, 115, CG_translateString( "gamesaved" ), color, qfalse, qtrue, 10, 10, 0 );
+	// +++
+	image = trap_R_RegisterShaderNoMip( "gfx/2d/gamesavedHint" );
+	if ( image ) {
+		CG_DrawPic( -22, 120, width, height, image );	// -15
+	} else {
+		translated = SE_CG_translateString( "gamesaved" );
+		CG_DrawStringExt2( -25, 115, translated[0], color, qfalse, qtrue, 10, 10, 0 );
+	}
+
+	trap_R_SetColor( NULL );
 
 }
 
@@ -1354,12 +1392,22 @@ static void CG_DrawGameSavedString ( void ) {
 CG_DrawPickupItem
 ===================
 */
+// XXX
 static void CG_DrawPickupItem( void ) {
 	int value;
 	float   *fadeColor;
 	char pickupText[256];
 	float color[4];
 	int w = 0;
+
+	// +++
+	qhandle_t image = 0;
+	float axis_x, axis_y, width = 200.0, height = 20.0;
+	// axis_x = (SCREEN_WIDTH - width ) * 0.95;
+	axis_x = (SCREEN_WIDTH - width / 2) - 10;
+	axis_y = (SCREEN_HEIGHT - height) * 0.8;
+	//const char* translated;
+
 
 	if ( cg_fixedAspect.integer == 2 ) {
 		CG_SetScreenPlacement(PLACE_CENTER, PLACE_BOTTOM);
@@ -1392,9 +1440,23 @@ static void CG_DrawPickupItem( void ) {
 			color[3] = fadeColor[0];
 			w = CG_DrawStrlen( pickupText ) * 10;
 #ifdef LOCALISATION
-			CG_DrawStringExt2( 640 - ( w / 2 ), 375, CG_TranslateString( pickupText ), color, qfalse, qtrue, 10, 10, 0 );
+			// CG_DrawStringExt2( 640 - ( w / 2 ), 375, CG_TranslateString( pickupText ), color, qfalse, qtrue, 10, 10, 0 );
+			// 增加
+			image = trap_R_RegisterShader( va("text/CHN/pickup/%s", pickupText) );
+			if ( image ){
+				CG_DrawPic( axis_x, axis_y, width, height, image );
+			} else {
+				CG_DrawStringExt2( 640 - ( w / 2 ) - 10, 300, G_TranslateString( pickupText ), color, qfalse, qtrue, 10, 10, 0 );
+			}
 #else
-			CG_DrawStringExt2( 640 - ( w / 2 ), 375, pickupText, color, qfalse, qtrue, 10, 10, 0 );
+			// CG_DrawStringExt2( 640 - ( w / 2 ), 375, pickupText, color, qfalse, qtrue, 10, 10, 0 );
+			// 增加
+			image = trap_R_RegisterShader( va("text/CHN/pickup/%s", pickupText) );
+			if ( image ){
+				CG_DrawPic( axis_x, axis_y, width, height, image );
+			} else {
+				CG_DrawStringExt2( 640 - ( w / 2 ) - 10, 300, pickupText, color, qfalse, qtrue, 10, 10, 0 );
+			}
 #endif
 
 			trap_R_SetColor( NULL );
@@ -1723,12 +1785,18 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
+// XXX
 void CG_CenterPrint( const char *str, int y, int charWidth ) {
 	char   *s;
 
 //----(SA)	added translation lookup
-	Q_strncpyz( cg.centerPrint, CG_translateString( (char*)str ), sizeof( cg.centerPrint ) );
+//	Q_strncpyz( cg.centerPrint, CG_translateString( (char*)str ), sizeof( cg.centerPrint ) );
 //----(SA)	end
+
+	const char** translated = SE_CG_translateString( (char*)str );
+	Q_strncpyz( cg.centerPrint, translated[0], sizeof( cg.centerPrint ) );
+	// Q_strncpyz( cg.centerPrintImageIndex, translated[1], sizeof(cg.centerPrintImageIndex) );
+
 
 
 	cg.centerPrintTime = cg.time;
@@ -1758,9 +1826,17 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
+// XXX
 void CG_BonusCenterPrint( const char *str, int y, int charWidth ) {
 	char   *s;
     int len;
+
+	// +++
+	// const char** array = SE_CG_bonusString( (char*)str );
+	// Q_strncpyz( cg.centerPrint, array[0], sizeof( cg.centerPrint ) );
+	// Q_strncpyz( cg.centerPrintImageIndex, array[1], sizeof(cg.centerPrintImageIndex) );
+
+
 //----(SA)	added translation lookup
 	Q_strncpyz( cg.centerPrint, CG_bonusString( (char*)str ), sizeof( cg.centerPrint ) );
 //----(SA)	end
@@ -1796,23 +1872,38 @@ Called for important messages that should stay in the center of the screen
 for a few moments
 ==============
 */
+// XXX
 void CG_SubtitlePrint( const char *str, int y, int charWidth ) {
 	char   *s;
 	int len;
 
-
     // Translate the input string
-    const char* translated = CG_translateTextString(str);
+    // const char* translated = CG_translateTextString(str);
+	// 测试
+	const char** translated = SE_CG_translateTextString(str);
 
-    // Check if the translated string is "IGNORED_SUBTITLE", indicating an ignored subtitle
+    /*
+	// Check if the translated string is "IGNORED_SUBTITLE", indicating an ignored subtitle
     if (strcmp(translated, "IGNORED_SUBTITLE") == 0) {
         // If it is, return immediately to prevent the subtitle from being displayed
         return;
     }
+	*/
+
+	// +++
+	if (strcmp(translated[0], "IGNORED_SUBTITLE" ) == 0 ) {
+        return;
+    }
 
     // Copy the translated string to cg.subtitlePrint
-    Q_strncpyz(cg.subtitlePrint, translated, sizeof(cg.subtitlePrint));
-
+    // Q_strncpyz(cg.subtitlePrint, translated, sizeof(cg.subtitlePrint));
+	// +++
+	Q_strncpyz(cg.subtitlePrint, translated[0], sizeof(cg.subtitlePrint));
+	if ( translated[0] && translated[1] && strcmp(translated[1], "") != 0 ) {
+		Q_strncpyz(cg.subtitleImagePath, translated[1], sizeof(cg.subtitleImagePath));
+	} else {
+		Q_strncpyz(cg.subtitleImagePath, "", sizeof(cg.subtitleImagePath));
+	}
 
 	
 	cg.subtitlePrintY = y;
@@ -1831,10 +1922,47 @@ void CG_SubtitlePrint( const char *str, int y, int charWidth ) {
 		}
 		s++;
 	}
-    // Calculate the number of characters in the message
-    len = CG_DrawStrlen(cg.subtitlePrint);
-	// Calculate the display time based on an average reading speed of 17 characters per second
-    int displayTime = (len / 17.0) * 1000; // Convert to milliseconds
+
+
+	// +++
+	// "#x.xx" to control the display time of the subtitle, in seconds
+	int displayTime=0, displaytime_milesec=0, length;
+	char *token = (char *)translated[0];
+	// CG_Printf( "str:%s\n", token );
+	// strncpy(token, translated[0], sizeof(token));
+	length = strlen(token);
+	if ( token && length>=2) {
+		int i=0;
+		while ( i<=length ) {
+			if ( token[i]=='#' ) {
+				char *time_str = c_strcut( token, i+1, length-i-1 );
+				// CG_Printf( "time str:%s\n", time_str );
+				displaytime_milesec = c_atoif(time_str) * 1000;
+				// CG_Printf( "time ms:%d\n", displaytime_milesec );
+				break;
+			}
+			i++;
+		}
+		
+		char *Print = c_strcut( translated[0], 0, i );
+		if ( Print && strlen(Print) > 0 ) {
+			Q_strncpyz(cg.subtitlePrint, Print, sizeof(cg.subtitlePrint));
+		}
+
+		if ( displaytime_milesec > 2000 ) {
+			displayTime = displaytime_milesec;
+		} else {
+			len = CG_DrawStrlen(cg.subtitlePrint);
+    		displayTime = (len / 17.0) * 1000;
+		}
+
+	} else {
+		// Calculate the number of characters in the message
+    	len = CG_DrawStrlen(cg.subtitlePrint);
+		// Calculate the display time based on an average reading speed of 17 characters per second
+    	int displayTime = (len / 17.0) * 1000; // Convert to milliseconds
+	}
+
 
 	// Ensure the display time is at least a certain minimum value to prevent very short messages from disappearing too quickly
     int minDisplayTime = 2000; // 2 seconds
@@ -1851,11 +1979,20 @@ void CG_SubtitlePrint( const char *str, int y, int charWidth ) {
 CG_DrawCenterString
 ===================
 */
+// XXX
 static void CG_DrawCenterString( void ) {
 	char    *start;
 	int l;
 	int x, y, w;
 	float   *color;
+
+	// +++
+	qhandle_t image = 0;
+	qhandle_t image2 = 0;
+	float axis_x, axis_y, width = 400.0, height = 40.0;
+	axis_x = (SCREEN_WIDTH - width) * 0.5;
+	axis_y = (SCREEN_HEIGHT - height) * 0.8 - 20;
+
 
 	if ( !cg.centerPrintTime ) {
 		return;
@@ -1874,6 +2011,50 @@ static void CG_DrawCenterString( void ) {
 
 	start = cg.centerPrint;
 
+	// +++
+	int length = strlen(start), run_behind = 1;
+	char *temp = (char *)malloc(length + 1);
+	strcpy( temp, start );
+	int index = c_strchk('#', temp);
+
+	if (index != -1) {
+		char *path;
+		path = c_strcutpy(temp, index+1, -1);
+		image = trap_R_RegisterShader( va("%s", path) );
+		
+		if ( image ) {
+			CG_DrawPic( axis_x, axis_y+25, width, height, image );
+			run_behind = 0;
+		} else if ( run_behind && image2 ) {
+			CG_DrawPic( axis_x, axis_y+25, width, height, image2 );
+			run_behind = 0;
+		} else {
+			//Q_strncpyz(start, c_strcutpy(temp, 0, index-1), sizeof(start));
+			strcpy( start, c_strcutpy(temp, 0, index-1) );
+			// CG_Printf( "Try name:%s\n", path2 );
+		}
+
+	}
+
+	if ( run_behind == 0 ) {
+		trap_R_SetColor( NULL );
+		return;
+	}
+	
+	// +++
+	if ( start && strlen(start) > 8 && strncmp( start, "-bombset", strlen("-bombset") ) == 0 ) {
+		char *bombtime = strstr( start, "-bombset");
+		bombtime += strlen("-bombset");
+		if ( strlen(bombtime) == 1 ) {
+			strcpy( bombtime, va( " %s" , bombtime) );
+		}
+		CG_DrawPic( axis_x, axis_y, width, height, trap_R_RegisterShader( "text/CHN/string/bombset" ) );
+		CG_DrawStringExt( axis_x + 236, axis_y + 4, va( "%s", bombtime ), color, qfalse, qtrue, cg.centerPrintCharWidth, (int)( cg.centerPrintCharWidth * 1.5 ), 0 );
+		trap_R_SetColor( NULL );
+		return;
+	}
+
+
 	y = cg.centerPrintY - cg.centerPrintLines * BIGCHAR_HEIGHT / 2;
 
 	while ( 1 ) {
@@ -1888,7 +2069,6 @@ static void CG_DrawCenterString( void ) {
 		linebuffer[l] = 0;
 
 		w = cg.centerPrintCharWidth * CG_DrawStrlen( linebuffer );
-
 		x = ( SCREEN_WIDTH - w ) / 2;
 
 		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.centerPrintCharWidth, (int)( cg.centerPrintCharWidth * 1.5 ), 0 );
@@ -1916,6 +2096,7 @@ static void CG_DrawCenterString( void ) {
 CG_DrawSubtitleString
 ===================
 */
+// XXX
 static void CG_DrawSubtitleString( void ) {
 	char    *start;
 	int l;
@@ -1941,45 +2122,62 @@ static void CG_DrawSubtitleString( void ) {
 
 	y = cg.subtitlePrintY - cg.subtitlePrintLines * BIGCHAR_HEIGHT / 2;
 
-while ( 1 ) {
-    char linebuffer[1024]; // Buffer size
 
-    for ( l = 0; l < 50; l++ ) { // Line length limit
-        if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
-            break;
-        }
-        linebuffer[l] = start[l];
-        if (l >= 49 && start[l+1] != ' ' && start[l+1] != '\0') { // Check if the next character is a space or end of string
-            while(l > 0 && linebuffer[l] != ' ') { // Move back to the last space
-                l--;
-            }
-            break;
-        }
-    }
-    linebuffer[l] = 0;
+	// +++
+	char *filename;
+	float axis_x, axis_y, width = 500.0, height = 50.0;
+	qhandle_t image = 0;
+	filename = cg.subtitleImagePath;
 
-    w = cg.subtitlePrintCharWidth * CG_DrawStrlen( linebuffer );
+	if ( filename && strlen( filename ) > 0 && strcmp( filename, "") !=0 && c_isStrAllSpaces( filename )==0 ) {
+		axis_x = ( SCREEN_WIDTH - width ) * 0.5;
+		axis_y = ( SCREEN_HEIGHT - height ) * 0.85; // 365.5
+		image = trap_R_RegisterShader( va("%s", filename) );
 
-    x = ( SCREEN_WIDTH - w ) / 2;
-
-
-    if ( cg_subtitleShadow.integer ) {
-       CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.subtitlePrintCharWidth, (int)( cg.subtitlePrintCharWidth * 1.5 ), 0 );
-	} else {
-       CG_DrawStringExt( x, y, linebuffer, color, qfalse, qfalse, cg.subtitlePrintCharWidth, (int)( cg.subtitlePrintCharWidth * 1.5 ), 0 );
 	}
 
-    y += cg.subtitlePrintCharWidth * 2;
+	if (image) {
+		CG_DrawPic( axis_x, axis_y, width, height, image );
+	} else {
+		while ( 1 ) {
+			char linebuffer[1024]; // Buffer size
 
-    // Skip processed characters and newline characters
-    start += l;
-    while ( *start && ( *start == '\n' || !Q_strncmp( start, "\\n", 1 ) ) ) {
-        start++;
-    }
-    if ( !*start ) {
-        break;
-    }
-}
+			for ( l = 0; l < 50; l++ ) { // Line length limit
+				if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
+					break;
+				}
+				linebuffer[l] = start[l];
+				if (l >= 49 && start[l+1] != ' ' && start[l+1] != '\0') { // Check if the next character is a space or end of string
+					while(l > 0 && linebuffer[l] != ' ') { // Move back to the last space
+						l--;
+					}
+					break;
+				}
+			}
+			linebuffer[l] = 0;
+
+			w = cg.subtitlePrintCharWidth * CG_DrawStrlen( linebuffer );
+			x = ( SCREEN_WIDTH - w ) / 2;
+
+			if ( cg_subtitleShadow.integer ) {
+				CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.subtitlePrintCharWidth, (int)( cg.subtitlePrintCharWidth * 1.5 ), 0 );
+			} else {
+				CG_DrawStringExt( x, y, linebuffer, color, qfalse, qfalse, cg.subtitlePrintCharWidth, (int)( cg.subtitlePrintCharWidth * 1.5 ), 0 );
+			}
+
+			y += cg.subtitlePrintCharWidth * 2;
+
+			// Skip processed characters and newline characters
+			start += l;
+			while ( *start && ( *start == '\n' || !Q_strncmp( start, "\\n", 1 ) ) ) {
+				start++;
+			}
+			if ( !*start ) {
+				break;
+			}
+		}
+
+	} // if (image)
 
 	trap_R_SetColor( NULL );
 }
@@ -2816,11 +3014,20 @@ static void CG_DrawCrosshair3D( void ) {
 CG_DrawDynamiteStatus
 ==============
 */
+// XXX
 static void CG_DrawDynamiteStatus( void ) {
 	float color[4];
 	char        *name;
 	int timeleft;
 	float w;
+
+	// +++
+	qhandle_t image = 0;
+	float axis_x, width = 400.0, height = 40.0;
+	axis_x = (SCREEN_WIDTH - width) * 0.5;
+	// axis_y = (SCREEN_HEIGHT - height) * 0.8 - 20;
+	image = trap_R_RegisterShader( "text/CHN/string/bombtime" );
+
 
 	if ( cg.snap->ps.weapon != WP_DYNAMITE ) {
 		return;
@@ -2849,8 +3056,18 @@ static void CG_DrawDynamiteStatus( void ) {
 	timeleft += 5000;
 	timeleft /= 1000;
 
-	name = va( "Timer: %d", timeleft );
-	w = CG_DrawStrlen( name ) * BIGCHAR_WIDTH;
+	// name = va( "Timer: %d", timeleft );
+	// w = CG_DrawStrlen( name ) * BIGCHAR_WIDTH;
+	// +++
+	if ( image ) {
+		name = va( "      : %d", timeleft );
+		w = CG_DrawStrlen( name ) * BIGCHAR_WIDTH;
+		CG_DrawPic( axis_x, 150, width, height, image );
+	} else {
+		name = va( "Timer: %d", timeleft );
+		w = CG_DrawStrlen( name ) * BIGCHAR_WIDTH;
+	}
+
 
 	color[3] *= cg_hudAlpha.value;
 	CG_DrawBigStringColor( 300 - w / 2, 170, name, color );
@@ -2926,12 +3143,18 @@ void CG_CheckForCursorHints( void ) {
 CG_DrawCrosshairNames
 =====================
 */
+// XXX
 static void CG_DrawCrosshairNames( void ) {
 	float       *color;
 	char        *name;
 	float w;
 
 	const char  *s;
+
+	// +++
+	qhandle_t image = 0;
+	float width = 200.0, height = 20.0;
+
 
 	if ( cg_drawCrosshair.integer < 0 ) {
 		return;
@@ -2967,7 +3190,15 @@ static void CG_DrawCrosshairNames( void ) {
 	w = CG_DrawStrlen( s ) * SMALLCHAR_WIDTH;
 
 	// draw the name and class
-	CG_DrawSmallStringColor( 370 - w / 2, 190, s, color );
+	// CG_DrawSmallStringColor( 370 - w / 2, 190, s, color );
+	// +++
+	image = trap_R_RegisterShader( va("text/CHN/string/%s", name) );
+	if ( image ) {
+		CG_DrawPic( 360 - w / 2, 190, width, height, image );
+	} else {
+		//CG_DrawPic( 360 - w / 2, 190, width, height, image );
+		CG_DrawSmallStringColor( 370 - w / 2, 190, s, color );
+	}
 
 	trap_R_SetColor( NULL );
 }
@@ -3415,6 +3646,7 @@ CG_DrawObjectiveInfo
 #define OID_LEFT    10
 #define OID_TOP     65
 
+// XXX // JUST MARK
 void CG_ObjectivePrint( const char *str, int charWidth, int team ) {
 	char    *s;
 

@@ -1283,14 +1283,25 @@ typedef struct
 
 // Note that the ordering indicates the order of preference used
 // when there are multiple images of different formats available
+// +++
 static imageExtToLoaderMap_t imageLoaders[ ] =
 {
+	
+	{ "jpg",  R_LoadJPG },	// change the default load order
+	{ "png",  R_LoadPNG },
+	{ "tga",  R_LoadTGA },
+	{ "jpeg", R_LoadJPG },
+	{ "pcx",  R_LoadPCX },
+	{ "bmp",  R_LoadBMP }
+
+	/*
 	{ "tga",  R_LoadTGA },
 	{ "jpg",  R_LoadJPG },
 	{ "jpeg", R_LoadJPG },
 	{ "png",  R_LoadPNG },
 	{ "pcx",  R_LoadPCX },
 	{ "bmp",  R_LoadBMP }
+	*/
 };
  
 static int numImageLoaders = ARRAY_LEN( imageLoaders );

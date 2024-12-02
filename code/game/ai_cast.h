@@ -280,7 +280,9 @@ typedef struct
 	char                            *params;
 } cast_script_stack_item_t;
 //
-#define AICAST_MAX_SCRIPT_STACK_ITEMS   64
+// +++
+// #define AICAST_MAX_SCRIPT_STACK_ITEMS   64
+#define AICAST_MAX_SCRIPT_STACK_ITEMS   128
 //
 typedef struct
 {

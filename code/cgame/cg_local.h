@@ -900,6 +900,8 @@ typedef struct {
 	int subtitlePrintY;
 	char subtitlePrint[1024];
 	int subtitlePrintLines;
+	// +++
+	char subtitleImagePath[128];
 
 	// fade in/out
 	int fadeTime;
@@ -1779,6 +1781,8 @@ extern vmCvar_t cg_zoomDefaultBinoc;
 extern vmCvar_t cg_zoomDefaultSniper;
 extern vmCvar_t cg_zoomDefaultFG;
 extern vmCvar_t cg_zoomDefaultSnooper;
+extern vmCvar_t cg_zoomSensitivity;
+extern vmCvar_t cg_zoomSensitivityFovScaled;
 extern vmCvar_t cg_zoomStepBinoc;
 extern vmCvar_t cg_zoomStepSniper;
 extern vmCvar_t cg_zoomStepSnooper;
@@ -2324,6 +2328,10 @@ const char *CG_translateString( const char *str );
 const char *CG_bonusString( const char *str );
 const char *CG_translateTextString( const char *str );
 const char *CG_translateTextString2( const char *str );
+// +++
+const char **SE_CG_translateTextString(const char *str);
+const char **SE_CG_translateString( const char *str );
+const char **SE_CG_bonusString( const char *str );
 
 
 //

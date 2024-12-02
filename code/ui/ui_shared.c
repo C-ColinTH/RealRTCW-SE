@@ -3548,11 +3548,16 @@ void Item_TextField_Paint( itemDef_t *item ) {
 
 }
 
+// +++
 void Item_YesNo_Paint( itemDef_t *item ) {
 	vec4_t newColor, lowLight;
 	float value;
 	menuDef_t *parent = (menuDef_t*)item->parent;
-	const char *yes_str = "yes", *no_str = "no";
+	
+
+	qhandle_t img_yes = 0, img_no = 0;
+	const char *yes_str = "\x80", *no_str = "\x81";
+
 
 	value = ( item->cvar ) ? DC->getCVarValue( item->cvar ) : 0;
 
@@ -3569,12 +3574,34 @@ void Item_YesNo_Paint( itemDef_t *item ) {
 	yes_str = DC->getTranslatedString( yes_str );
 	no_str = DC->getTranslatedString( no_str );
 
+	img_yes = trap_R_RegisterShaderNoMip( "fonts/uishow/yes.tga" );
+	img_no = trap_R_RegisterShaderNoMip( "fonts/uishow/no.tga" );
+	
+	if ( img_yes && img_no ) {
+		if ( item->text ) {
+			Item_Text_Paint( item );
+			DC->drawText( item->textRect.x + item->textRect.w + 8, item->textRect.y, item->font, item->textscale, newColor, ( value != 0 ) ? yes_str : no_str, 0, 0, item->textStyle );
+		} else {
+			DC->drawText( item->textRect.x, item->textRect.y, item->font, item->textscale, newColor, ( value != 0 ) ? yes_str : no_str, 0, 0, item->textStyle );
+		}
+	} else {
+		if ( item->text ) {
+			Item_Text_Paint( item );
+			DC->drawText( item->textRect.x + item->textRect.w + 8, item->textRect.y, item->font, item->textscale, newColor, ( value != 0 ) ? "yes" : "no", 0, 0, item->textStyle );
+		} else {
+			DC->drawText( item->textRect.x, item->textRect.y, item->font, item->textscale, newColor, ( value != 0 ) ? "yes" : "no", 0, 0, item->textStyle );
+		}
+	}
+
+
+	/*
 	if ( item->text ) {
 		Item_Text_Paint( item );
 		DC->drawText( item->textRect.x + item->textRect.w + 8, item->textRect.y, item->font, item->textscale, newColor, ( value != 0 ) ? yes_str : no_str, 0, 0, item->textStyle );
 	} else {
 		DC->drawText( item->textRect.x, item->textRect.y, item->font, item->textscale, newColor, ( value != 0 ) ? yes_str : no_str, 0, 0, item->textStyle );
 	}
+	*/
 }
 
 void Item_Multi_Paint( itemDef_t *item ) {
@@ -3882,7 +3909,11 @@ void BindingFromName( const char *cvar ) {
 			if ( b2 != -1 ) {
 				DC->keynumToStringBuf( b2, g_nameBind2, 32 );
 				Q_strupr( g_nameBind2 );
-				strcat( g_nameBind1, va( " %s ", DC->getTranslatedString( "or" ) ) );
+
+				// +++
+				// strcat( g_nameBind1, va( " %s ", DC->getTranslatedString( "or" ) ) );
+				strcat( g_nameBind1, va( " %s ", DC->getTranslatedString( "\x94" ) ) );
+				
 				strcat( g_nameBind1, g_nameBind2 );
 			}
 			return;

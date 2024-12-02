@@ -64,7 +64,10 @@ typedef unsigned int glIndex_t;
 // can't be increased without changing bit packing for drawsurfs
 // see QSORT_SHADERNUM_SHIFT
 
-#define SHADERNUM_BITS	11
+// XXX
+// #define SHADERNUM_BITS	11
+#define SHADERNUM_BITS	13
+
 #define MAX_SHADERS		(1<<SHADERNUM_BITS)
 
 // a trRefEntity_t has all the information passed in by
@@ -1019,13 +1022,13 @@ old:
 #define	QSORT_ENTITYNUM_SHIFT	12
 #define	QSORT_FOGNUM_SHIFT		3
 
-new:
+new:										[SE]
 
-22 - 31	: sorted shader index
-11 - 21	: entity index
-2 - 6	: fog index
-removed	: used to be clipped flag
-0 - 1	: dlightmap index
+22 - 31	: sorted shader index				18-31 : sorted shader index
+11 - 21	: entity index						7-17  : entity index
+2 - 6	: fog index							2-6   : fog index
+removed	: used to be clipped flag			1     : atiTess
+0 - 1	: dlightmap index					0     : dlight flag
 
 #define QSORT_SHADERNUM_SHIFT   22
 #define QSORT_ENTITYNUM_SHIFT   11
@@ -1033,15 +1036,19 @@ removed	: used to be clipped flag
 
 */
 
+// XXX
 #define	QSORT_FOGNUM_SHIFT	2
-#define	QSORT_REFENTITYNUM_SHIFT	11
+// #define	QSORT_REFENTITYNUM_SHIFT	11
+#define	QSORT_REFENTITYNUM_SHIFT	7	//+++
 #define	QSORT_SHADERNUM_SHIFT	(QSORT_REFENTITYNUM_SHIFT+REFENTITYNUM_BITS)
 #if (QSORT_SHADERNUM_SHIFT+SHADERNUM_BITS) > 32
 	#error "Need to update sorting, too many bits."
 #endif
 
+// XXX
 // GR - tessellation flag in bit 8
-#define QSORT_ATI_TESS_SHIFT    8
+// #define QSORT_ATI_TESS_SHIFT    8
+#define QSORT_ATI_TESS_SHIFT    1	// +++
 // GR - TruForm flags
 #define ATI_TESS_TRUFORM    1
 #define ATI_TESS_NONE       0

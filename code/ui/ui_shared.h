@@ -310,6 +310,7 @@ typedef struct {
 	fontInfo_t smallFont;
 	fontInfo_t bigFont;
 	fontInfo_t handwritingFont;
+	fontInfo_t freefont;	// +++
 	qhandle_t cursor;
 	qhandle_t gradientBar;
 	qhandle_t scrollBarArrowUp;

@@ -677,6 +677,7 @@ CG_DrawHoldableSelect
   This, of course, will all change when we've got a hud, but for now it makes the holdable items usable and not bad looking
 ==============
 */
+// XXX
 void CG_DrawHoldableSelect( void ) {
 	int	bits;
 	int	count;
@@ -685,6 +686,14 @@ void CG_DrawHoldableSelect( void ) {
 	float	*color;
 	char	*name;
 	gitem_t	*item;
+
+	// +++
+	qhandle_t image;
+	float axis_x, axis_y, width = 200.0, height = 20.0;
+	axis_x = ( SCREEN_WIDTH - width) * 0.5;
+	axis_y = ( SCREEN_HEIGHT ) * 0.913;
+	// const char* translated;
+
 
 	// don't display if dead
 	if ( cg.predictedPlayerState.stats[STAT_HEALTH] <= 0 ) {
@@ -778,7 +787,16 @@ void CG_DrawHoldableSelect( void ) {
 				w = CG_DrawStrlen( name ) * 10;
 				x = ( SCREEN_WIDTH - w ) / 2;
 //				CG_DrawBigStringColor(x, y - 22, name, color);
-				CG_DrawStringExt2( x, y + 74, name, color, qfalse, qtrue, 10, 10, 0 );
+				//	CG_DrawStringExt2( x, y + 74, name, color, qfalse, qtrue, 10, 10, 0 );
+			
+				// 测试
+				image = trap_R_RegisterShader( va("text/CHN/pickup/%s", name) );
+				if ( image ) {
+					CG_DrawPic( axis_x, axis_y, width, height, image );
+				} else {
+					CG_DrawStringExt2( x, y + 74, name, color, qfalse, qtrue, 10, 10, 0 );
+				}
+				
 			}
 		}
 	}

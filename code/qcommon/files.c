@@ -40,6 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 #include "qcommon.h"
 #include "../zlib-1.2.11/unzip.h"
 
+
 /*
 =============================================================================
 
@@ -2747,30 +2748,84 @@ static char** Sys_ConcatenateFileLists( char **list0, char **list1 )
 	return cat;
 }
 
+
+
+// +++
+// parse "\Xxx" in a char rather than in a string
+static void strtrsp(char *str) {
+    char *p1 = str, *p2 = str;
+
+    while (*p1) {
+        if (*p1 == '\\') {
+            switch (*(p1 + 1)) {
+                case 'x':
+                    *p2++ = (char)strtol(p1 + 2, NULL, 16);
+                    p1 += 4;
+                    break;
+                default:
+                    *p2++ = *p1++;
+                    break;
+            }
+        } else {
+            *p2++ = *p1++;
+        }
+    }
+    *p2 = '\0';
+}
+
+
 /*
 ================
 FS_GetModDescription
 ================
 */
+// +++
 void FS_GetModDescription( const char *modDir, char *description, int descriptionLen ) {
 	fileHandle_t	descHandle;
 	char			descPath[MAX_QPATH];
 	int				nDescLen;
 	FILE			*file;
 
-	Com_sprintf( descPath, sizeof ( descPath ), "%s%cdescription.txt", modDir, PATH_SEP );
-
+	Com_sprintf( descPath, sizeof ( descPath ), "%s%cCHNdescription.txt", modDir, PATH_SEP );
 	nDescLen = FS_SV_FOpenFileRead( descPath, &descHandle );
 
 	if ( nDescLen > 0 ) {
 		file = FS_FileForHandle(descHandle);
 		Com_Memset( description, 0, descriptionLen );
 		nDescLen = fread(description, 1, descriptionLen, file);
+
+		/*
+		char *text = c_strtrs(description);
+		int len = strlen(text);
+		Q_strncpyz( description, text, sizeof(description) );
+
+		if (len >= 0) {
+			description[len] = '\0';
+		}
+		*/
+		strtrsp(description);
+
 		if (nDescLen >= 0) {
 			description[nDescLen] = '\0';
 		}
+
 	} else {
-		Q_strncpyz( description, modDir, descriptionLen );
+		Com_sprintf( descPath, sizeof ( descPath ), "%s%cdescription.txt", modDir, PATH_SEP );
+		nDescLen = FS_SV_FOpenFileRead( descPath, &descHandle );
+
+		if ( nDescLen > 0 ) {
+			file = FS_FileForHandle(descHandle);
+			Com_Memset( description, 0, descriptionLen );
+			nDescLen = fread(description, 1, descriptionLen, file);
+
+
+			int len = strlen(description);
+			if (len >= 0) {
+				description[len] = '\0';
+			}
+		} else {
+			Q_strncpyz( description, modDir, descriptionLen );
+		}
 	}
 
 	if ( descHandle ) {

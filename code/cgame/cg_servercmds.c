@@ -34,7 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "cg_local.h"
 #include "../ui/ui_shared.h"
-
+#include "c_mylib.h"
 
 /*
 =================
@@ -804,10 +804,22 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	// +++
 	if ( !strcmp( cmd, "dp" ) ) {    // dynamite print (what a hack :(
 		int time = atoi( CG_Argv( 1 ) );
 
-		CG_CenterPrint( va( "%s %d %s", CG_translateString( "dynamitetimer" ), time, CG_translateString( "seconds" ) ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		// 测试
+		qhandle_t image;
+		image = trap_R_RegisterShader( "text/CHN/string/bombset" );
+		if ( image ){
+			// CG_DrawPic( 120, 332, 400, 40, image );
+			CG_CenterPrint( va( "-bombset%d", time ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		} else {
+			CG_CenterPrint( va( "%s %d %s", CG_translateString( "dynamitetimer" ), time, CG_translateString( "seconds" ) ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		}
+		
+
+		// CG_CenterPrint( va( "%s %d %s", CG_translateString( "dynamitetimer" ), time, CG_translateString( "seconds" ) ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
 		return;
 	}
 
@@ -818,8 +830,19 @@ static void CG_ServerCommand( void ) {
 		return;
 	}
 
+	// +++
 	if ( !strcmp( cmd, "cp" ) ) {
-		CG_CenterPrint( CG_Argv( 1 ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		char *path = c_strmap( CG_Argv( 1 ) );
+		qhandle_t image = 0;
+		image = trap_R_RegisterShader( va("text/CHN/string/%s", path) );
+		if ( image ){
+			// CG_DrawPic( 120, 332, 400, 40, image );
+			CG_CenterPrint( va( "%s#text/CHN/string/%s", CG_Argv( 1 ), path ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		} else {
+			CG_CenterPrint( CG_Argv( 1 ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		}
+
+		// CG_CenterPrint( CG_Argv( 1 ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
 		return;
 	}
 
@@ -946,8 +969,16 @@ static void CG_ServerCommand( void ) {
 	// NERVE - SMF
 	if ( !Q_stricmp( cmd, "oid" ) ) {
 		int team = atoi( CG_Argv( 1 ) );
+		char *path = c_strmap( CG_Argv( 2 ) );
+		qhandle_t image = 0;
+		image = trap_R_RegisterShader( va("text/CHN/string/%s", path) );
+		if ( image ) {
+			CG_CenterPrint( va( "%s#text/CHN/string/%s", CG_Argv( 2 ), path ), SCREEN_HEIGHT - ( SCREEN_HEIGHT * 0.25 ), SMALLCHAR_WIDTH );
+		} else {
+			CG_ObjectivePrint( CG_Argv( 2 ), SMALLCHAR_WIDTH, team );
+		}
 
-		CG_ObjectivePrint( CG_Argv( 2 ), SMALLCHAR_WIDTH, team );
+		// CG_ObjectivePrint( CG_Argv( 2 ), SMALLCHAR_WIDTH, team );
 		return;
 	}
 	// -NERVE - SMF

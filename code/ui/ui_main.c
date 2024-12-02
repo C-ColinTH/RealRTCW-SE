@@ -352,6 +352,8 @@ int Text_Height( const char *text, int font, float scale, int limit ) {
 		fnt = &uiInfo.uiDC.Assets.smallFont;
 	} else if ( font == UI_FONT_HANDWRITING ) {
 		fnt = &uiInfo.uiDC.Assets.handwritingFont;
+	} else if ( font == UI_FONT_FREE ) {		// +++
+		fnt = &uiInfo.uiDC.Assets.freefont;
 	}
 
 	useScale = scale * fnt->glyphScale;
@@ -406,6 +408,8 @@ void Text_Paint( float x, float y, int font, float scale, vec4_t color, const ch
 		fnt = &uiInfo.uiDC.Assets.smallFont;
 	} else if ( font == UI_FONT_HANDWRITING ) {
 		fnt = &uiInfo.uiDC.Assets.handwritingFont;
+	} else if ( font == UI_FONT_FREE ) {		// +++
+		fnt = &uiInfo.uiDC.Assets.freefont;
 	}
 
 	useScale = scale * fnt->glyphScale;
@@ -487,6 +491,8 @@ void Text_PaintWithCursor( float x, float y, int font, float scale, vec4_t color
 		fnt = &uiInfo.uiDC.Assets.smallFont;
 	} else if ( font == UI_FONT_HANDWRITING ) {
 		fnt = &uiInfo.uiDC.Assets.handwritingFont;
+	} else if ( font == UI_FONT_FREE ) {		// +++
+		fnt = &uiInfo.uiDC.Assets.freefont;
 	}
 
 	useScale = scale * fnt->glyphScale;
@@ -820,6 +826,17 @@ qboolean Asset_Parse( int handle ) {
 			continue;
 		}
 
+		// freefont
+		// +++
+		if ( Q_stricmp( token.string, "freefont" ) == 0 ) {
+			int pointSize;
+			if ( !PC_String_Parse( handle, &tempStr ) || !PC_Int_Parse( handle, &pointSize ) ) {
+				return qfalse;
+			}
+			trap_R_RegisterFont( tempStr, pointSize, &uiInfo.uiDC.Assets.freefont );
+			continue;
+		}
+
 		// handwriting
 		if ( Q_stricmp( token.string, "handwritingFont" ) == 0 ) {
 			int pointSize;
@@ -1082,6 +1099,7 @@ void UI_LoadMenus( const char *menuFile, qboolean reset ) {
 UI_LoadTranslationStrings
 ==============
 */
+// +++
 #define MAX_BUFFER          20000
 static void UI_LoadTranslationStrings( void ) {
 	char buffer[MAX_BUFFER];
@@ -1091,11 +1109,16 @@ static void UI_LoadTranslationStrings( void ) {
 	int len, i, numStrings;
 	char *token;
 
-	Com_sprintf( filename, MAX_QPATH, "text/strings.txt" );
+
+	Com_sprintf( filename, MAX_QPATH, "CHN/strings.txt" );
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 	if ( len <= 0 ) {
+		Com_sprintf( filename, MAX_QPATH, "text/strings.txt" );
+		len = trap_FS_FOpenFile( filename, &f, FS_READ );
+		if ( len <= 0 ) {
 //		CG_Printf( S_COLOR_RED "WARNING: string translation file (strings.txt not found in main/text)\n" );
-		return;
+			return;
+		}
 	}
 	if ( len > MAX_BUFFER ) {
 //		CG_Error( "%s is too big, make it smaller (max = %i bytes)\n", filename, MAX_BUFFER );
@@ -1168,14 +1191,18 @@ qboolean ParsePairs( int handle ) {
 	return qtrue;
 }
 
+// +++
 static void UI_LoadTranslateTable( void ) {
 	pc_token_t token;
 	int handle;
 
-	handle = trap_PC_LoadSource( "text/text.txt" );
-
+	handle = trap_PC_LoadSource( "text/CHN/text.txt" );
 	if ( !handle ) {
-		return;
+		handle = trap_PC_LoadSource( "text/text.txt" );
+
+		if ( !handle ) {
+			return;
+		}
 	}
 
 	if ( !trap_PC_ReadToken( handle, &token ) ) {
@@ -1196,6 +1223,7 @@ static void UI_LoadTranslateTable( void ) {
 UI_LoadbonusStrings
 ==============
 */
+// +++
 #define MAX_BUFFER_BONUS          20000
 static void UI_LoadbonusStrings( void ) {
 	char buffer[MAX_BUFFER_BONUS];
@@ -1205,10 +1233,14 @@ static void UI_LoadbonusStrings( void ) {
 	int len, i, numStrings;
 	char *token;
 
-	Com_sprintf( filename, MAX_QPATH, "text/bonus_strings.txt" );
+	Com_sprintf( filename, MAX_QPATH, "text/CHN/bonus_strings.txt" );
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 	if ( len <= 0 ) {
-		return;
+		Com_sprintf( filename, MAX_QPATH, "text/bonus_strings.txt" );
+		len = trap_FS_FOpenFile( filename, &f, FS_READ );
+		if ( len <= 0 ) {
+			return;
+		}
 	}
 	if ( len > MAX_BUFFER_BONUS ) {
 //		CG_Error( "%s is too big, make it smaller (max = %i bytes)\n", filename, MAX_BUFFER );
@@ -1611,14 +1643,25 @@ UI_DrawMapLevelshot
 	Draws the levelshot for the current map.
 ==============
 */
+// +++
 static void UI_DrawMapLevelshot( rectDef_t *rect ) {
 	char levelname[64];
 	qhandle_t levelshot = 0;
 
 	DC->getCVarString( "mapname", levelname, sizeof( levelname ) );
 
+	/*
 	if ( levelname[0] != 0 ) {
 		levelshot = trap_R_RegisterShaderNoMip( va( "levelshots/%s.tga", levelname ) );
+	}
+	*/
+
+	// 测试
+	if ( levelname[0] != 0 ) {
+		levelshot = trap_R_RegisterShaderNoMip( va( "levelshots/%s.jpg", levelname ) );
+		if ( !levelshot ) {
+			levelshot = trap_R_RegisterShaderNoMip( va( "levelshots/%s.tga", levelname ) );
+		}
 	}
 
 	if ( !levelshot ) {

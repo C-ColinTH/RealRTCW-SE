@@ -1534,10 +1534,12 @@ typedef struct translateTextString_s{
 	int *time;
 	char *stringname;
 	char *stringtext;
+	char *filename;		// +++
 } translateTextString_t;
 
-
-#define MAX_TRANSLATETEXTSTRINGS 2048
+// +++
+// #define MAX_TRANSLATETEXTSTRINGS 2048
+#define MAX_TRANSLATETEXTSTRINGS 4096 		// increase!
 extern translateTextString_t translateTextStrings[MAX_TRANSLATETEXTSTRINGS];
 //----(SA)	end
 //====================================================================

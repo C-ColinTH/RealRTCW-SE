@@ -19,7 +19,7 @@ along with Quake III Arena source code; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 ===========================================================================
 */
-
+#include <windows.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <limits.h>
@@ -257,9 +257,11 @@ static qboolean Sys_WritePIDFile( const char *gamedir )
 Sys_InitPIDFile
 =================
 */
+// XXX
 void Sys_InitPIDFile( const char *gamedir ) {
 	if( Sys_WritePIDFile( gamedir ) ) {
 #ifndef DEDICATED
+/*
 		char message[1024];
 		char modName[MAX_OSPATH];
 
@@ -273,6 +275,30 @@ void Sys_InitPIDFile( const char *gamedir ) {
 		if( Sys_Dialog( DT_YES_NO, message, "Abnormal Exit" ) == DR_YES ) {
 			Cvar_Set( "com_abnormalExit", "1" );
 		}
+*/
+		// char message[1024];
+		char modName[MAX_OSPATH];
+
+		FS_GetModDescription( gamedir, modName, sizeof ( modName ) );
+		Q_CleanStr( modName );
+
+
+		char utf8_message[1024];
+    	wchar_t wide_message[1024];
+    
+		if (!strcmp("main", modName)) {
+			sprintf(utf8_message, "游戏上次运行时未正常退出，这可能是游戏设置不正确导致的，是否恢复游戏默认设置选项并启动游戏？");
+		} else {
+			sprintf(utf8_message, "游戏上次运行 %s 时未正常退出，这可能是游戏设置不正确导致的，是否恢复游戏默认设置选项并启动游戏？", modName );
+		}
+
+    	MultiByteToWideChar(CP_UTF8, 0, utf8_message, -1, wide_message, 100);
+    	int result = MessageBoxW(NULL, wide_message, L"提示", MB_YESNO | MB_ICONQUESTION);
+
+    	if (result == IDYES) {
+			Cvar_Set( "com_abnormalExit", "1" );
+    	}
+
 #endif
 	}
 }

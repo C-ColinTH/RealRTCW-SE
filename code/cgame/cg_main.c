@@ -184,6 +184,8 @@ vmCvar_t cg_zoomStepBinoc;
 vmCvar_t cg_zoomStepSniper;
 vmCvar_t cg_zoomStepSnooper;
 vmCvar_t cg_zoomStepFG;         //----(SA)	added
+vmCvar_t cg_zoomSensitivity;
+vmCvar_t cg_zoomSensitivityFovScaled;
 vmCvar_t cg_zoomDefaultBinoc;
 vmCvar_t cg_zoomDefaultSniper;
 vmCvar_t cg_zoomDefaultSnooper;
@@ -328,6 +330,8 @@ cvarTable_t cvarTable[] = {
 	{ &cg_zoomDefaultSniper, "cg_zoomDefaultSniper", "15", CVAR_ARCHIVE },
 	{ &cg_zoomDefaultSnooper, "cg_zoomDefaultSnooper", "40", CVAR_ARCHIVE },
 	{ &cg_zoomDefaultFG, "cg_zoomDefaultFG", "55", CVAR_ARCHIVE },                //----(SA)	added
+	{ &cg_zoomSensitivityFovScaled, "cg_zoomSensitivityFovScaled", "1", CVAR_ARCHIVE },
+	{ &cg_zoomSensitivity, "cg_zoomSensitivity", "1", CVAR_ARCHIVE },
 	{ &cg_zoomStepBinoc, "cg_zoomStepBinoc", "3", CVAR_ARCHIVE },
 	{ &cg_zoomStepSniper, "cg_zoomStepSniper", "2", CVAR_ARCHIVE },
 	{ &cg_zoomStepSnooper, "cg_zoomStepSnooper", "5", CVAR_ARCHIVE },
@@ -847,7 +851,9 @@ static void CG_RegisterItemSounds( int itemNum ) {
 CG_LoadPickupNames
 ==============
 */
-#define MAX_BUFFER          20000
+// XXX
+//#define MAX_BUFFER          20000
+#define MAX_BUFFER 25600
 static void CG_LoadPickupNames( void ) {
 	char buffer[MAX_BUFFER];
 	char *text;
@@ -856,11 +862,16 @@ static void CG_LoadPickupNames( void ) {
 	int len, i;
 	char *token;
 
-	Com_sprintf( filename, MAX_QPATH, "text/pickupnames.txt" );
+	// +++
+	Com_sprintf( filename, MAX_QPATH, "text/CHN/pickupnames.txt" );
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 	if ( len <= 0 ) {
-		CG_Printf( S_COLOR_RED "WARNING: pickup name file (pickupnames.txt not found in main/text)\n" );
-		return;
+		Com_sprintf( filename, MAX_QPATH, "text/pickupnames.txt" );
+		len = trap_FS_FOpenFile( filename, &f, FS_READ );
+		if ( len <= 0 ) {
+			CG_Printf( S_COLOR_YELLOW "WARNING: pickup name file (pickupnames.txt not found in main/text)\n" );
+			return;
+		}
 	}
 	if ( len > MAX_BUFFER ) {
 		CG_Error( "%s is too big, make it smaller (max = %i bytes)\n", filename, MAX_BUFFER );
@@ -890,6 +901,7 @@ static void CG_LoadPickupNames( void ) {
 	}
 }
 
+// XXX
 // a straight dupe right now so I don't mess anything up while adding this
 static void CG_LoadTranslationStrings( void ) {
 	char buffer[MAX_BUFFER];
@@ -899,11 +911,16 @@ static void CG_LoadTranslationStrings( void ) {
 	int len, i, numStrings;
 	char *token;
 
-	Com_sprintf( filename, MAX_QPATH, "text/strings.txt" );
+	// +++
+	Com_sprintf( filename, MAX_QPATH, "text/CHN/strings.txt" );
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 	if ( len <= 0 ) {
-		CG_Printf( S_COLOR_RED "WARNING: string translation file (strings.txt not found in main/text)\n" );
-		return;
+		Com_sprintf( filename, MAX_QPATH, "text/strings.txt" );
+		len = trap_FS_FOpenFile( filename, &f, FS_READ );
+		if ( len <= 0 ) {
+			CG_Printf( S_COLOR_YELLOW "WARNING: string translation file (strings.txt not found in main/text)\n" );
+			return;
+		}
 	}
 	if ( len > MAX_BUFFER ) {
 		CG_Error( "%s is too big, make it smaller (max = %i bytes)\n", filename, MAX_BUFFER );
@@ -932,6 +949,7 @@ static void CG_LoadTranslationStrings( void ) {
 	}
 }
 
+// XXX
 // a straight dupe right now so I don't mess anything up while adding this
 static void CG_LoadbonusStrings( void ) {
 	char buffer[MAX_BUFFER];
@@ -941,11 +959,16 @@ static void CG_LoadbonusStrings( void ) {
 	int len, i, numStrings;
 	char *token;
 
-	Com_sprintf( filename, MAX_QPATH, "text/bonus_strings.txt" );
+	// +++
+	Com_sprintf( filename, MAX_QPATH, "text/CHN/bonus_strings.txt" );
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
-	if ( len <= 0 ) {
-		CG_Printf( S_COLOR_RED "WARNING: string translation file (bonus_strings.txt not found in main/text)\n" );
-		return;
+	if ( len < 0 ) {
+		Com_sprintf( filename, MAX_QPATH, "text/bonus_strings.txt" );
+		len = trap_FS_FOpenFile( filename, &f, FS_READ );
+		if ( len <= 0 ) {
+			CG_Printf( S_COLOR_YELLOW "WARNING: string translation file (bonus_strings.txt not found in main/text)\n" );
+			return;
+		}
 	}
 	if ( len > MAX_BUFFER ) {
 		CG_Error( "%s is too big, make it smaller (max = %i bytes)\n", filename, MAX_BUFFER );
@@ -974,6 +997,7 @@ static void CG_LoadbonusStrings( void ) {
 	}
 }
 
+// XXX
 static void CG_LoadTranslationTextStrings(const char *file) {
 	char buffer[MAX_BUFFER];
 	char *text;
@@ -982,11 +1006,16 @@ static void CG_LoadTranslationTextStrings(const char *file) {
 	int len, i;
 	char *token;
 
-	Com_sprintf(filename, MAX_QPATH, file);
+	// +++
+	Com_sprintf( filename, MAX_QPATH, "text/CHN/maps/%s", file );
 	len = trap_FS_FOpenFile(filename, &f, FS_READ);
 	if (len <= 0) {
-		CG_Printf(S_COLOR_RED "WARNING: string translation file (main/%s)\n", filename);
-		return;
+		Com_sprintf( filename, MAX_QPATH, "text/EnglishUSA/maps/%s", file );
+		len = trap_FS_FOpenFile(filename, &f, FS_READ);
+		if (len <= 0) {
+			CG_Printf(S_COLOR_YELLOW "WARNING: string translation file (main/%s)\n", filename);
+			return;
+		}
 	}
 	if (len > MAX_BUFFER) {
 		CG_Printf("%s is too big, make it smaller (max = %i bytes)\n", filename, MAX_BUFFER);
@@ -999,31 +1028,73 @@ static void CG_LoadTranslationTextStrings(const char *file) {
 	// parse the list
 	text = buffer;
 	token = COM_ParseExt(&text, qtrue);
-	if (token[0] != '{') {
+
+
+	if (token[0] != '{' && token[0] != '[') {
 		CG_Printf("^1WARNING: expecting '{', found '%s' instead in translation file \"text/translate.txt\"\n", token);
 		return;
 	}
-	i = 0;
-	while (1)
-	{
-		token = COM_ParseExt(&text, qtrue);
-		if (!token[0]) {
-			CG_Printf("^1WARNING: no concluding '}' in translation file \"text/translate.txt\"\n");
-			break;
+
+
+	if (token[0] == '{') {
+		i = 0;
+		while (1)
+		{
+			token = COM_ParseExt(&text, qtrue);
+			if (!token[0]) {
+				CG_Printf("^1WARNING: no concluding '}' in translation file \"text/translate.txt\"\n");
+				break;
+			}
+			// end of shader definition
+			if (token[0] == '}') {
+				break;
+			}
+			translateTextStrings[i].stringname = malloc(strlen(token) + 1);
+			strcpy(translateTextStrings[i].stringname, token);
+			
+			token = COM_ParseExt(&text, qfalse);
+			translateTextStrings[i].stringtext = malloc(strlen(token) + 1);
+			strcpy(translateTextStrings[i].stringtext, token);
+
+			translateTextStrings[i].filename = malloc(strlen("") + 1);
+			strcpy(translateTextStrings[i].filename, "");
+
+			i++;
 		}
-		// end of shader definition
-		if (token[0] == '}') {
-			break;
+	} else if (token[0] == '[') {
+		i = 0;
+		while (1) {
+			token = COM_ParseExt(&text, qtrue);
+			if (!token[0]) {
+				CG_Printf("^1WARNING: no concluding ']' in translation file \"text/translate.txt\"\n");
+				break;
+			}
+			// end of shader definition
+			if (token[0] == ']') {
+				break;
+			}
+
+			translateTextStrings[i].stringname = malloc(strlen(token) + 1);
+			strcpy(translateTextStrings[i].stringname, token);
+			// CG_Printf("stringname: %s\n", token);
+
+			token = COM_ParseExt(&text, qfalse);
+			translateTextStrings[i].stringtext = malloc(strlen(token) + 1);
+			strcpy(translateTextStrings[i].stringtext, token);
+			// CG_Printf("stringtext: %s\n", token);
+
+			token = COM_ParseExt(&text, qfalse);
+			translateTextStrings[i].filename = malloc(strlen(token) + 1);
+			strcpy(translateTextStrings[i].filename, token);
+			// CG_Printf("filename: %s\n", token);
+
+			i++;
 		}
-		translateTextStrings[i].stringname = malloc(strlen(token) + 1);
-		strcpy(translateTextStrings[i].stringname, token);
-		token = COM_ParseExt(&text, qfalse);
-		translateTextStrings[i].stringtext = malloc(strlen(token) + 1);
-		strcpy(translateTextStrings[i].stringtext, token);
-		i++;
 	}
+
 }
 
+// XXX
 static void CG_LoadIgnoredTranslationTextStrings() {
 
 	char buffer[MAX_BUFFER];
@@ -1033,11 +1104,15 @@ static void CG_LoadIgnoredTranslationTextStrings() {
 	int len, i;
 	char *token;
 
-	Com_sprintf( filename, MAX_QPATH, "text/ignoredstitles.txt" );
+	Com_sprintf( filename, MAX_QPATH, "text/CHN/ignoredstitles.txt" );
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 	if ( len <= 0 ) {
-		CG_Printf( S_COLOR_RED "WARNING: ignored name file (ignoredstitles.txt not found in main/text)\n" );
-		return;
+		Com_sprintf( filename, MAX_QPATH, "text/ignoredstitles.txt" );
+		len = trap_FS_FOpenFile( filename, &f, FS_READ );
+		if ( len <= 0 ) {
+			CG_Printf( S_COLOR_YELLOW "WARNING: ignored name file (ignoredstitles.txt not found in main/text)\n" );
+			return;
+		}
 	}
 	if ( len > MAX_BUFFER ) {
 		CG_Error( "%s is too big, make it smaller (max = %i bytes)\n", filename, MAX_BUFFER );
@@ -1060,6 +1135,7 @@ static void CG_LoadIgnoredTranslationTextStrings() {
 	}
 }
 
+// XXX
 static void CG_LoadTranslateStrings( void ) {
 	const char  *info;
 	char    *mapname;
@@ -1070,7 +1146,8 @@ static void CG_LoadTranslateStrings( void ) {
 	CG_LoadPickupNames();
 	CG_LoadTranslationStrings();    // right now just centerprint
 	CG_LoadbonusStrings();
-	CG_LoadTranslationTextStrings(va("text/EnglishUSA/maps/%s.txt", mapname));
+	// CG_LoadTranslationTextStrings(va("text/EnglishUSA/maps/%s.txt", mapname));
+	CG_LoadTranslationTextStrings( va("%s.txt", mapname) );
 	CG_LoadIgnoredTranslationTextStrings();
 }
 
@@ -1103,6 +1180,85 @@ const char *CG_translateTextString(const char *str) {
 	}
 	return str;
 }
+
+
+// XXX
+const char **SE_CG_translateTextString(const char *str) {
+	int i, numStrings, len;
+	const char **array = (const char**)malloc(2 * sizeof(char*));
+
+
+    numStrings = sizeof(cgs.ignoredSubtitles) / sizeof(cgs.ignoredSubtitles[0]) - 1;
+    for (i = 0; i < numStrings; i++) {
+        if (!strcmp(str, cgs.ignoredSubtitles[i])) {
+			len = strlen("IGNORED_SUBTITLE") + 1;
+			array[0] = (char*)malloc( len * sizeof(char) );
+			// array[0] = "IGNORED_SUBTITLE";
+			strcpy( (char *)array[0], "IGNORED_SUBTITLE" );
+
+			len = strlen( "" ) + 1;
+			array[1] = (char*)malloc( len * sizeof(char) );
+			// array[1] = "";
+			strcpy( (char *)array[1], "" );
+
+			return array;
+        }
+    }
+	numStrings = sizeof(translateTextStrings) / sizeof(translateTextStrings[0]) - 1;
+	i = 0;
+	
+	for (i = 0; i < numStrings; i++) {
+		if (!translateTextStrings[i].stringname || !strlen(translateTextStrings[i].stringname)) {
+			// return str;
+
+			len = strlen( str ) + 1;
+			array[0] = (char*)malloc( len * sizeof(char) );
+			// array[0] = str;
+			strcpy( (char *)array[0], str );
+
+			if ( translateTextStrings[i].filename ) {
+				len = strlen( translateTextStrings[i].filename ) + 1;
+				array[1] = (char*)malloc( len * sizeof(char) );
+				// array[1] = translateTextStrings[i].filename;
+				strcpy( (char *)array[1], translateTextStrings[i].filename );
+			} else {
+				array[1] = NULL;
+			}
+			
+			return array;
+		}
+		if (!strcmp(str, translateTextStrings[i].stringname)) {
+			if (translateTextStrings[i].stringtext && strlen(translateTextStrings[i].stringtext)) 
+			{
+				len = strlen( translateTextStrings[i].stringtext ) + 1;
+				array[0] = (char*)malloc( len * sizeof(char) );
+				// array[0] = translateTextStrings[i].stringtext;
+				strcpy( (char *)array[0], translateTextStrings[i].stringtext );
+
+				len = strlen( translateTextStrings[i].filename ) + 1;
+				array[1] = (char*)malloc( len * sizeof(char) );
+				// array[1] = translateTextStrings[i].filename;
+				strcpy( (char *)array[1], translateTextStrings[i].filename );
+
+				return array;
+			}
+			break;
+		}
+	}
+
+	len = strlen( str ) + 1;
+	array[0] = (const char*)malloc( len * sizeof(char) );
+	// array[0] = str;
+	strcpy( (char *)array[0], str );
+	
+	array[1] = NULL;
+	// len = strlen( "" ) + 1;
+	// array[1] = (char*)malloc( len * sizeof(char) );
+	// strcpy( (char *)array[1], "" );
+
+	return array;
+}
+
 
 const char *CG_translateTextString2(const char *str) {
 	int i, numStrings;
@@ -1892,6 +2048,17 @@ qboolean CG_Asset_Parse( int handle ) {
 			continue;
 		}
 
+		// freefont
+		// XXX
+		if ( Q_stricmp( token.string, "freefont" ) == 0 ) {
+			int pointSize;
+			if ( !PC_String_Parse( handle, &tempStr ) || !PC_Int_Parse( handle, &pointSize ) ) {
+				return qfalse;
+			}
+			cgDC.registerFont( tempStr, pointSize, &cgDC.Assets.freefont );
+			continue;
+		}
+
 		// handwriting
 		if ( Q_stricmp( token.string, "handwritingFont" ) == 0 ) {
 			int pointSize;
@@ -2589,6 +2756,60 @@ const char *CG_translateString( const char *str ) {
 	return str;
 }
 
+// XXX
+const char **SE_CG_translateString( const char *str ) {
+	int i, numStrings, len;
+	char index[10];
+	const char **array = (const char**)malloc(2 * sizeof(char*));
+
+	numStrings = sizeof( translateStrings ) / sizeof( translateStrings[0] ) - 1;
+
+	for ( i = 0; i < numStrings; i++ ) {
+		if ( !translateStrings[i].name || !strlen( translateStrings[i].name ) ) {
+
+			len = strlen( str ) + 1;
+			array[0] = (char*)malloc( len * sizeof(char) );
+			// array[0] = str;
+			strcpy( (char *)array[0], str );
+
+			sprintf( index, "%d", i+1 );
+			len = strlen( index ) + 1;
+			array[1] = (char*)malloc( len * sizeof(char) );
+			// array[1] = index;
+			strcpy( (char *)array[1], index );
+
+			return array;
+		}
+
+		if ( !strcmp( str, translateStrings[i].name ) ) {
+			if ( translateStrings[i].localname && strlen( translateStrings[i].localname ) ) {
+
+				len = strlen( translateStrings[i].localname ) + 1;
+				array[0] = (char*)malloc( len * sizeof(char) );
+				// array[0] = translateStrings[i].localname;
+				strcpy( (char *)array[0], translateStrings[i].localname );
+
+				sprintf( index, "%d", i+1 );
+				len = strlen( index ) + 1;
+				array[1] = (char*)malloc( len * sizeof(char) );
+				// array[1] = index;
+				strcpy( (char *)array[1], index );
+
+				return array;
+			}
+			break;
+		}
+	}
+
+	len = strlen( str ) + 1;
+	array[0] = (char*)malloc( len * sizeof(char) );
+	strcpy( (char *)array[0], str );
+	array[1] = NULL;
+
+	return array;
+}
+
+
 /*
 ==============
 CG_bonusString
@@ -2615,6 +2836,61 @@ const char *CG_bonusString( const char *str ) {
 
 	return str;
 }
+
+// XXX
+const char **SE_CG_bonusString( const char *str ) {
+	int i, j, numStrings, len;
+	char index[10];
+	const char **array = (const char **)malloc(2 * sizeof(char*));
+
+	numStrings = sizeof( bonusStrings ) / sizeof( bonusStrings[0] ) - 1;
+
+	for ( i = 0; i < numStrings; i++ ) {
+		if ( !bonusStrings[i].name || !strlen( bonusStrings[i].name ) ) {
+
+			len = strlen( str ) + 1;
+			array[0] = (char*)malloc( len * sizeof(char) );
+			strcpy( (char *)array[0], str );
+
+			j = i/2 + 1;
+			sprintf( index, "bonus%d", j );
+			len = strlen( index ) + 1;
+			array[1] = (char*)malloc( len * sizeof(char) );
+			strcpy( (char *)array[1], index );
+
+			return array;
+			// return str;
+		}
+
+		if ( !strcmp( str, bonusStrings[i].name ) ) {
+			if ( bonusStrings[i].localname && strlen( bonusStrings[i].localname ) ) {
+
+				len = strlen( translateStrings[i].localname ) + 1;
+				array[0] = (char*)malloc( len * sizeof(char) );
+				strcpy( (char *)array[0], translateStrings[i].localname );
+
+				j = i/2 + 1;
+				sprintf( index, "bonus%d", j );
+				len = strlen( index ) + 1;
+				array[1] = (char*)malloc( len * sizeof(char) );
+				strcpy( (char *)array[1], index );
+
+				return array;
+				// return bonusStrings[i].localname;
+			}
+			break;
+		}
+	}
+
+	len = strlen( str ) + 1;
+	array[0] = (char*)malloc( len * sizeof(char) );
+	strcpy( (char *)array[0], str );
+	array[1] = NULL;
+
+	return array;
+	// return str;
+}
+
 
 /*
 =================

@@ -136,7 +136,9 @@ typedef struct
 	char                        *params;
 } g_script_stack_item_t;
 //
-#define G_MAX_SCRIPT_STACK_ITEMS    64
+// +++
+// #define G_MAX_SCRIPT_STACK_ITEMS    64
+#define G_MAX_SCRIPT_STACK_ITEMS    128
 //
 typedef struct
 {
