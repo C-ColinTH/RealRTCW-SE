@@ -156,6 +156,7 @@ If you have questions concerning this license or the applicable additional terms
 #define UI_FONT_BIG             2
 #define UI_FONT_SMALL           3
 #define UI_FONT_HANDWRITING     4
+#define UI_FONT_FREE            5	// +++
 
 // owner draw types
 // ideally these should be done outside of this file but
