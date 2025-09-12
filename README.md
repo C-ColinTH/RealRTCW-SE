@@ -1,36 +1,36 @@
-# RealRTCW
+# RealRTCW-SE/back_to_victors
 
-RealRTCW is a community single-player overhaul project for Return to Castle Wolfenstein based on the iortcw and rtcw-sp source code.
+### Project Description
 
-Features:
-* All iortcw features including proper widescreen support
-* Steam integration support using Steamshim by Ryan C. Gordon
-* Support for 99% of community made maps
-* Expanded .weap files system from Enemy Territory
-* Reworked difficulty levels
-* Automatic AI attributes system
-* Greatly expanded arsenal of weapons
-* Overhauled recoil system
-* Atmospheric effects support
-* Foliage tech support
-* Subtitles support
-* New inventory items
-* Increased engine limits
-* Improved controller support
-* Extended scripting functionality
-* Custom BSPC and BSPCUI included in sdk folder
-* A lot of bug fixes and QOL improvements
+Based on https://github.com/wolfetplayer/RealRTCW/tree/victors-archived.
 
-The original id software readme that accompanied the RTCW source release is named README.txt and is contained within the source tree of both MP and SP games.
+This project aims to maintain compatibility with the Victor Legacy version, enabling it to run seamlessly on the new RealRTCW environment.
 
-Available on ModDB:
-https://www.moddb.com/mods/realrtcw-realism-mod
+### This Fork Features
 
-And on Steam:
-https://store.steampowered.com/app/1379630/RealRTCW/
+• Full compatibility with Victor Legacy
 
-Arch Linux Repo by M0Rf30:
-https://aur.archlinux.org/packages/realrtcw/
+• Adaptation to new RealRTCW capabilities
 
-Opensuse package:
-https://build.opensuse.org/package/show/games/realrtcw
+• Fixes for compatibility issues from the original branch
+
+• Ongoing maintenance and updates
+
+### ⚠️ Legal Disclaimer
+__​​This is a personal hobby project. I do not distribute, include, or modify any original files from Victor's Legacy. This repository contains only compatibility modifications for the RealRTCW environment, focusing on engine-level adaptations to support legacy gameplay experiences.​​__
+
+All work here is based on publicly available RealRTCW source code and does not incorporate any protected assets from Victor's Legacy.
+
+### Original Project Links
+
+• RealRTCW: https://github.com/wolfetplayer/RealRTCW
+
+• ModDB: https://www.moddb.com/mods/realrtcw-realism-mod
+
+• Steam: https://store.steampowered.com/app/1379630/RealRTCW/
+
+• Arch Linux Repo (maintained by M0Rf30): https://aur.archlinux.org/packages/realrtcw/
+
+• Opensuse Package: https://build.opensuse.org/package/show/games/realrtcw
+
+• ModDB: https://www.moddb.com/mods/the-victors
