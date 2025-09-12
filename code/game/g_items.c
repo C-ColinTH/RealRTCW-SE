@@ -682,14 +682,20 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 		COM_BitSet( other->client->ps.weapons, WP_FG42SCOPE );
 	} else if ( weapon == WP_SNIPERRIFLE ) {
 		COM_BitSet( other->client->ps.weapons, WP_MAUSER );
+	/*
 	} else if ( weapon == WP_M1GARAND ) {
 		COM_BitSet( other->client->ps.weapons, WP_M7 );
 	} else if ( weapon == WP_M7 ) {
 		COM_BitSet( other->client->ps.weapons, WP_M1GARAND );
+	*/
 	} else if ( weapon == WP_DELISLESCOPE ) {
 		COM_BitSet( other->client->ps.weapons, WP_DELISLE );
 	} else if ( weapon == WP_M1941SCOPE ) {
 		COM_BitSet( other->client->ps.weapons, WP_M1941 );
+	} else if ( weapon == WP_M1GARANDSCOPE ) {
+		COM_BitSet( other->client->ps.weapons, WP_M1GARAND );
+	} else if ( weapon == WP_M1GARAND ) {
+		COM_BitSet( other->client->ps.weapons, WP_M1GARANDSCOPE );
 	}
 	
 	Add_Ammo( other, weapon, quantity, !alreadyHave );
@@ -775,6 +781,7 @@ weapon_t GetSimpleWeapon( weapon_t weapon ) {
 	case WP_SNIPERRIFLE:
 	case WP_DELISLESCOPE:
 	case WP_M1941SCOPE:
+	case WP_M1GARANDSCOPE:
 		return GetWeaponTableData( weapon )->weapAlts;
 	default:
 		return weapon;
@@ -797,6 +804,7 @@ qboolean IsWeaponComplex( weapon_t weapon ) {
 	case WP_SNIPERRIFLE:
 	case WP_DELISLESCOPE:
 	case WP_M1941SCOPE:
+	case WP_M1GARANDSCOPE:
 		return qtrue;
 	default:
 		return qfalse;

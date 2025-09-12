@@ -1466,6 +1466,7 @@ void Cmd_Activate_f( gentity_t *ent ) {
 					case WP_FG42SCOPE:
 					case WP_DELISLESCOPE:
 					case WP_M1941SCOPE:
+					case WP_M1GARANDSCOPE:
 						return;
 
 					default:

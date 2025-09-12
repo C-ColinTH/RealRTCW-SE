@@ -773,7 +773,7 @@ void Bullet_Endpos( gentity_t *ent, float spread, vec3_t *end ) {
 		r += crandom() * accuracy;
 		u += crandom() * ( accuracy * 1.25 );
 	} else {
-		if ( ent->s.weapon == WP_SNOOPERSCOPE || ent->s.weapon == WP_SNIPERRIFLE || ent->s.weapon == WP_FG42SCOPE || ent->s.weapon == WP_DELISLESCOPE  ) {
+		if ( ent->s.weapon == WP_SNOOPERSCOPE || ent->s.weapon == WP_SNIPERRIFLE || ent->s.weapon == WP_FG42SCOPE || ent->s.weapon == WP_DELISLESCOPE || ent->s.weapon == WP_M1GARANDSCOPE ) {
 			dist *= 2;
 			randSpread = qfalse;
 		}
@@ -1099,6 +1099,7 @@ gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenType ) {
 		case WP_AIRSTRIKE:
 		case WP_POISONGAS_MEDIC:
 		case WP_DYNAMITE_ENG:
+		case WP_SMOKE_BOMB:
 			upangle *= ammoTable[grenType].upAngle;
 			break;
 		default:
@@ -1150,6 +1151,12 @@ gentity_t *weapon_grenadelauncher_fire( gentity_t *ent, int grenType ) {
 			m->poisonGasRadius          = ammoTable[WP_POISONGAS_MEDIC].playerSplashRadius;
 			m->poisonGasDamage        =  ammoTable[WP_POISONGAS_MEDIC].playerDamage;	
 		    
+	}
+
+	// Arnout: override for smoke gren
+	if ( grenType == WP_SMOKE_BOMB ) {
+		m->s.effect1Time = 16;
+		m->think = weapon_smokeBombExplode;
 	}
 
 	if ( grenType == WP_AIRSTRIKE ) {
@@ -1689,6 +1696,7 @@ void CalcMuzzlePoint( gentity_t *ent, int weapon, vec3_t forward, vec3_t right, 
 	case WP_GRENADE_PINEAPPLE:
 	case WP_GRENADE_LAUNCHER:
 	case WP_POISONGAS:
+	case WP_SMOKE_BOMB:
 		VectorMA( muzzlePoint, 20, right, muzzlePoint );
 		break;
 	case WP_AKIMBO:     // left side rather than right
@@ -1739,7 +1747,7 @@ void CalcMuzzlePoints( gentity_t *ent, int weapon ) {
 	if ( !( ent->r.svFlags & SVF_CASTAI ) ) {   // non ai's take into account scoped weapon 'sway' (just another way aimspread is visualized/utilized)
 		float spreadfrac, phase;
 
-		if ( weapon == WP_SNIPERRIFLE || weapon == WP_SNOOPERSCOPE || weapon == WP_FG42SCOPE || weapon == WP_DELISLESCOPE || weapon == WP_M1941SCOPE ) {
+		if ( weapon == WP_SNIPERRIFLE || weapon == WP_SNOOPERSCOPE || weapon == WP_FG42SCOPE || weapon == WP_DELISLESCOPE || weapon == WP_M1941SCOPE || weapon == WP_M1GARANDSCOPE ) {
 			spreadfrac = ent->client->currentAimSpreadScale;
 
 			// rotate 'forward' vector by the sway
@@ -2044,6 +2052,18 @@ void FireWeapon( gentity_t *ent ) {
 	case WP_MP44: 
 		Bullet_Fire(ent, G_GetWeaponSpread(WP_MP44, ent) * aimSpreadScale, G_GetWeaponDamage(WP_MP44, ent));
 		break;
+	case WP_M1GARANDSCOPE:
+		Bullet_Fire( ent, G_GetWeaponSpread(WP_M1GARANDSCOPE, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M1GARANDSCOPE, ent) ); // Knightmare added
+		if ( !ent->aiCharacter ) {
+//		if (g_gametype.integer != GT_SINGLE_PLAYER) {
+			VectorCopy( ent->client->ps.viewangles,viewang );
+//			ent->client->sniperRifleMuzzleYaw = crandom()*0.04; // used in clientthink
+			ent->client->sniperRifleMuzzleYaw = 0;
+			ent->client->sniperRifleMuzzlePitch = 0.01f;
+			ent->client->sniperRifleFiredTime = level.time;
+			SetClientViewAngle( ent,viewang );
+		}
+	    break; // Knightmare added
 	case WP_MG42M:
 		Bullet_Fire(ent, G_GetWeaponSpread(WP_MG42M, ent) * aimSpreadScale, G_GetWeaponDamage(WP_MG42M, ent));
 		if (!ent->aiCharacter) {
@@ -2154,6 +2174,7 @@ void FireWeapon( gentity_t *ent ) {
 	case WP_GRENADE_PINEAPPLE:
 	case WP_DYNAMITE:
 	case WP_POISONGAS:
+	case WP_SMOKE_BOMB:
 		weapon_grenadelauncher_fire( ent, ent->s.weapon );
 		break;
 	case WP_FLAMETHROWER:

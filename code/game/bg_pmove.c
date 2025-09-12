@@ -2219,9 +2219,11 @@ static void PM_BeginWeaponReload( int weapon ) {
 		return;
 	}
 
+/*
 	if((weapon == WP_M1GARAND) && pm->ps->ammoclip[WP_M1GARAND] != 0) {
 			return;	
 	}
+*/
 
 	if (weapon == WP_M1941)
 	{
@@ -2256,6 +2258,7 @@ static void PM_BeginWeaponReload( int weapon ) {
 	case WP_DYNAMITE_ENG:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
+	case WP_SMOKE_BOMB:
 		break;
 
 	default:
@@ -2376,7 +2379,9 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 		 oldweapon == WP_GRENADE_PINEAPPLE ||
 		 oldweapon == WP_DYNAMITE ||
 		 oldweapon == WP_PANZERFAUST ||
-		 oldweapon == WP_POISONGAS ) {
+		 oldweapon == WP_POISONGAS ||
+		 oldweapon == WP_SMOKE_BOMB
+	) {
 		if ( !pm->ps->ammoclip[oldweapon] ) {  // you're empty, don't show grenade '0'
 			showdrop = qfalse;
 		}
@@ -2394,6 +2399,7 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 	case WP_DYNAMITE_ENG:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
+	case WP_SMOKE_BOMB:
 	case WP_POISONGAS:
 	case WP_KNIFE:
 		pm->ps->grenadeTimeLeft = 0;        // initialize the timer on the potato you're switching to
@@ -2431,6 +2437,7 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 	switchtime = 250;   // dropping/raising usually takes 1/4 sec.
 	// sometimes different switch times for alt weapons
 	switch ( oldweapon ) {
+	/*
 	case WP_M1GARAND:
 		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
 			switchtime = 0;
@@ -2439,6 +2446,8 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 			}
 		}
 		break;
+	*/
+
 	case WP_M7:
 		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
 			switchtime = 0;
@@ -2451,6 +2460,12 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 		}
 		break;
 
+	case WP_M1GARAND:
+	case WP_M1GARANDSCOPE:
+		if ( altswitch ) {
+			switchtime = 50;        // fast
+		}
+		break;
 	}
 
 	// play an animation
@@ -2503,6 +2518,7 @@ static void PM_FinishWeaponChange( void ) {
 	case WP_FG42SCOPE:
 	case WP_DELISLESCOPE:
 	case WP_M1941SCOPE:
+	case WP_M1GARANDSCOPE:
 		pm->ps->aimSpreadScale = 255;               // initially at lowest accuracy
 		pm->ps->aimSpreadScaleFloat = 255.0f;       // initially at lowest accuracy
 
@@ -2526,6 +2542,7 @@ static void PM_FinishWeaponChange( void ) {
 			switchtime = 50;        // fast
 		}
 		break;
+	/*
 	case WP_M1GARAND:
 		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
 			if ( pm->ps->ammoclip[ BG_FindAmmoForWeapon( oldweapon ) ] ) {
@@ -2537,10 +2554,18 @@ static void PM_FinishWeaponChange( void ) {
 			altSwitchAnim = qtrue ;
 		}
 		break;
+	*/
+
 	case WP_M7:
 		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
 			switchtime = 2350;
 			altSwitchAnim = qtrue ;
+		}
+		break;
+	case WP_M1GARAND:
+	case WP_M1GARANDSCOPE:
+		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
+			switchtime = 50;        // fast
 		}
 		break;
 	}
@@ -2711,6 +2736,7 @@ void PM_CheckForReload(int weapon) {
 			case WP_FG42SCOPE:
 			case WP_DELISLESCOPE:
 			case WP_M1941SCOPE:
+			case WP_M1GARANDSCOPE:
 				if (reloadRequested && pm->ps->ammo[ammoWeap]) {
 					int maxclip = BG_GetMaxClip(pm->ps, weapon);
 					if (pm->ps->ammoclip[clipWeap] < maxclip) {
@@ -2994,6 +3020,7 @@ void PM_AdjustAimSpreadScale( void ) {
 		case WP_DELISLESCOPE:
 		case WP_M1941SCOPE:
 		//case WP_M1GARAND: //haha no plz
+		case WP_M1GARANDSCOPE:
 			for ( i = 0; i < 2; i++ )
 				viewchange += fabs( pm->ps->velocity[i] );
 			break;
@@ -3122,7 +3149,9 @@ static qboolean PM_CheckGrenade() {
 		pm->ps->weapon != WP_AIRSTRIKE &&
 		pm->ps->weapon != WP_KNIFE &&
 		pm->ps->weapon != WP_POISONGAS_MEDIC &&
-	    pm->ps->weapon != WP_DYNAMITE_ENG ) {
+	    pm->ps->weapon != WP_DYNAMITE_ENG &&
+		pm->ps->weapon != WP_SMOKE_BOMB
+		) {
 			return qfalse;
 		}
 
@@ -3155,7 +3184,7 @@ static qboolean PM_CheckGrenade() {
 
 				if ( pm->ps->grenadeTimeLeft <= 0 ) {   // give two frames advance notice so there's time to launch and detonate
 					PM_WeaponUseAmmo( pm->ps->weapon, 1 ); 
-                    if (!( pm->ps->weapon == WP_POISONGAS))
+					if ( !( pm->ps->weapon == WP_POISONGAS) || !( pm->ps->weapon == WP_SMOKE_BOMB) )
 					{
 					PM_AddEvent( EV_GRENADE_SUICIDE );      //----(SA)	die, dumbass
 					}
@@ -3257,11 +3286,13 @@ static void PM_Weapon( void ) {
 	// game is reloading (mission fail/success)
 #ifdef CGAMEDLL
 	if ( cg_reloading.integer )
+		gameReloading = qtrue;
 #endif
 #ifdef GAMEDLL
 	if ( g_reloading.integer )
-#endif
 		gameReloading = qtrue;
+#endif
+		// gameReloading = qtrue;
 	else {
 		gameReloading = qfalse;
 	}
@@ -3624,7 +3655,9 @@ static void PM_Weapon( void ) {
 			 pm->ps->weapon != WP_GRENADE_LAUNCHER &&
 			 pm->ps->weapon != WP_GRENADE_PINEAPPLE &&
 			 pm->ps->weapon != WP_POISONGAS &&
-			 pm->ps->weapon != WP_POISONGAS_MEDIC ) {
+			 pm->ps->weapon != WP_POISONGAS_MEDIC &&
+			 pm->ps->weapon != WP_SMOKE_BOMB
+		) {
 			PM_AddEvent( EV_NOFIRE_UNDERWATER );        // event for underwater 'click' for nofire
 			pm->ps->weaponTime  = 500;
 			return;
@@ -3692,6 +3725,7 @@ static void PM_Weapon( void ) {
     case WP_M7:
 	case WP_M1941:
 	case WP_M1941SCOPE:
+	case WP_M1GARANDSCOPE:
 		if ( !weaponstateFiring ) {
 			// NERVE's panzerfaust spinup
 //			if (pm->ps->weapon == WP_PANZERFAUST)
@@ -3721,28 +3755,29 @@ static void PM_Weapon( void ) {
 	case WP_DYNAMITE_ENG:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
-case WP_POISONGAS:
-	if ( !delayedFire ) {
-		if ( pm->ps->aiChar ) {
-			// ai characters go into their regular animation setup
-			BG_AnimScriptEvent( pm->ps, ANIM_ET_FIREWEAPON, qtrue, qtrue );
-		} else {
-			// the player pulls the fuse and holds the hot potato
-			if ( pm->ps->weapon == WP_DYNAMITE_ENG || PM_WeaponAmmoAvailable( pm->ps->weapon ) ) {
-				if ( pm->ps->weapon == WP_DYNAMITE || pm->ps->weapon == WP_DYNAMITE_ENG ) {
-					pm->ps->grenadeTimeLeft = 50;
-				} else {
-					// start at four seconds and count down
-					pm->ps->grenadeTimeLeft = 4000;
+	case WP_SMOKE_BOMB:
+	case WP_POISONGAS:
+		if ( !delayedFire ) {
+			if ( pm->ps->aiChar ) {
+				// ai characters go into their regular animation setup
+				BG_AnimScriptEvent( pm->ps, ANIM_ET_FIREWEAPON, qtrue, qtrue );
+			} else {
+				// the player pulls the fuse and holds the hot potato
+				if ( pm->ps->weapon == WP_DYNAMITE_ENG || PM_WeaponAmmoAvailable( pm->ps->weapon ) ) {
+					if ( pm->ps->weapon == WP_DYNAMITE || pm->ps->weapon == WP_DYNAMITE_ENG ) {
+						pm->ps->grenadeTimeLeft = 50;
+					} else {
+						// start at four seconds and count down
+						pm->ps->grenadeTimeLeft = 4000;
+					}
+					pm->ps->holdable[HI_KNIVES] = 0; // holding nade
+					PM_StartWeaponAnim( WEAP_ATTACK1 );
 				}
-				pm->ps->holdable[HI_KNIVES] = 0; // holding nade
-				PM_StartWeaponAnim( WEAP_ATTACK1 );
 			}
-		}
 
-		pm->ps->weaponDelay = ammoTable[pm->ps->weapon].fireDelayTime;
-	}
-	break;
+			pm->ps->weaponDelay = ammoTable[pm->ps->weapon].fireDelayTime;
+		}
+		break;
 	}
 
 	if ( PM_AltFiring(delayedFire) || PM_AltFire() )
@@ -3799,6 +3834,7 @@ case WP_POISONGAS:
 			case WP_GRENADE_LAUNCHER:
 			case WP_GRENADE_PINEAPPLE:
 			case WP_POISONGAS:
+			case WP_SMOKE_BOMB:
 				playswitchsound = qfalse;
 				break;
 			// some weapons not allowed to reload.  must switch back to primary first
@@ -3807,6 +3843,7 @@ case WP_POISONGAS:
 			case WP_FG42SCOPE:
 			case WP_DELISLESCOPE:
 			case WP_M1941SCOPE:
+			case WP_M1GARAND:
 				reloadingW = qfalse;
 				break;
 			}
@@ -3894,6 +3931,7 @@ case WP_POISONGAS:
 	case WP_M1GARAND:
 	case WP_GRENADE_LAUNCHER:
 	case WP_GRENADE_PINEAPPLE:
+	case WP_SMOKE_BOMB:
 	case WP_DYNAMITE:
 	case WP_DYNAMITE_ENG:
 	case WP_M97:
@@ -4074,6 +4112,7 @@ case WP_POISONGAS:
 	switch(pm->ps->weapon) {
 		case WP_GRENADE_LAUNCHER:
 		case WP_GRENADE_PINEAPPLE:
+		case WP_SMOKE_BOMB:
 		case WP_POISONGAS:
 		case WP_AIRSTRIKE:
 		case WP_POISONGAS_MEDIC:
@@ -4768,14 +4807,14 @@ void PmoveSingle( pmove_t *pmove ) {
 
 	if ( pm->cmd.wbuttons & WBUTTON_ZOOM ) {
 		if ( pm->ps->stats[STAT_KEYS] & ( 1 << INV_BINOCS ) ) {        // (SA) binoculars are an inventory item (inventory==keys)
-			if ( pm->ps->weapon != WP_SNIPERRIFLE && pm->ps->weapon != WP_SNOOPERSCOPE && pm->ps->weapon != WP_FG42SCOPE && pm->ps->weapon != WP_DELISLESCOPE && pm->ps->weapon != WP_M1941SCOPE ) {   // don't allow binocs if using scope
+			if ( pm->ps->weapon != WP_SNIPERRIFLE && pm->ps->weapon != WP_SNOOPERSCOPE && pm->ps->weapon != WP_FG42SCOPE && pm->ps->weapon != WP_DELISLESCOPE && pm->ps->weapon != WP_M1941SCOPE && pm->ps->weapon != WP_M1GARANDSCOPE ) {   // don't allow binocs if using scope
 				if ( !( pm->ps->eFlags & EF_MG42_ACTIVE ) ) {    // or if mounted on a weapon
 					pm->ps->eFlags |= EF_ZOOMING;
 				}
 			}
 
 			// don't allow binocs if in the middle of throwing grenade
-			if ( ( pm->ps->weapon == WP_GRENADE_LAUNCHER || pm->ps->weapon == WP_GRENADE_PINEAPPLE || pm->ps->weapon == WP_DYNAMITE || pm->ps->weapon == WP_DYNAMITE_ENG || pm->ps->weapon == WP_POISONGAS ) && pm->ps->grenadeTimeLeft > 0 ) {
+			if ( ( pm->ps->weapon == WP_GRENADE_LAUNCHER || pm->ps->weapon == WP_GRENADE_PINEAPPLE || pm->ps->weapon == WP_DYNAMITE || pm->ps->weapon == WP_DYNAMITE_ENG || pm->ps->weapon == WP_POISONGAS || pm->ps->weapon == WP_SMOKE_BOMB ) && pm->ps->grenadeTimeLeft > 0 ) {
 				pm->ps->eFlags &= ~EF_ZOOMING;
 			}
 		}
