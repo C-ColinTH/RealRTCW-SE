@@ -512,24 +512,24 @@ typedef enum
 // NOTE: we can only use up to 15 in the client-server stream
 // SA NOTE: should be 31 now (I added 1 bit in msg.c)
 typedef enum {
-	WP_NONE,                
+	WP_NONE,
 	// Melee Weapons
-	WP_KNIFE,          
+	WP_KNIFE,
 	// Pistols
-	WP_LUGER,              
-	WP_SILENCER,           
-    WP_COLT,               
-	WP_TT33,               
+	WP_LUGER,
+	WP_SILENCER,
+    WP_COLT,
+	WP_TT33,
 	WP_REVOLVER,
 	WP_HDM,
 	WP_AKIMBO,
-	WP_DUAL_TT33,           
+	WP_DUAL_TT33,
 	// SMGs
-	WP_MP40,             
-	WP_THOMPSON,         
-	WP_STEN,             
-	WP_PPSH,             
-	WP_MP34,             
+	WP_MP40,
+	WP_THOMPSON,
+	WP_STEN,
+	WP_PPSH,
+	WP_MP34,
 	// Rifles
 	WP_MAUSER,                    
 	WP_GARAND,            
@@ -563,24 +563,26 @@ typedef enum {
 	WP_ARTY,
 	WP_POISONGAS,
 	WP_POISONGAS_MEDIC,
-	WP_SMOKETRAIL,          
+	WP_SMOKETRAIL,
 	WP_HOLYCROSS,
+	WP_SMOKE_BOMB,
 	// Alt Modes
-	WP_SNIPERRIFLE, 
+	WP_SNIPERRIFLE,
     WP_SNOOPERSCOPE,
 	WP_DELISLESCOPE,
     WP_M1941SCOPE,
 	WP_FG42SCOPE,
+	WP_M1GARANDSCOPE,
 	WP_M7,
     // Misc stuff, not actual weapons
 	WP_DUMMY_MG42,
-	WP_MONSTER_ATTACK1,     	
-	WP_MONSTER_ATTACK2,     	
-	WP_MONSTER_ATTACK3,    	       
-	WP_SNIPER,              
-	WP_MORTAR,           
-	VERYBIGEXPLOSION,       	
-	WP_NUM_WEAPONS 
+	WP_MONSTER_ATTACK1,
+	WP_MONSTER_ATTACK2,
+	WP_MONSTER_ATTACK3,
+	WP_SNIPER,
+	WP_MORTAR,
+	VERYBIGEXPLOSION,
+	WP_NUM_WEAPONS
 } weapon_t;
 
 
@@ -1190,6 +1192,7 @@ typedef enum {
 	MOD_M1941SCOPE,
 	MOD_M1GARAND,
 	MOD_M7,
+	MOD_M1GARANDSCOPE,
 	MOD_BAR,
 	MOD_MP44,
 	MOD_MG42M,
@@ -1220,6 +1223,7 @@ typedef enum {
 	MOD_GRAPPLE,
 	MOD_EXPLOSIVE,
 	MOD_POISONGAS,
+	MOD_SMOKEBOMB,
 	MOD_ZOMBIESPIT,
 	MOD_ZOMBIESPIT_SPLASH,
 	MOD_ZOMBIESPIRIT,
