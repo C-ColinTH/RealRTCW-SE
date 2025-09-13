@@ -84,4 +84,5 @@ int AICast_NumAttempts( int entnum );
 
 void AICast_RegisterPain( int entnum );
 
-
+// for smoke bomb
+qboolean AICast_BotEntInvisibleBySmokeBomb( vec3_t start, vec3_t end );
