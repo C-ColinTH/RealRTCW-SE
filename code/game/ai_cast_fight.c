@@ -346,12 +346,33 @@ qboolean AICast_EntityVisible( cast_state_t *cs, int enemynum, qboolean directvi
 	vis = &cs->vislist[enemynum];
 
 
+
+	// dangerous!
+	// if ( vis > 0 && AICast_BotEntInvisibleBySmokeBomb( start, end ) ) 
+	// {
+	// 	vis = 0;
+	// }
+
+	// see AICast_CheckVisibility and AICast-UupdateVisibility
+	// okay, these don't seem to have much impact below
+/*
 	// for smoke bomb
-	vec3_t start, end;
-	if ( vis > 0 && AICast_BotEntInvisibleBySmokeBomb( start, end ) ) 
-	{
-		vis = 0;
+	vec3_t start = {0};
+	vec3_t end = {0};
+	gentity_t *selfEntity, *enemyEnt;
+
+	selfEntity = &g_entities[cs->entityNum];
+	enemyEnt = &g_entities[enemynum];
+
+	if ( selfEntity && enemyEnt && selfEntity->health > 0 && enemyEnt->health > 0 ) {
+		VectorCopy(selfEntity->client->ps.origin, start);
+		VectorCopy(enemyEnt->client->ps.origin, end);
 	}
+
+	if ( AICast_BotEntInvisibleBySmokeBomb(start, end) ) {
+		return qfalse;
+	}
+*/
 
 
 	if ( !vis->visible_timestamp && !vis->real_visible_timestamp ) {
