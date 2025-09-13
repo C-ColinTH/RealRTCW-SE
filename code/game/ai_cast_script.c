@@ -519,6 +519,22 @@ cast_script_stack_action_t scriptActions[] =
 	{"achievement_easterIce",       AICast_ScriptAction_Achievement_ICE_EE},
 	
 	{"achievement_6perks",       AICast_ScriptAction_Achievement_6PERKS},
+
+	// victors added, fake achievements, just keep compatible
+	{"achievement_lightsoff",      AICast_ScriptAction_decoy},
+	{"achievement_blitzkrieg",       AICast_ScriptAction_decoy},
+	{"achievement_worthit",       AICast_ScriptAction_decoy},
+	{"achievement_femme",       AICast_ScriptAction_decoy},
+	{"achievement_fatale",      AICast_ScriptAction_decoy},
+	{"achievement_belomorcanal",      AICast_ScriptAction_decoy},
+	{"achievement_grenadestash",       AICast_ScriptAction_decoy},
+	{"achievement_dogsgold",       AICast_ScriptAction_decoy},
+	{"achievement_rabinovich",      AICast_ScriptAction_decoy},
+	{"achievement_kolodec",       AICast_ScriptAction_decoy},
+	{"achievement_g43",       AICast_ScriptAction_decoy},
+	{"achievement_ambush",       AICast_ScriptAction_decoy},
+	{"achievement_noambush",       AICast_ScriptAction_decoy},
+	{"achievement_finish",       AICast_ScriptAction_decoy},
      // achievements end
 	{"endgame",          AICast_ScriptAction_EndGame},				//----(SA)	added
 	{"announce",     AICast_ScriptAction_Announce},
