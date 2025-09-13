@@ -1,0 +1,108 @@
+weaponDef
+{
+	client {
+		standModel		    "models/weapons2/stg44/stg44_stand.mdc"
+		pickupModel			"models/weapons2/stg44/stg44.md3"
+		droppedAnglesHack
+		
+		weaponConfig		"models/weapons2/stg44/weapon.cfg"
+		handsModel			"models/weapons2/stg44/v_stg44_hand.md3"
+		
+		flashDlightColor	1.0 0.6 0.23
+		flashSound			"sound/weapons/stg44/stg44_fire.wav"		
+		flashEchoSound		"sound/weapons/stg44/stg44_far.wav"		
+		//lastShotSound		""										
+		
+		//readySound		""
+		//firingSound		""									
+		overheatSound		"sound/weapons/overheat.wav"
+		reloadSound			"sound/weapons/stg44/stg44_reload.wav"
+		reloadSoundFast		"sound/weapons/stg44/stg44_reload.wav"
+		reloadSoundAi	    "sound/weapons/ai/ar_reload.wav"
+		//reloadFastSound	""		
+		//spinupSound		""									
+		//spindownSound		""									
+		//switchSound		""
+        bounceSound         "sound/misc/weapon_bounce.wav"			
+		
+		weaponIcon			"icons/iconw_stg44_1"
+		weaponSelectedIcon	"icons/iconw_stg44_1_select"
+		
+		//missileModel		""
+		//missileSound		""
+		//missileTrailFunc	""									// supports "GrenadeTrail", "RocketTrail", "PyroSmokeTrail"
+		//missileDlight		0
+		//missileDlightColor	0 0 0							
+		
+		weaponPosition      -1 1 1                              // X Y Z positions
+		weaponPositionAlt   3 4 -1                              // X Y Z positions
+		weaponPositionAlt2  -8 4 0                              // X Y Z positions
+		
+		ejectBrassFunc		"MachineGunEjectBrass"				// supports "MachineGunEjectBrass" "PistolEjectBrass" and "PanzerFaustEjectBrass"
+		
+		//modModel 1		""
+		
+		firstPerson {
+			model			"models/weapons2/stg44/v_stg44.md3"
+			flashModel		"models/weapons2/stg44/v_stg44_flash.md3"
+
+			weaponLink
+			{
+				part 0
+				{
+					tag		"tag_barrel"
+					model	"models/weapons2/stg44/v_stg44_barrel.md3"
+				}
+				part 1
+				{
+					tag		"tag_barrel2"
+					model	"models/weapons2/stg44/v_stg44_barrel2.md3"
+				}
+				part 2
+				{
+					tag		"tag_barrel3"
+					model	"models/weapons2/stg44/v_stg44_barrel3.md3"
+				}
+			}
+		}
+		
+		thirdPerson {
+			model			"models/weapons2/stg44/stg44.md3"
+			flashmodel		"models/weapons2/stg44/stg44_flash.md3"
+		}
+	}
+			ammo {
+			maxammoPerSkill         180 180 180 180 180 150
+            maxammoUpgradedPerSkill	300 300 300 300 300 300		
+			maxclipPerSkill         30  30  30  30  30  30
+            maxclipUpgradedPerSkill 60  60  60  60  60  60			
+			uses                    1
+            usesUpgraded            1			
+			reloadTime              3100                
+			reloadTimeFull          3100               
+			fireDelayTime           0               
+			nextShotTime            85
+            nextShotTimeUpgraded    85			
+			nextShotTime2           150
+            nextShotTime2Upgraded   150			
+			maxHeat                 0                 
+			coolRate                0                 
+			playerDamage            12
+            playerDamageUpgraded    27			
+			aiDamage                7			
+			playerSplashRadius      0                   
+			aiSplashRadius          0                  
+			spread                  850
+            spreadUpgraded          700			
+			aimSpreadScaleAdd       15                  
+			spreadScale             0.55                 
+			weapRecoilDuration      40                  
+			weapRecoilPitch         0.1 0.1             
+			weapRecoilYaw           0.0 0.0            
+			soundRange              1300               
+			moveSpeed               0.90                
+			twoHand                 1                 
+			upAngle                 0                  
+			falloffDistance         1000.0 2000.0      
+		}
+}

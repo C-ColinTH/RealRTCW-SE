@@ -1,0 +1,121 @@
+weaponDef
+{
+	client {
+		//standModel		""	
+		pickupModel			"models/weapons2/mosin/mosin.mdc"
+		droppedAnglesHack
+		
+		weaponConfig		"models/weapons2/mosin/weapon.cfg"
+		handsModel			"models/weapons2/mosin/v_mosin_hand.mdc"
+		
+		flashDlightColor	1.0 0.6 0.23
+		flashSound			"sound/weapons/mosin/mosin_fire.wav"
+        flashSoundAI		"sound/weapons/mosin/mosin_fire_last.wav"			
+		flashEchoSound	    "sound/weapons/mosin/mosin_far.wav"		
+		lastShotSound		"sound/weapons/mosin/mosin_fire.wav"
+		
+		//readySound		""
+		//firingSound		""									
+		//overheatSound		""
+		reloadSound			"sound/weapons/mosin/mosin_reload.wav"
+		reloadSoundFast		"sound/weapons/mosin/mosin_reload.wav"
+		reloadSoundAi	    "sound/weapons/ai/rifle_reload.wav"
+		//reloadFastSound	""		
+		//spinupSound		""									
+		//spindownSound		""									
+		//switchSound		""
+        bounceSound         "sound/misc/weapon_bounce.wav"			
+		
+		weaponIcon			"icons/iconw_mosin_1"
+		weaponSelectedIcon	"icons/iconw_mosin_1_select"
+		
+		//missileModel		""
+		//missileSound		""
+		//missileTrailFunc	""									// supports "GrenadeTrail", "RocketTrail", "PyroSmokeTrail"
+		//missileDlight		0
+		//missileDlightColor	0 0 0							
+		
+		weaponPosition      0 0 -1                              // X Y Z positions
+		weaponPositionAlt   -2 3 1                              // X Y Z positions
+		weaponPositionAlt2   0 3 -1                              // X Y Z positions
+		
+		ejectBrassFunc		"MachineGunEjectBrass"				// supports "MachineGunEjectBrass" "PistolEjectBrass" and "PanzerFaustEjectBrass"
+		
+		//modModel 1		""
+		
+		firstPerson {
+			model			"models/weapons2/mosin/v_mosin.mdc"
+			flashModel		"models/weapons2/mosin/v_mosin_flash.mdc"
+
+			weaponLink
+			{
+				part 0
+				{
+					tag		"tag_barrel"
+					model	"models/weapons2/mosin/v_mosin_barrel.mdc"
+				}
+				part 1
+				{
+					tag		"tag_barrel2"
+					model	"models/weapons2/mosin/v_mosin_barrel2.mdc"
+				}
+				part 2
+				{
+					tag		"tag_barrel3"
+					model	"models/weapons2/mosin/v_mosin_barrel3.mdc"
+				}
+				part 3
+				{
+					tag		"tag_barrel4"
+					model	"models/weapons2/mosin/v_mosin_barrel4.mdc"
+				}
+				part 4
+				{
+					tag		"tag_barrel5"
+					model	"models/weapons2/mosin/v_mosin_barrel5.mdc"
+				}
+			}
+		}
+		
+		thirdPerson {
+			model			"models/weapons2/mosin/mosin.mdc"
+			flashmodel		"models/weapons2/mosin/mosin_flash.mdc"
+		}
+	}
+			ammo {
+			maxammoPerSkill         80 80 80  80  80  100 
+			maxammoUpgradedPerSkill 100 100 100 100 100 100
+			maxclipPerSkill         5   5   5   5   5    5  
+			maxclipUpgradedPerSkill 1   1   1   1   1    1
+			uses                    1
+            usesUpgraded            1			
+			reloadTime              2550             
+			reloadTimeFull          2550            
+			fireDelayTime           100             
+			nextShotTime            1100
+            nextShotTimeUpgraded    1100            
+			nextShotTime2           1100
+            nextShotTime2Upgraded   1100            
+			maxHeat                 0              
+			coolRate                0             
+			playerDamage            40
+            playerDamageUpgraded    150			
+			aiDamage                20               
+			playerSplashRadius      0                
+			aiSplashRadius          0                
+			spread                  400
+            spreadUpgraded          10			
+			aimSpreadScaleAdd       50               
+			spreadScale             0.5              
+			weapRecoilDuration      50              
+			weapRecoilPitch         1.0 1.0       
+			weapRecoilYaw           0.1 0.1          
+			soundRange              2000           
+			moveSpeed               0.90            
+			twoHand                 1                
+			upAngle                 0                
+			falloffDistance         2500.0 5000.0
+			brassDelayEmpty         1800
+			brassDelay              700
+		}
+}

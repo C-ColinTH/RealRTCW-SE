@@ -1,0 +1,122 @@
+weaponDef
+{
+	client {
+		//standModel			""
+		pickupModel			"models/weapons2/panzerfaust/pf.mdc"
+		//droppedAnglesHack                        
+	
+		weaponConfig		"models/weapons2/panzerfaust/weapon.cfg"
+		handsModel			"models/weapons2/panzerfaust/v_pf_hand.mdc"
+		
+		flashDlightColor	0.75 0.3 0.0
+		flashSound			"sound/weapons/rocket/rocklf1a.wav"	
+//		flashEchoSound		""	
+		//lastShotSound		""										
+		
+		//readySound		""
+		//firingSound		""									
+		//overheatSound		""
+		//reloadSound		""
+		//reloadFullSound	""
+		//reloadFastSound	""									
+		//spinupSound		""		
+		//spindownSound		""									
+		//switchSound		""		
+        bounceSound         "sound/misc/weapon_bounce.wav"			
+		
+		weaponIcon			"icons/iconw_panzerfaust_1"
+		weaponSelectedIcon	"icons/iconw_panzerfaust_1_select"
+		
+		missileModel		"models/ammo/rocket/rocket.mdc"
+		missileSound		"sound/weapons/rocket/rockfly.wav"
+		missileTrailFunc	"RocketTrail"						// supports "GrenadeTrail", "RocketTrail", "PyroSmokeTrail"
+		missileDlight		200
+		missileDlightColor	0.75 0.3 0.0
+		
+		weaponPosition      0 1 0                              // X Y Z positions
+		weaponPositionAlt   2 3 0                              // X Y Z positions
+		weaponPositionAlt2  0 5 0                              // X Y Z positions
+		
+		ejectBrassFunc		"PanzerFaustEjectBrass"				// supports "MachineGunEjectBrass" "PistolEjectBrass" and "PanzerFaustEjectBrass"
+		
+		//modModel 1		""
+		
+		firstPerson {
+			model			"models/weapons2/panzerfaust/v_pf.mdc"
+			flashModel		"models/weapons2/panzerfaust/v_pf_flash.mdc"
+
+			weaponLink
+			{
+				part 0
+				{
+					tag		"tag_barrel"
+					model	"models/weapons2/panzerfaust/v_pf_barrel.mdc"
+				}
+				part 1
+				{
+					tag		"tag_barrel2"
+					model	"models/weapons2/panzerfaust/v_pf_barrel2.mdc"
+				}
+				part 2
+				{
+					tag		"tag_barrel3"
+					model	"models/weapons2/panzerfaust/v_pf_barrel3.mdc"
+				}
+				part 3
+				{
+					tag		"tag_barrel4"
+					model	"models/weapons2/panzerfaust/v_pf_barrel4.mdc"
+				}
+				part 4
+				{
+					tag		"tag_barrel5"
+					model	"models/weapons2/panzerfaust/v_pf_barrel5.mdc"
+				}
+				// part 6
+				// {
+					// tag		"tag_barrel7"
+					// model	"models/weapons2/panzerfaust/v_pf_barrel7.mdc"
+				// }
+			}
+		}
+		
+		thirdPerson {
+			model			"models/weapons2/panzerfaust/pf.mdc"
+			flashmodel		"models/weapons2/panzerfaust/pf_flash.mdc"
+		}
+	}
+			ammo {
+			maxammoPerSkill         5  5  5  5  5  12
+            maxammoUpgradedPerSkill 20 20 20 20 20 20			
+			maxclipPerSkill         1  1  1  1  1  1
+            maxclipUpgradedPerSkill 2  2  2  2  2  2			
+			uses                    1
+            usesUpgraded            2			
+			reloadTime              1000              
+			reloadTimeFull          1000              
+			fireDelayTime           50                
+			nextShotTime            2000             
+			nextShotTime2           2000            
+			maxHeat                 0                 
+			coolRate                0                
+			playerDamage            300
+            playerDamageUpgraded    400			
+			aiDamage                100               
+			playerSplashRadius      350               
+			aiSplashRadius          200               
+			spread                  0
+            spreadUpgraded          0			
+			aimSpreadScaleAdd       30                
+			spreadScale             0.5               
+			weapRecoilDuration      0                
+			weapRecoilPitch         0.0 0.0          
+			weapRecoilYaw           0.0 0.0           
+			soundRange              1000             
+			moveSpeed               0.85              
+			twoHand                 1                 
+			upAngle                 0                 
+			falloffDistance         0.0 0.0             
+			brassDelayEmpty         550
+			brassDelay              550
+		}
+}

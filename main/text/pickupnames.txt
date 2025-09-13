@@ -1,0 +1,175 @@
+"---"
+"---"
+"Treasure Item"
+"Small Health"
+"Med Health"
+"Large Health"
+"Hot Meal"
+"Cold Meal"
+"Health"
+"Health"		// hanging kit
+"Beer"		// stein
+"Brandy"		// brandy
+"Flak Jacket"
+"Flak Jacket"	// hanging on hook
+"Armored Helmet"
+"Knife"
+"Luger"
+"Mauser kar98k"		// Kar98k
+"PPS43"			// Thompson
+"De Lisle"
+"De Lisle Scoped"
+"M1941 Scoped"
+"MP43"			// Sten
+"Dual Colts"
+"Dual TT33"
+"TT33"			// Colt
+"---"			// notmosin
+"MP40"
+"FG42"
+"Luger S"
+"Panzerfaust"
+"Grenade"		// Stielhandgranate
+"Grenade"		// MK2 Grenade
+"Smoke Grenade"		// +++
+"Dynamite"		// Dynamite Weapon
+"Venom Gun"
+"Flamethrower"
+"Tesla MKI"
+"Mauser Kar98k Scope"	// Kar98 Sniper
+"Mosin"			// Snooper Rifle
+"FG42"
+"G43"			// +++
+"---"
+"---"
+"---"
+"---"
+"MP34"
+// "TT33"			// ---
+"PPSH"
+"Mauser Kar98k"		// Mosin Nagant
+"SVT40"			// G43
+"M1941"
+"G43"			// M1 Garand
+"M7 Launcher"
+// "BAR"			// ---
+// "StG44"		// ---
+"MG34"			// MG42
+"Browning"
+// "Ithaca"		// ---
+"Auto 5 Shotgun"
+"HDM"
+"Holy Cross"
+"P38"			// 1905 Revolver
+"Airstrike Signal"
+"Poison Grenade"
+"Dynamite"
+"---"
+"---"
+"Poison Gas"
+"Poison Grenades"
+"M7 Grenades"
+"Holy Spirit"
+"Luger Rounds"		// 7.62x25mm Tokarev
+"TT33 Rounds"		// 7.62x25mm Tokarev
+"Walther Rounds"		// 7.62x54mmR
+"MP34 Rounds"		// Springfield Ammo
+"MP34 Rounds"		// Springfield Ammo
+"Springfield Ammo"
+".22 LR"
+".45cal Special"
+"MP34 Rounds"		// 7.92x33mm Kurz
+"MP40 Rounds"		// 7.92x33mm Kurz
+"MP40 Rounds" 		// 12-gauge
+"MP40 Rounds" 		// Revolver Ammo
+"MP43 Rounds"		// 9mm Rounds
+"MP43 Rounds"		// 9mm
+"MP43 Rounds"		// 9mm Box
+"PPSH Rounds"		// .45cal Rounds
+"PPSH Rounds"		// .45cal
+"PPSH Rounds"		// .45cal Box
+"PPS43 Rounds"		// +++
+"PPS43 Rounds"		// +++
+"Mauser kar98k Rounds"	// +++
+"Mauser kar98k Rounds"	// +++
+"Mauser kar98k Rounds"	// +++
+"Mosin Rounds"		// 7.92mm Rounds
+"Mosin Rounds"		// 7.92mm
+"Mosin Rounds"		// +++
+"FG42 Rounds"		// 7.92mm Box
+"FG42 Rounds"		// +++
+"FG42 Rounds"		// +++
+"G43 Rounds"		// +++
+"G43 Rounds"		// +++
+"G43 Rounds"		// .30cal Rounds
+"SVT40 Rounds"		// +++
+"SVT40 Rounds"		// +++
+"SVT40 Rounds"		// .30cal
+"MG34 Rounds"		// +++
+"MG34 Rounds"		// +++
+"MG34 Rounds"		// .30cal Box
+"12.7mm"		// MG Ammo
+"Grenades"
+"Pineapples"
+"Dynamite"
+"Smoke Grenade"		// +++
+"Cell"
+"Fuel"
+"Panzerfaust Rockets"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"---"
+"1921 Chateau Lafite"	// 1938 Latour
+"Adrenaline M-1"
+"Adrenaline M-2"
+"Adrenaline M-3"
+"Adrenaline M-4"
+"Bandages"
+"Journal"			// Venom Tech Manual
+"Radiocipher Journal"	// Project Book
+"Journal"			// Dr. Zemph's Journal
+"Quad Damage"
+"Vampirism"
+"Resupply"
+"Haste"
+"Haste"
+"Enviro"
+"Veil Shield"
+"Invisibility"
+"Resilience"
+"Scavenger"
+"Marathon"
+"Fast Hands"
+"Double Shot"
+"Resurrection"
+"Binoculars"
+"Ammo Pack"

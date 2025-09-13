@@ -1,0 +1,92 @@
+weaponDef
+{
+	client {
+		//standModel		""										
+		//pickupModel		""
+		
+		weaponConfig		"models/weapons2/smoke_grenade/weapon.cfg"
+		handsModel			"models/weapons2/smoke_grenade/v_smoke_grenade_hand.mdc"
+		
+		flashDlightColor	1 0.7 0.5
+		//flashSound	    ""	
+		//flashEchoSound	""										
+		//lastShotSound		""										
+		
+		//readySound		""
+		//firingSound		""									
+		overheatSound		"sound/weapons/gasgrenade/gren_gas.wav"	
+		//reloadSound		""
+		//reloadFullSound	""
+		//reloadFastSound	""									
+		//spinupSound		""									
+		//spindownSound		""									
+		//switchSound		""	
+        //bounceSound       ""			
+		
+		weaponIcon			"icons/iconw_grenade_1"
+		weaponSelectedIcon	"icons/iconw_grenade_1_select"
+		
+		missileModel		"models/weapons2/smoke_grenade/smoke_grenade.mdc"
+		//missileSound		""
+		missileTrailFunc	"GrenadeTrail"						// supports "GrenadeTrail", "RocketTrail", "PyroSmokeTrail"
+		//missileDlight		200
+		//missileDlightColor	0 0 0
+		
+		//ejectBrassFunc	""									// supports "MachineGunEjectBrass" "PistolEjectBrass" and "PanzerFaustEjectBrass"
+		
+		//modModel 1		""
+		
+		firstPerson {
+			model			"models/weapons2/smoke_grenade/v_smoke_grenade.mdc"
+			//flashModel		""
+			
+			weaponLink
+			{
+				part 0
+				{
+					tag		"tag_barrel"
+					model	"models/weapons2/smoke_grenade/v_smoke_grenade_barrel.mdc"
+				}
+			}
+		}
+		
+		thirdPerson {
+			model			"models/weapons2/smoke_grenade/smoke_grenade.mdc"
+			//flashmodel		""
+		}
+	}
+			ammo {
+			maxammoPerSkill         5 5 5 5 5 5
+			maxammoUpgradedPerSkill 5 5 5 5 5 5
+			maxclipPerSkill         5 5 5 5 5 5
+			maxclipUpgradedPerSkill 5 5 5 5 5 5
+			uses                    1
+            usesUpgraded            1			
+			reloadTime              1000         
+			reloadTimeFull          1000         
+			fireDelayTime           250      
+			nextShotTime            1600
+            nextShotTimeUpgraded    1500			
+			nextShotTime2           1600
+            nextShotTime2Upgraded   1500			
+			maxHeat                 0         
+			coolRate                0         
+			playerDamage            0
+            playerDamageUpgraded    0			
+			aiDamage                0        
+			playerSplashRadius      0     
+			aiSplashRadius          0    
+			spread                  0
+            spreadUpgraded          0			
+			aimSpreadScaleAdd       0        
+			spreadScale             0.0      
+			weapRecoilDuration      0         
+			weapRecoilPitch         0.0 0.0   
+			weapRecoilYaw           0.0 0.0   
+			soundRange              500      
+			moveSpeed               0.95      
+			twoHand                 0         
+			upAngle                 900       
+			falloffDistance         0.0 0.0             
+		}
+}

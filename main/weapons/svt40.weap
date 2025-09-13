@@ -1,0 +1,113 @@
+weaponDef
+{
+	client {
+		//standModel		""	
+		pickupModel			"models/weapons2/svt40/svt40.mdc"
+		droppedAnglesHack
+		
+		weaponConfig		"models/weapons2/svt40/weapon.cfg"
+		handsModel			"models/weapons2/svt40/v_svt40_hand.mdc"
+		
+		flashDlightColor	1.0 0.6 0.23
+		flashSound			"sound/weapons/svt40/svt40_fire.wav"		
+		flashEchoSound	    "sound/weapons/svt40/svt40_far.wav"		
+		//lastShotSound		""										
+		
+		//readySound		""
+		//firingSound		""									
+		//overheatSound		""
+		reloadSound			"sound/weapons/svt40/svt40_reload.wav"
+		reloadSoundFast		"sound/weapons/svt40/svt40_reload.wav"
+		reloadSoundAi	    "sound/weapons/ai/auto_rifle_reload.wav"
+		//reloadFastSound	""		
+		//spinupSound		""									
+		//spindownSound		""									
+		//switchSound		""		
+        bounceSound         "sound/misc/weapon_bounce.wav"			
+		
+		weaponIcon			"icons/iconw_svt40_1"
+		weaponSelectedIcon	"icons/iconw_svt40_1_select"
+		
+		//missileModel		""
+		//missileSound		""
+		//missileTrailFunc	""									// supports "GrenadeTrail", "RocketTrail", "PyroSmokeTrail"
+		//missileDlight		0
+		//missileDlightColor	0 0 0							
+		
+		weaponPosition      1 0 -1                              // X Y Z positions
+		weaponPositionAlt   1 2 0                              // X Y Z positions
+		weaponPositionAlt2  1 2 -1                              // X Y Z positions
+		
+		ejectBrassFunc		"MachineGunEjectBrass"				// supports "MachineGunEjectBrass" "PistolEjectBrass" and "PanzerFaustEjectBrass"
+		
+		//modModel 1		""
+		
+		firstPerson {
+			model			"models/weapons2/svt40/v_svt40.mdc"
+			flashModel		"models/weapons2/svt40/v_svt40_flash.mdc"
+
+			weaponLink
+			{
+				part 0
+				{
+					tag		"tag_barrel"
+					model	"models/weapons2/svt40/v_svt40_barrel.mdc"
+				}
+				part 1
+				{
+					tag		"tag_barrel2"
+					model	"models/weapons2/svt40/v_svt40_barrel2.mdc"
+				}
+				part 2
+				{
+					tag		"tag_barrel3"
+					model	"models/weapons2/svt40/v_svt40_barrel3.mdc"
+				}
+				part 3
+				{
+					tag		"tag_barrel4"
+					model	"models/weapons2/svt40/v_svt40_barrel4.mdc"
+				}
+			}
+		}
+		
+		thirdPerson {
+			model			"models/weapons2/svt40/svt40.mdc"
+			flashmodel		"models/weapons2/svt40/svt40_flash.mdc"
+		}
+	}
+			ammo {
+			maxammoPerSkill         90 90 90 90 90 90
+			maxammoUpgradedPerSkill 250 250 250 250 250 250
+			maxclipPerSkill         10  10  10  10  10  10
+            maxclipUpgradedPerSkill 20  20  20  20  20  20			
+			uses                    1
+            usesUpgraded            1			
+			reloadTime              3900                
+			reloadTimeFull          3900                
+			fireDelayTime           100                
+			nextShotTime            400
+            nextShotTimeUpgraded    150			
+			nextShotTime2           400
+            nextShotTime2Upgraded   150			
+			maxHeat                 4000                  
+			coolRate                200                   
+			playerDamage            35
+            playerDamageUpgraded    50			
+			aiDamage                15                   
+			playerSplashRadius      0                   
+			aiSplashRadius          0                   
+			spread                  350
+            spreadUpgraded          300			
+			aimSpreadScaleAdd       40                  
+			spreadScale             0.4                 
+			weapRecoilDuration      40                 
+			weapRecoilPitch         0.2 0.2             
+			weapRecoilYaw           0.1 0.1             
+			soundRange              2000                
+			moveSpeed               0.90               
+			twoHand                 1                   
+			upAngle                 0                  
+			falloffDistance         2000.0 4000.0
+		}
+}
