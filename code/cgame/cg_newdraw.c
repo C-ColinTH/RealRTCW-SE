@@ -507,6 +507,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 	playerState_t   *ps;
 	int weap;
 	qboolean special = qfalse;
+	weapon_t specialWeap = WP_NONE;
 
 	cent = &cg_entities[cg.snap->ps.clientNum];
 	ps = &cg.snap->ps;
@@ -532,9 +533,15 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 	case WP_DYNAMITE_ENG:
 		return;
 
+	// case WP_AKIMBO:
+	// case WP_DUAL_TT33:
+	// 	special = qtrue;
+	// 	break;
 	case WP_AKIMBO:
+		specialWeap = WP_COLT;
+		break;
 	case WP_DUAL_TT33:
-		special = qtrue;
+		specialWeap = WP_TT33;
 		break;
 
 	case WP_GRENADE_LAUNCHER:
@@ -555,12 +562,15 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 		break;
 	}
 
+	if ( specialWeap > WP_NONE && specialWeap < WP_NUM_WEAPONS ) special = qtrue;
+
 	if ( type == 0 ) { // ammo
 		value = cg.snap->ps.ammo[BG_FindAmmoForWeapon( weap )];
 	} else {        // clip
 		value = ps->ammoclip[BG_FindClipForWeapon( weap )];
 		if ( special ) {
-			value2 = value;
+			// value2 = value;
+			value2 = ps->ammoclip[BG_FindClipForWeapon(specialWeap)];
 			if ( ammoTable[weap].weapAlts ) {
 				value = ps->ammoclip[ammoTable[weap].weapAlts];
 			}
