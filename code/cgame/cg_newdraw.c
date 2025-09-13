@@ -160,6 +160,7 @@ static int weapIconDrawSize( int weap ) {
 	case WP_FLAMETHROWER:
 	case WP_FG42:
 	case WP_FG42SCOPE:
+	case WP_M1GARANDSCOPE:
 	case WP_SNOOPERSCOPE:
 	case WP_SNIPERRIFLE:
 	// RealRTCW weapons
@@ -544,6 +545,7 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 	case WP_FLAMETHROWER:
 	case WP_POISONGAS:
 	case WP_HOLYCROSS:
+	case WP_SMOKE_BOMB:
 		if ( type == 0 ) {  // don't draw reserve value, just clip (since these weapons have all their ammo in the clip)
 			return;
 		}
@@ -1531,6 +1533,12 @@ qboolean CG_OwnerDrawVisible( int flags ) {
 		}
 	}
 
+	if ( flags & CG_SHOW_NOT_V_FGSCOPE ) {        // if looking through g43 scope
+		if ( cg.weaponSelect == WP_M1GARANDSCOPE ) {
+			return qfalse;
+		}
+	}
+
 //----(SA)	end
 
 	if ( flags & CG_SHOW_TEAMINFO ) {
@@ -1573,7 +1581,7 @@ qboolean CG_OwnerDrawVisible( int flags ) {
 //----(SA)	added
 	if ( flags & CG_SHOW_NOT_V_CLEAR ) {
 		// if /not/ looking through binocs,snooper or sniper
-		if ( !cg.zoomedBinoc && !( cg.weaponSelect == WP_SNIPERRIFLE ) && !( cg.weaponSelect == WP_SNOOPERSCOPE ) && !( cg.weaponSelect == WP_FG42SCOPE ) && !( cg.weaponSelect == WP_DELISLESCOPE ) && !( cg.weaponSelect == WP_M1941SCOPE ) ) {
+		if ( !cg.zoomedBinoc && !( cg.weaponSelect == WP_SNIPERRIFLE ) && !( cg.weaponSelect == WP_SNOOPERSCOPE ) && !( cg.weaponSelect == WP_FG42SCOPE ) && !( cg.weaponSelect == WP_DELISLESCOPE ) && !( cg.weaponSelect == WP_M1941SCOPE ) && !( cg.weaponSelect == WP_M1GARANDSCOPE ) ) {
 			return qfalse;
 		}
 	}
@@ -1997,7 +2005,7 @@ void CG_DrawWeapStability( rectDef_t *rect, vec4_t color, int align ) {
 		return;
 	}
 
-	if ( cg_drawSpreadScale.integer == 1 && !( cg.weaponSelect == WP_SNOOPERSCOPE || cg.weaponSelect == WP_SNIPERRIFLE || cg.weaponSelect == WP_FG42SCOPE || cg.weaponSelect == WP_DELISLESCOPE || cg.weaponSelect == WP_M1941SCOPE ) ) {
+	if ( cg_drawSpreadScale.integer == 1 && !( cg.weaponSelect == WP_SNOOPERSCOPE || cg.weaponSelect == WP_SNIPERRIFLE || cg.weaponSelect == WP_FG42SCOPE || cg.weaponSelect == WP_DELISLESCOPE || cg.weaponSelect == WP_M1941SCOPE || cg.weaponSelect == WP_M1GARANDSCOPE ) ) {
 		// cg_drawSpreadScale of '1' means only draw for scoped weapons, '2' means draw all the time (for debugging)
 		return;
 	}

@@ -280,12 +280,12 @@ static void CG_ItemPickup( int itemNum ) {
 			//	4 - "New or Better"
 			//	5 - "New and Better"
 
-			if ( weapon == WP_SNIPERRIFLE || weapon == WP_SNOOPERSCOPE || weapon == WP_FG42SCOPE || weapon == WP_DELISLESCOPE || weapon == WP_M1941SCOPE ) {
+			if ( weapon == WP_SNIPERRIFLE || weapon == WP_SNOOPERSCOPE || weapon == WP_FG42SCOPE || weapon == WP_DELISLESCOPE || weapon == WP_M1941SCOPE || weapon == WP_M1GARANDSCOPE ) {
 				weapon = GetWeaponTableData( weapon )->weapAlts;
 			}
 
 			// don't ever autoswitch to secondary fire weapons
-			if ( weapon != WP_SNIPERRIFLE && weapon != WP_SNOOPERSCOPE && weapon != WP_FG42SCOPE && weapon != WP_DELISLESCOPE && weapon != WP_M1941SCOPE ) {  //----(SA)	modified
+			if ( weapon != WP_SNIPERRIFLE && weapon != WP_SNOOPERSCOPE && weapon != WP_FG42SCOPE && weapon != WP_DELISLESCOPE && weapon != WP_M1941SCOPE && weapon != WP_M1GARANDSCOPE ) {  //----(SA)	modified
 
 				// no weap currently selected, always just select the new one
 				if ( !cg.weaponSelect ) {
@@ -1848,7 +1848,7 @@ case EV_FILL_CLIP_FULL:
 
 	case EV_NOAMMO:
 		DEBUGNAME( "EV_NOAMMO" );
-		if ( ( es->weapon != WP_GRENADE_LAUNCHER ) && ( es->weapon != WP_GRENADE_PINEAPPLE ) && ( es->weapon != WP_DYNAMITE )  && ( es->weapon != WP_DYNAMITE_ENG ) && ( es->weapon != WP_AIRSTRIKE ) && ( es->weapon != WP_POISONGAS ) && ( es->weapon != WP_POISONGAS_MEDIC )  ) {
+		if ( ( es->weapon != WP_GRENADE_LAUNCHER ) && ( es->weapon != WP_GRENADE_PINEAPPLE ) && ( es->weapon != WP_DYNAMITE )  && ( es->weapon != WP_DYNAMITE_ENG ) && ( es->weapon != WP_AIRSTRIKE ) && ( es->weapon != WP_POISONGAS ) && ( es->weapon != WP_POISONGAS_MEDIC ) && ( es->weapon != WP_SMOKE_BOMB ) ) {
 			trap_S_StartSound( NULL, es->number, CHAN_AUTO, cgs.media.noAmmoSound );
 		}
 		if ( es->number == cg.snap->ps.clientNum && cg_autoReload.integer == 1 ) {
@@ -1885,6 +1885,8 @@ case EV_FILL_CLIP_FULL:
 		case WP_FG42SCOPE:
 			newweap = WP_FG42;
 			break;
+		case WP_M1GARANDSCOPE:
+			newweap = WP_M1GARAND;
 		default:
 			break;
 		}

@@ -710,11 +710,13 @@ float zoomTable[ZOOM_MAX_ZOOMS][2] = {
 // max {out,in}
 	{0, 0},
 
-	{36, 8},    //	binoc
-	{20, 4},    //	sniper
-	{60, 20},   //	snooper
-	{35, 35},   //	fg42 //RealRTCW was 55 55
-	{55, 55}    //	mg42
+	// non-variable focal for sniper rifles now
+	{40, 6},		//	binoc	{36, 8}
+	{25, 25},		//	sniper 	{20, 4}
+	{20, 20},		//	snooper {60, 20}
+	{30, 30},		//	fg42	{35, 35}
+	{55, 55},		//	mg42
+	{30, 30}		//	victors g43
 };
 
 void CG_AdjustZoomVal( float val, int type ) {
@@ -740,6 +742,8 @@ void CG_ZoomIn_f( void ) {
 		CG_AdjustZoomVal( -( cg_zoomStepSnooper.value ), ZOOM_SNIPER );
 	} else if ( cg.zoomedBinoc )      {
 		CG_AdjustZoomVal( -( cg_zoomStepBinoc.value ), ZOOM_BINOC );
+	}  else if ( cg_entities[cg.snap->ps.clientNum].currentState.weapon == WP_M1GARANDSCOPE )      {
+		CG_AdjustZoomVal( -( cg_zoomStepSnooper.value ), ZOOM_G43SCOPE );
 	} 
 }
 
@@ -756,6 +760,8 @@ void CG_ZoomOut_f( void ) {
 		CG_AdjustZoomVal( cg_zoomStepSnooper.value, ZOOM_SNIPER );
 	} else if ( cg.zoomedBinoc )      {
 		CG_AdjustZoomVal( cg_zoomStepBinoc.value, ZOOM_BINOC );
+	} else if ( cg_entities[cg.snap->ps.clientNum].currentState.weapon == WP_M1GARANDSCOPE )      {
+		CG_AdjustZoomVal( cg_zoomStepSnooper.value, ZOOM_G43SCOPE );
 	} 
 }
 
@@ -791,6 +797,8 @@ void CG_Zoom( void ) {
 			cg.zoomval = cg_zoomDefaultSniper.value;
 		} else if ( cg.predictedPlayerState.weapon == WP_M1941SCOPE ) {
 			cg.zoomval = cg_zoomDefaultSniper.value;
+		} else if ( cg.predictedPlayerState.weapon == WP_M1GARANDSCOPE ) {
+			cg.zoomval = cg_zoomDefaultG43.value;
 		} else {
 			cg.zoomval = 0;
 		}
@@ -1523,7 +1531,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 		return;
 	}
 
-	if ( cg.weaponSelect == WP_FG42SCOPE || cg.weaponSelect == WP_SNOOPERSCOPE || cg.weaponSelect == WP_SNIPERRIFLE || cg.weaponSelect == WP_DELISLESCOPE || cg.weaponSelect == WP_M1941SCOPE ) {
+	if ( cg.weaponSelect == WP_FG42SCOPE || cg.weaponSelect == WP_SNOOPERSCOPE || cg.weaponSelect == WP_SNIPERRIFLE || cg.weaponSelect == WP_DELISLESCOPE || cg.weaponSelect == WP_M1941SCOPE || cg.weaponSelect == WP_M1GARANDSCOPE ) {
 		float spd;
 		spd = VectorLength( cg.snap->ps.velocity );
 		if ( spd > 180.0f ) {
@@ -1542,6 +1550,9 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 				break;
 			case WP_M1941SCOPE:
 				CG_FinishWeaponChange( cg.weaponSelect, WP_M1941 );
+				break;
+			case WP_M1GARANDSCOPE:
+				CG_FinishWeaponChange( cg.weaponSelect, WP_M1GARAND );
 				break;
 			}
 		}

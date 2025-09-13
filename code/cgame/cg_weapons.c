@@ -55,17 +55,17 @@ static qboolean CG_WeaponHasAmmo( int i );
 static int maxWeapBanks = MAX_WEAP_BANKS, maxWeapsInBank = MAX_WEAPS_IN_BANK; // JPW NERVE
 
 int weapBanks[MAX_WEAP_BANKS][MAX_WEAPS_IN_BANK] = {
-	{0, 0, 0, 0, 0, 0},																						  //	0 (empty)
-	{WP_KNIFE, WP_HOLYCROSS, 0, 0, 0},															  //	1
-	{WP_LUGER, WP_SILENCER, WP_COLT, WP_AKIMBO, WP_TT33, WP_DUAL_TT33, WP_REVOLVER, WP_HDM},				  //	2
-	{WP_MP40, WP_MP34, WP_STEN, WP_THOMPSON, WP_PPSH, 0},													  //	3
-	{WP_MAUSER, WP_GARAND, WP_MOSIN, WP_DELISLE, 0, 0},														  //	4
-	{WP_G43, WP_M1GARAND, WP_M1941, 0, 0, 0},																  //	5
-	{WP_FG42, WP_MP44, WP_BAR, 0, 0, 0},																	  //	6
-	{WP_M97, WP_AUTO5, 0, 0, 0},																	  //	7
-	{WP_GRENADE_LAUNCHER, WP_GRENADE_PINEAPPLE, WP_DYNAMITE, WP_AIRSTRIKE, WP_POISONGAS, WP_POISONGAS_MEDIC, WP_DYNAMITE_ENG}, //	8
-	{WP_PANZERFAUST, WP_FLAMETHROWER, WP_MG42M, WP_BROWNING, 0, 0},											  //	9
-	{WP_VENOM, WP_TESLA, 0, 0, 0, 0}																		  //	10
+	{0,						0,						0,				0,				0,				0},	//	0 (empty)
+	{WP_KNIFE,				0,						0,				0,				0,				0},	//	1
+	{WP_LUGER,				WP_SILENCER,			WP_COLT,		WP_AKIMBO,		WP_REVOLVER,	0},	//	2
+	{WP_MP34,				WP_MP40,				WP_STEN,		WP_PPSH,		WP_THOMPSON,	0},	//	3
+	{WP_MOSIN,				WP_MAUSER,				WP_GARAND,		0,				0,				0},	//	4
+	{WP_FG42,				WP_M1GARAND,			WP_G43,			0,				0,				0},	//	5
+	{WP_GRENADE_LAUNCHER, 	WP_GRENADE_PINEAPPLE, 	WP_DYNAMITE, 	WP_POISONGAS, 	WP_SMOKE_BOMB, 	0},	//	6
+	{WP_PANZERFAUST, 		0,						0,				0, 				0,				0},	//	7
+	{WP_MG42M, 				0,						0,				0, 				0, 				0},	//	8
+	{WP_FLAMETHROWER, 		0,						0,				0, 				0, 				0},	//	9
+	{0, 0, 0, 0, 0, 0}									//	10
 };
 
 // JPW NERVE -- in mutiplayer, characters get knife/special on button 1, pistols on 2, 2-handed on 3
@@ -2191,6 +2191,7 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles ) {
 		case WP_KNIFE:
 		case WP_GRENADE_LAUNCHER:
 		case WP_GRENADE_PINEAPPLE:
+		case WP_SMOKE_BOMB:
 			break;
 
 			// adjust when leaning right (in case of reload)
@@ -3077,8 +3078,8 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	}
 
 	// don't draw weapon stuff when looking through a scope
-	if ( weaponNum == WP_SNOOPERSCOPE || weaponNum == WP_SNIPERRIFLE || weaponNum == WP_FG42SCOPE || weaponNum == WP_DELISLESCOPE || weaponNum == WP_M1941SCOPE ||
-		 weapSelect == WP_SNOOPERSCOPE || weapSelect == WP_SNIPERRIFLE || weapSelect == WP_FG42SCOPE || weapSelect == WP_DELISLESCOPE || weapSelect == WP_M1941SCOPE ) {
+	if ( weaponNum == WP_SNOOPERSCOPE || weaponNum == WP_SNIPERRIFLE || weaponNum == WP_FG42SCOPE || weaponNum == WP_DELISLESCOPE || weaponNum == WP_M1941SCOPE || weaponNum == WP_M1GARANDSCOPE ||
+		 weapSelect == WP_SNOOPERSCOPE || weapSelect == WP_SNIPERRIFLE || weapSelect == WP_FG42SCOPE || weapSelect == WP_DELISLESCOPE || weapSelect == WP_M1941SCOPE || weapSelect == WP_M1GARANDSCOPE ) {
 		if ( isPlayer && !cg.renderingThirdPerson ) {
 			return;
 		}
@@ -3468,7 +3469,9 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 #define BARREL_SMOKE_TIME 1000
 
 		if ( ps || cg.renderingThirdPerson || !isPlayer ) {
-			if ( weaponNum == WP_VENOM || weaponNum == WP_STEN || weaponNum == WP_MG42M || weaponNum == WP_BROWNING ) {
+			if ( weaponNum == WP_VENOM || weaponNum == WP_STEN || weaponNum == WP_MG42M || weaponNum == WP_BROWNING || 
+				weaponNum == WP_PPSH || weaponNum == WP_MP40 || weaponNum == WP_MP34 || weaponNum == WP_THOMPSON || 
+				weaponNum == WP_G43 || weaponNum == WP_M1GARAND || weaponNum == WP_FG42 ) {
 				if ( !cg_paused.integer ) {    // don't add while paused
 					// hot smoking gun
 					if ( cg.time - cent->overheatTime < 3000 ) {
@@ -3515,18 +3518,21 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		 weaponNum == WP_KNIFE ||
 		 weaponNum == WP_DYNAMITE ||
 		 weaponNum == WP_DYNAMITE_ENG ||
-		 weaponNum == WP_M7 ) {
+		 weaponNum == WP_M7 ||
+		 weaponNum == WP_SMOKE_BOMB
+	) {
 		return;
 	}
 
-	if ( weaponNum == WP_STEN ) {  // sten has no muzzleflash
-		flash.hModel = 0;
-	}
+	// WP_STEN is stg44 in victors
+	// if ( weaponNum == WP_STEN ) {  // sten has no muzzleflash
+	// 	flash.hModel = 0;
+	// }
 
 	// weaps with barrel smoke
 	if ( ps || cg.renderingThirdPerson || !isPlayer ) {
 		if ( !cg_paused.integer ) {    // don't add while paused
-			if ( weaponNum == WP_STEN || weaponNum == WP_VENOM ) {
+			if ( weaponNum == WP_MG42M || weaponNum == WP_VENOM ) {
 				if ( cg.time - cent->muzzleFlashTime < 100 ) {
 //					CG_ParticleImpactSmokePuff (cgs.media.smokeParticleShader, flash.origin);
 					CG_ParticleImpactSmokePuffExtended( cgs.media.smokeParticleShader, flash.origin, tv( 0,0,1 ), 8, 500, 8, 20, 30, 0.25f );
@@ -3878,6 +3884,7 @@ void CG_DrawWeaponSelect( void ) {
 		case WP_FLAMETHROWER:
 		case WP_FG42:
 		case WP_FG42SCOPE:
+		case WP_M1GARANDSCOPE:
 		case WP_M1941:
 			wideweap = qtrue;
 			break;
@@ -4038,6 +4045,11 @@ static qboolean CG_WeaponSelectable( int i ) {
 		break;
 	case WP_FG42SCOPE:
 		if ( i == WP_FG42 ) {
+			return qtrue;
+		}
+		break;
+	case WP_M1GARANDSCOPE:
+		if ( i == WP_M1GARAND ) {
 			return qtrue;
 		}
 		break;
@@ -4337,6 +4349,10 @@ void CG_SetSniperZoom( int lastweap, int newweap ) {
 //			cg.zoomedScope	= 1;	// TODO: add to zoomTable
 //			cg.zoomTime		= cg.time;
 		break;
+	case WP_M1GARANDSCOPE:
+//			cg.zoomedScope	= 1;	// TODO: add to zoomTable
+//			cg.zoomTime		= cg.time;
+		break;
 	}
 
 	switch ( newweap ) {
@@ -4368,6 +4384,11 @@ void CG_SetSniperZoom( int lastweap, int newweap ) {
 		cg.zoomval = cg_zoomDefaultFG.value;
 		cg.zoomedScope  = 1;        // TODO: add to zoomTable
 		zoomindex = ZOOM_FG42SCOPE;
+		break;
+	case WP_M1GARANDSCOPE:
+		cg.zoomval = cg_zoomDefaultG43.value;
+		cg.zoomedScope  = 1;        // TODO: add to zoomTable
+		zoomindex = ZOOM_G43SCOPE;
 		break;
 	}
 
@@ -4453,6 +4474,7 @@ void CG_FinishWeaponChange( int lastweap, int newweap ) {
 		case WP_FG42SCOPE:
 		case WP_DELISLESCOPE:
 		case WP_M1941SCOPE:
+		case WP_M1GARANDSCOPE:
 			break;
 		default:
 			cg.switchbackWeapon = lastweap;
@@ -4546,7 +4568,10 @@ void CG_NextWeap( qboolean switchBanks ) {
 	CG_WeaponIndex( curweap, &bank, &cycle );     // get bank/cycle of current weapon
 
 	switch ( num ) {
-	case WP_M7:
+	// case WP_M7:
+	// 	curweap = num = WP_M1GARAND;
+	// 	break;
+	case WP_M1GARANDSCOPE:
 		curweap = num = WP_M1GARAND;
 		break;
 	case WP_SNIPERRIFLE:
@@ -4585,8 +4610,11 @@ void CG_NextWeap( qboolean switchBanks ) {
 				qboolean found = qfalse;
 				switch ( num ) {
 				case WP_M1GARAND:
-					if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
-						num = WP_M7;
+					// if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
+					// 	num = WP_M7;
+					// }
+					if ( ( found = CG_WeaponSelectable( WP_M1GARANDSCOPE ) ) ) {
+						num = WP_M1GARANDSCOPE;
 					}
 					break;
 				}
@@ -4622,8 +4650,11 @@ void CG_NextWeap( qboolean switchBanks ) {
 				qboolean found = qfalse;
 				switch ( num ) {
 				case WP_M1GARAND:
-					if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
-						num = WP_M7;
+					// if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
+					// 	num = WP_M7;
+					// }
+					if ( ( found = CG_WeaponSelectable( WP_M1GARANDSCOPE ) ) ) {
+						num = WP_M1GARANDSCOPE;
 					}
 					break;
 				}
@@ -4645,8 +4676,11 @@ void CG_NextWeap( qboolean switchBanks ) {
 					qboolean found = qfalse;
 					switch ( num ) {
 					case WP_M1GARAND:
-						if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
-							num = WP_M7;
+						// if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
+						// 	num = WP_M7;
+						// }
+						if ( ( found = CG_WeaponSelectable( WP_M1GARANDSCOPE ) ) ) {
+							num = WP_M1GARANDSCOPE;
 						}
 						break;
 					}
@@ -4683,7 +4717,10 @@ void CG_PrevWeap( qboolean switchBanks ) {
 	num = curweap = cg.weaponSelect;
 
 	switch ( num ) {
-	case WP_M7:
+	// case WP_M7:
+	// 	curweap = num = WP_M1GARAND;
+	// 	break;
+	case WP_M1GARANDSCOPE:
 		curweap = num = WP_M1GARAND;
 		break;
 	case WP_SNIPERRIFLE:
@@ -4721,8 +4758,11 @@ void CG_PrevWeap( qboolean switchBanks ) {
 				qboolean found = qfalse;
 				switch ( num ) {
 				case WP_M1GARAND:
-					if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
-						num = WP_M7;
+					// if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
+					// 	num = WP_M7;
+					// }
+					if ( ( found = CG_WeaponSelectable( WP_M1GARANDSCOPE ) ) ) {
+						num = WP_M1GARANDSCOPE;
 					}
 					break;
 				}
@@ -4753,8 +4793,11 @@ void CG_PrevWeap( qboolean switchBanks ) {
 				qboolean found = qfalse;
 				switch ( num ) {
 				case WP_M1GARAND:
-					if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
-						num = WP_M7;
+					// if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
+					// 	num = WP_M7;
+					// }
+					if ( ( found = CG_WeaponSelectable( WP_M1GARANDSCOPE ) ) ) {
+						num = WP_M1GARANDSCOPE;
 					}
 					break;
 				}
@@ -4775,8 +4818,11 @@ void CG_PrevWeap( qboolean switchBanks ) {
 					qboolean found = qfalse;
 					switch ( num ) {
 					case WP_M1GARAND:
-						if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
-							num = WP_M7;
+						// if ( ( found = CG_WeaponSelectable( WP_M7 ) ) ) {
+						// 	num = WP_M7;
+						// }
+						if ( ( found = CG_WeaponSelectable( WP_M1GARANDSCOPE ) ) ) {
+							num = WP_M1GARANDSCOPE;
 						}
 						break;
 					}
@@ -5323,6 +5369,7 @@ void CG_WeaponFireRecoil( int weapon ) {
 		yawRandom = 1;
 	break;
 	case WP_FG42SCOPE:
+	case WP_M1GARANDSCOPE:
 		pitchAdd = 0.8;
 	break;
 	case WP_FG42:
@@ -5444,7 +5491,9 @@ void CG_FireWeapon( centity_t *cent, int event ) {
 				  ent->weapon == WP_AIRSTRIKE ||
 				  ent->weapon == WP_POISONGAS || 
 				  ent->weapon == WP_POISONGAS_MEDIC ||
-				  ent->weapon == WP_DYNAMITE_ENG ) { 
+				  ent->weapon == WP_DYNAMITE_ENG ||
+				  ent->weapon == WP_SMOKE_BOMB
+	) { 
 		if ( ent->apos.trBase[0] > 0 ) { // underhand
 			return;
 		}
@@ -5838,6 +5887,7 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 	case WP_REVOLVER:
 	case WP_FG42:
 	case WP_FG42SCOPE:
+	case WP_M1GARANDSCOPE:
 	case WP_THOMPSON:
 	case WP_STEN:
 	case WP_SILENCER:
@@ -5944,7 +5994,7 @@ void CG_MissileHitWall( int weapon, int clientNum, vec3_t origin, vec3_t dir, in
 		// enough to see it, this way we can leave other marks around a lot
 		// longer, since most of the time we can't actually see the bullet holes
 // (SA) small modification.  only do this for non-rifles (so you can see your shots hitting when you're zooming with a rifle scope)
-		if ( weapon == WP_FG42SCOPE || weapon == WP_SNIPERRIFLE || weapon == WP_SNOOPERSCOPE || weapon == WP_DELISLESCOPE || weapon == WP_M1941SCOPE || ( Distance( cg.refdef.vieworg, origin ) < 384 ) ) {
+		if ( weapon == WP_FG42SCOPE || weapon == WP_SNIPERRIFLE || weapon == WP_SNOOPERSCOPE || weapon == WP_DELISLESCOPE || weapon == WP_M1941SCOPE || weapon == WP_M1GARANDSCOPE || ( Distance( cg.refdef.vieworg, origin ) < 384 ) ) {
 
 			if ( clientNum ) {
 

@@ -191,6 +191,7 @@ vmCvar_t cg_zoomSensitivityFovScaled;
 vmCvar_t cg_zoomDefaultBinoc;
 vmCvar_t cg_zoomDefaultSniper;
 vmCvar_t cg_zoomDefaultSnooper;
+vmCvar_t cg_zoomDefaultG43;
 vmCvar_t cg_zoomDefaultFG;      //----(SA)	added
 vmCvar_t cg_reticles;
 vmCvar_t cg_reticleBrightness;      //----(SA)	added
@@ -333,9 +334,10 @@ cvarTable_t cvarTable[] = {
 	{ &cg_hintFadeTime, "cg_hintFadeTime", "500", CVAR_ARCHIVE }, //----(SA)	added
 	{ &cg_zoomFov, "cg_zoomfov", "22.5", CVAR_ARCHIVE },
 	{ &cg_zoomDefaultBinoc, "cg_zoomDefaultBinoc", "22.5", CVAR_ARCHIVE },
-	{ &cg_zoomDefaultSniper, "cg_zoomDefaultSniper", "15", CVAR_ARCHIVE },
-	{ &cg_zoomDefaultSnooper, "cg_zoomDefaultSnooper", "40", CVAR_ARCHIVE },
-	{ &cg_zoomDefaultFG, "cg_zoomDefaultFG", "55", CVAR_ARCHIVE },                //----(SA)	added
+	{ &cg_zoomDefaultSniper, "cg_zoomDefaultSniper", "25", CVAR_ARCHIVE },
+	{ &cg_zoomDefaultSnooper, "cg_zoomDefaultSnooper", "20", CVAR_ARCHIVE },
+	{ &cg_zoomDefaultFG, "cg_zoomDefaultFG", "30", CVAR_ARCHIVE },                //----(SA)	added
+	{ &cg_zoomDefaultG43, "cg_zoomDefaultG43", "30", CVAR_ARCHIVE },
 	{ &cg_zoomSensitivityFovScaled, "cg_zoomSensitivityFovScaled", "1", CVAR_ARCHIVE },
 	{ &cg_zoomSensitivity, "cg_zoomSensitivity", "1", CVAR_ARCHIVE },
 	{ &cg_zoomStepBinoc, "cg_zoomStepBinoc", "3", CVAR_ARCHIVE },

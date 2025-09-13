@@ -2824,6 +2824,7 @@ static void PM_SwitchIfEmpty( void ) {
 	case WP_DYNAMITE:
 	case WP_PANZERFAUST:
 	case WP_POISONGAS:
+	case WP_SMOKE_BOMB:
 	case WP_KNIFE:
 		break;
 	default:
@@ -2847,6 +2848,7 @@ static void PM_SwitchIfEmpty( void ) {
 	case WP_GRENADE_PINEAPPLE:
 	case WP_DYNAMITE:
 	case WP_POISONGAS:
+	case WP_SMOKE_BOMB:
 	case WP_KNIFE:
 		// take the 'weapon' away from the player
 		COM_BitClear( pm->ps->weapons, pm->ps->weapon );
@@ -3610,7 +3612,7 @@ static void PM_Weapon( void ) {
 		}
 	// check for fire
 	if ( (!(pm->cmd.buttons & BUTTON_ATTACK) && !PM_AltFire() && !delayedFire) 
-	    || (pm->ps->leanf != 0 && !PM_AltFiring(delayedFire) && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_POISONGAS) )
+	    || (pm->ps->leanf != 0 && !PM_AltFiring(delayedFire) && pm->ps->weapon != WP_GRENADE_LAUNCHER && pm->ps->weapon != WP_GRENADE_PINEAPPLE && pm->ps->weapon != WP_POISONGAS && pm->ps->weapon != WP_SMOKE_BOMB) )
 	{
 		pm->ps->weaponTime  = 0;
 		pm->ps->weaponDelay = 0;
