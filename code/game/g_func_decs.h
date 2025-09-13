@@ -1769,3 +1769,9 @@ extern qboolean AICast_ScriptAction_ChangeAiHead(cast_state_t* cs, char* params)
 extern qboolean AICast_BotEntInvisibleBySmokeBomb( vec3_t start, vec3_t end );
 extern gentity_t * G_FindSmokeBomb ( gentity_t * start ) ;
 extern gentity_t * G_FindMissile ( gentity_t * start , weapon_t weap ) ;
+
+// victors added
+extern qboolean G_ScriptAction_ChangeSpeakerSound(gentity_t* ent, char* params);
+extern qboolean G_ScriptAction_ChangeGrammofonSound(gentity_t* ent, char* params);
+extern qboolean G_ScriptAction_ChangeMoverModel(gentity_t* ent, char* params);
+extern qboolean G_ScriptAction_AccumPrint(gentity_t* ent, char* params);

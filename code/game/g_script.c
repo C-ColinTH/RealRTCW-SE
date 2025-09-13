@@ -102,6 +102,11 @@ qboolean G_ScriptAction_ShaderRemapFlush( gentity_t* ent, char *params );
 
 qboolean G_ScriptAction_FollowSpline( gentity_t *ent, char *params );
 
+// victors added
+qboolean G_ScriptAction_ChangeSpeakerSound(gentity_t* ent, char* params);
+qboolean G_ScriptAction_ChangeGrammofonSound(gentity_t* ent, char* params);
+qboolean G_ScriptAction_ChangeMoverModel(gentity_t* ent, char* params);
+qboolean G_ScriptAction_AccumPrint(gentity_t* ent, char* params);
 
 //----(SA)	end
 
@@ -159,6 +164,12 @@ g_script_stack_action_t gScriptActions[] =
 	{"mu_stop",                  G_ScriptAction_MusicStop},  // (int time)						// time to fadeout
 	{"mu_fade",                  G_ScriptAction_MusicFade},  // (float target_volume, int time)	// time to fade to target
 	{"mu_queue",             G_ScriptAction_MusicQueue}, // (char *new_music)				// music that will start when previous fades to 0
+
+	// victors added
+	{ "changespeakersound", G_ScriptAction_ChangeSpeakerSound},
+	{ "changegrammofonsound", G_ScriptAction_ChangeGrammofonSound},
+	{ "changemovermodel", G_ScriptAction_ChangeMoverModel},
+	{ "accumPrint", G_ScriptAction_AccumPrint},
 
 	{NULL,                      0}
 };
