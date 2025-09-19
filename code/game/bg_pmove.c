@@ -3996,7 +3996,7 @@ case WP_POISONGAS:
 	}
 
 	// Alt firing mode
-	if (pm->cmd.wbuttons & WBUTTON_ATTACK2)
+	if ( (pm->cmd.wbuttons & WBUTTON_ATTACK2) && !(pm->cmd.buttons & BUTTON_ATTACK) )
 	{
 		addTime = BG_GetNextShotTime(pm->ps, pm->ps->weapon, qtrue);
 	}
