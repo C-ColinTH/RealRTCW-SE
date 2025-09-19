@@ -1355,6 +1355,55 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 		0,
 		0,                                       
 	},
+
+	{
+		WP_M30,
+		WEAPON_CLASS_SHOTGUN,
+		WP_NONE,
+		WEAPON_TEAM_COMMON,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0.0f,
+		0,
+		{.0f, .0f},
+		{.0f, .0f},
+		0,
+		0.0,
+		0,
+		0,
+		{0.0, 0.0},
+		MOD_M30,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+	},
+
    // Heavy Weapons
 	{   
 		WP_BROWNING,
@@ -2618,7 +2667,7 @@ int reloadableWeapons[] = {
 	WP_MAUSER, WP_SNIPERRIFLE, WP_SNOOPERSCOPE, WP_MOSIN, WP_M1GARAND, WP_G43,
 	WP_MP44, WP_BAR, WP_M97, WP_FG42SCOPE, WP_BROWNING, WP_VENOM,
 	WP_DELISLE, WP_DELISLESCOPE, WP_TESLA, WP_M1941, WP_AUTO5,
-	WP_M1941SCOPE, WP_DUAL_TT33, WP_HDM, -1};
+	WP_M1941SCOPE, WP_DUAL_TT33, WP_HDM, WP_M30, -1};
 
 // new (10/18/00)
 char *animStrings[] = {
@@ -4581,6 +4630,33 @@ model="models/weapons2/m97/m97_3rd.md3"
 			{ 0,0,0,0,0,0 }
 	},
 
+
+/*QUAKED weapon_m30 (.3 .3 1) (-16 -16 -16) (16 16 16) SUSPENDED SPIN - RESPAWN
+-------- MODEL FOR RADIANT ONLY - DO NOT SET THIS AS A KEY --------
+model="models/weapons2/m30/m30_3rd.md3"
+*/
+	{
+		"weapon_m30",
+		"sound/misc/w_pkup.wav",
+		{ 
+		"",
+		"",
+		""
+		},
+
+			"icons/iconw_m30",   
+			"m30",           
+			700,
+			IT_WEAPON,
+			WP_M30,
+			WP_M30,
+			WP_M97,
+			WP_M30,
+			WP_M30,
+			"",                    
+			"",                     
+			{ 0,0,0,0,0,0 }
+	},
 
 /*QUAKED weapon_hdm (.3 .3 1) (-16 -16 -16) (16 16 16) SUSPENDED SPIN - RESPAWN
 "stand" values:
@@ -9331,6 +9407,7 @@ char *BG_GetWeaponFilename( weapon_t weaponNum )
 		case WP_BAR:               return "bar.weap";				// Chauchat
 		case WP_M97:               return "ithaca.weap";			// Winchester M1897
 		case WP_AUTO5:             return "auto5.weap";				// Auto 5 Shotgun
+		case WP_M30:               return "m30.weap";
 		case WP_FLAMETHROWER:      return "flamethrower.weap";
 		case WP_PANZERFAUST:       return "panzerfaust.weap";		// Leuchpistol
 		case WP_MG42M:             return "mg42m.weap";				// MG34

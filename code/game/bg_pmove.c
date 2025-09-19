@@ -3659,6 +3659,7 @@ static void PM_Weapon( void ) {
 	case WP_FG42SCOPE:
 	case WP_M97:
 	case WP_AUTO5:
+	case WP_M30:
 	case WP_AIRSTRIKE:
 	case WP_POISONGAS_MEDIC:
 		if ( !weaponstateFiring ) {
@@ -3901,6 +3902,7 @@ case WP_POISONGAS:
 	case WP_M97:
 	case WP_AUTO5:
     case WP_M7:
+	case WP_M30:
 		PM_StartWeaponAnim( weapattackanim );
 		break;
 	case WP_VENOM:

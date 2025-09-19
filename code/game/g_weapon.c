@@ -2123,6 +2123,46 @@ void FireWeapon( gentity_t *ent ) {
 		}
 		break;
 	
+	case WP_M30:
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		if ( ammoTable[WP_M30].uses > 1 ) {
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+			Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+		}
+
+		if (!ent->aiCharacter) {
+			vec3_t vec_forward, vec_vangle;
+			VectorCopy(ent->client->ps.viewangles, vec_vangle);
+			vec_vangle[PITCH] = 0;	// nullify pitch so you can't lightning jump
+			AngleVectors(vec_vangle, vec_forward, NULL, NULL);
+			 // make it less if in the air
+			if (ent->s.groundEntityNum == ENTITYNUM_NONE)
+				VectorMA(ent->client->ps.velocity, -8, vec_forward, ent->client->ps.velocity);
+			else
+				VectorMA(ent->client->ps.velocity, -24, vec_forward, ent->client->ps.velocity);
+		}
+		break;
 
 	case WP_THOMPSON:
 		if (ent->client->ps.weaponUpgraded[WP_THOMPSON])
