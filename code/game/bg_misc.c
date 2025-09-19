@@ -157,7 +157,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	{   
 		WP_LUGER,              
 		WEAPON_CLASS_PISTOL,
-		WP_NONE,
+		WP_SILENCER,
 		WEAPON_TEAM_AXIS,          
 		0,          
 		0,                     
@@ -205,7 +205,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	{  
 		WP_SILENCER,           
 		WEAPON_CLASS_PISTOL,
-		WP_NONE,
+		WP_LUGER,
 		WEAPON_TEAM_AXIS,       
 		0,        
 		0,                     
@@ -3837,7 +3837,7 @@ model="models/weapons2/sp5/sp5.md3"
 		WP_SILENCER,
 		WP_LUGER,
 		WP_SILENCER,
-		WP_SILENCER,
+		WP_LUGER,
 		"",                 
 		"",                  
 		{0,0,0,0,0,0}

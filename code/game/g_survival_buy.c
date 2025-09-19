@@ -97,7 +97,8 @@ qboolean Survival_HandleRandomWeaponBox(gentity_t *ent, gentity_t *activator, ch
 	if (!activator || !activator->client) return qfalse;
 
 	static const weapon_t random_box_weapons[] = {
-		WP_LUGER, WP_SILENCER, WP_COLT, WP_TT33, WP_REVOLVER, WP_DUAL_TT33,
+		// WP_LUGER, WP_SILENCER, WP_COLT, WP_TT33, WP_REVOLVER, WP_DUAL_TT33,
+		WP_LUGER, WP_COLT, WP_TT33, WP_REVOLVER, WP_DUAL_TT33,
 		WP_AKIMBO, WP_HDM, WP_MP40, WP_THOMPSON, WP_STEN, WP_PPSH, WP_MP34,
 		WP_MAUSER, WP_SNIPERRIFLE, WP_SNOOPERSCOPE, WP_MOSIN,
 		WP_M1GARAND, WP_G43, WP_MP44, WP_FG42, WP_BAR, WP_M97,
@@ -105,7 +106,8 @@ qboolean Survival_HandleRandomWeaponBox(gentity_t *ent, gentity_t *activator, ch
 	};
 
 	static const weapon_t random_box_weapons_dlc[] = {
-		WP_LUGER, WP_SILENCER, WP_COLT, WP_TT33, WP_REVOLVER, WP_DUAL_TT33,
+		// WP_LUGER, WP_SILENCER, WP_COLT, WP_TT33, WP_REVOLVER, WP_DUAL_TT33,
+		WP_LUGER, WP_COLT, WP_TT33, WP_REVOLVER, WP_DUAL_TT33,
 		WP_AKIMBO, WP_HDM, WP_MP40, WP_THOMPSON, WP_STEN, WP_PPSH, WP_MP34,
 		WP_MAUSER, WP_SNIPERRIFLE, WP_SNOOPERSCOPE, WP_MOSIN,
 		WP_M1GARAND, WP_G43, WP_M1941, WP_MP44, WP_FG42, WP_BAR, WP_M97, WP_AUTO5,

@@ -682,6 +682,10 @@ int Pickup_Weapon( gentity_t *ent, gentity_t *other ) {
 		COM_BitSet( other->client->ps.weapons, WP_FG42SCOPE );
 	} else if ( weapon == WP_SNIPERRIFLE ) {
 		COM_BitSet( other->client->ps.weapons, WP_MAUSER );
+	} else if (weapon == WP_SILENCER) {
+		COM_BitSet( other->client->ps.weapons, WP_LUGER );
+	} else if (weapon == WP_LUGER) {
+		COM_BitSet( other->client->ps.weapons, WP_SILENCER );
 	} else if ( weapon == WP_M1GARAND ) {
 		COM_BitSet( other->client->ps.weapons, WP_M7 );
 	} else if ( weapon == WP_M7 ) {
@@ -752,6 +756,7 @@ qboolean IsThereEmptySlot( gentity_t *other ) {
 weapon_t GetComplexWeapon( weapon_t weapon ) {
 	switch ( weapon )
 	{
+	case WP_LUGER:
 	case WP_GARAND:
 	case WP_FG42:
 	case WP_M1GARAND:
@@ -769,6 +774,7 @@ weapon_t GetComplexWeapon( weapon_t weapon ) {
 weapon_t GetSimpleWeapon( weapon_t weapon ) {
 	switch ( weapon )
 	{
+	case WP_SILENCER:
 	case WP_SNOOPERSCOPE:
 	case WP_FG42SCOPE:
 	case WP_M7:
@@ -784,14 +790,16 @@ weapon_t GetSimpleWeapon( weapon_t weapon ) {
 qboolean IsWeaponComplex( weapon_t weapon ) {
 	switch ( weapon )
 	{
-	
+	case WP_LUGER:
 	case WP_GARAND:
 	case WP_FG42:
 	case WP_M1GARAND:
 
+	case WP_SILENCER:
 	case WP_SNOOPERSCOPE:
 	case WP_FG42SCOPE:
 	case WP_M7:
+
 
 	// semi complex
 	case WP_SNIPERRIFLE:

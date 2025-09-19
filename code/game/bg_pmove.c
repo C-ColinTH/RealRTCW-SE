@@ -2445,6 +2445,17 @@ void PM_BeginWeaponChange( int oldweapon, int newweapon, qboolean reload ) { //-
 			switchtime = 0;
 		}
 		break;
+	case WP_LUGER:
+		if ( altswitch ) {
+			switchtime = 50;
+		}
+		break;
+	case WP_SILENCER:
+		if ( altswitch ) {
+			switchtime = 150;
+			altSwitchAnim = qtrue;
+		}
+		break;
 	case WP_FG42:
 	case WP_FG42SCOPE:
 		if ( altswitch ) {
@@ -2521,6 +2532,18 @@ static void PM_FinishWeaponChange( void ) {
 
 	// sometimes different switch times for alt weapons
 	switch ( newweapon ) {
+	case WP_LUGER:
+		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
+			switchtime = 50;
+	        altSwitchAnim = qtrue;
+		}
+		break;
+	case WP_SILENCER:
+		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
+			switchtime = 140;
+			altSwitchAnim = qtrue;
+		}
+		break;
 	case WP_FG42:
 	case WP_FG42SCOPE:
 		if ( newweapon == ammoTable[oldweapon].weapAlts ) {
