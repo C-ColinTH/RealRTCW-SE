@@ -2493,23 +2493,23 @@ static void CG_DrawWeapReticle( void ) {
 			CG_SetScreenPlacement(PLACE_CENTER, PLACE_CENTER);
 		}
 
+// WP_SNOOPERSCOPE is Lee Enfield MK1 now, no night vision filter
+/*
 //----(SA)	added
 		// DM didn't like how bright it gets
 
-		// WP_SNOOPERSCOPE is Lee Enfield MK1 now
-		/*
+		
 		snooperBrightness = Com_Clamp( 0.0f, 1.0f, cg_reticleBrightness.value );
 		snoopercolor[0] *= snooperBrightness;
 		snoopercolor[1] *= snooperBrightness;
 		snoopercolor[2] *= snooperBrightness;
 		trap_R_SetColor( snoopercolor );
-		*/
 //----(SA)	end
 
 		if ( cgs.media.snooperShaderSimple ) {
 			CG_DrawPic( 80, 0, 480, 480, cgs.media.snooperShaderSimple );
 		}
-
+*/
 		// hairs
 
 		CG_FillRect( 310, 120, 20, 1, color );   //					-----
