@@ -9305,53 +9305,53 @@ char *BG_GetWeaponFilename( weapon_t weaponNum )
 {
 	switch ( weaponNum ) {
 		case WP_KNIFE:             return "knife.weap";
-		case WP_LUGER:             return "luger.weap";
-		case WP_SILENCER:          return "luger_silenced.weap";
-		case WP_COLT:              return "colt.weap";
-		case WP_AKIMBO:            return "akimbo.weap";
-		case WP_TT33:              return "tt33.weap";
-		case WP_DUAL_TT33:         return "dualtt33.weap";
-		case WP_REVOLVER:          return "revolver.weap";
-		case WP_THOMPSON:          return "thompson.weap";
-		case WP_STEN:              return "sten.weap";
-		case WP_MP34:              return "mp34.weap";
-		case WP_PPSH:              return "ppsh.weap";
+		case WP_LUGER:             return "luger.weap";				// Mauser M712
+		case WP_SILENCER:          return "luger_silenced.weap";	// Mauser M712-auto
+		case WP_COLT:              return "colt.weap";				// Walther P38B
+		case WP_AKIMBO:            return "akimbo.weap";			// Walther P38A
+		case WP_TT33:              return "tt33.weap";				// Welrod
+		case WP_DUAL_TT33:         return "dualtt33.weap";			// Welrods
+		case WP_REVOLVER:          return "revolver.weap";			// Webley Mark VI
+		case WP_THOMPSON:          return "thompson.weap";			// Beretta Mab38A
+		case WP_STEN:              return "sten.weap";				// MP18
+		case WP_MP34:              return "mp34.weap";				// Blyskawica
+		case WP_PPSH:              return "ppsh.weap";				// Beretta OVP M1918
 		case WP_MP40:              return "mp40.weap";
-		case WP_MAUSER:            return "mauser.weap";
-		case WP_SNIPERRIFLE:       return "sniperrifle.weap";
+		case WP_MAUSER:            return "mauser.weap";			// Mauser Kar98az
+		case WP_SNIPERRIFLE:       return "sniperrifle.weap";		// Kar98az Sniper (non-model)
 		case WP_GARAND:            return "garand.weap";
-		case WP_SNOOPERSCOPE:      return "snooper.weap";
-		case WP_MOSIN:             return "mosin.weap";
-		case WP_G43:               return "g43.weap";
-		case WP_M1GARAND:          return "m1garand.weap";
+		case WP_SNOOPERSCOPE:      return "snooper.weap";			// Lee Enfield MK1
+		case WP_MOSIN:             return "mosin.weap";				// De Lisle
+		case WP_G43:               return "g43.weap";				// Mauser Selbstlader M1916
+		case WP_M1GARAND:          return "m1garand.weap";			// M3 Grease
 		case WP_M7:                return "m7.weap";
-		case WP_FG42:              return "fg42.weap";
+		case WP_FG42:              return "fg42.weap";				// AVS38
 		case WP_FG42SCOPE:         return "fg42scope.weap";
-		case WP_MP44:              return "mp44.weap";
-		case WP_BAR:               return "bar.weap";
-		case WP_M97:               return "ithaca.weap";
-		case WP_AUTO5:             return "auto5.weap";
+		case WP_MP44:              return "mp44.weap";				// Breda M1935 PG
+		case WP_BAR:               return "bar.weap";				// Chauchat
+		case WP_M97:               return "ithaca.weap";			// Winchester M1897
+		case WP_AUTO5:             return "auto5.weap";				// Auto 5 Shotgun
 		case WP_FLAMETHROWER:      return "flamethrower.weap";
-		case WP_PANZERFAUST:       return "panzerfaust.weap";
-		case WP_MG42M:             return "mg42m.weap";
+		case WP_PANZERFAUST:       return "panzerfaust.weap";		// Leuchpistol
+		case WP_MG42M:             return "mg42m.weap";				// MG34
 		case WP_TESLA:             return "tesla.weap";
-		case WP_VENOM:             return "venom.weap";
+		case WP_VENOM:             return "venom.weap";				// MG42
 		case WP_GRENADE_LAUNCHER:  return "grenade.weap";
 		case WP_GRENADE_PINEAPPLE: return "pineapple.weap";
 		case WP_DYNAMITE:          return "dynamite.weap";
-		case WP_BROWNING:          return "browning.weap";
+		case WP_BROWNING:          return "browning.weap";			// MG08-15
 		case WP_AIRSTRIKE:         return "airstrike.weap";
 		case WP_POISONGAS_MEDIC:   return "poisongas_medic.weap";
 		case WP_DYNAMITE_ENG:      return "dynamite_eng.weap";
 		case WP_ARTY:              return "arty.weap";
 		case WP_SMOKETRAIL:        return "smoketrail.weap";
 		case WP_POISONGAS:         return "poisongas.weap";
-		case WP_HDM:               return "hdm.weap";
+		case WP_HDM:               return "hdm.weap";				// Ruby
 		case WP_HOLYCROSS:         return "cross.weap";
-		case WP_DELISLE:           return "delisle.weap";
-		case WP_DELISLESCOPE:      return "delislescope.weap";
+		case WP_DELISLE:           return "delisle.weap";			// Carcano M91-38
+		case WP_DELISLESCOPE:      return "delislescope.weap";		// Carcano M91-38
 		case WP_DUMMY_MG42:        return "dummy_mg42.weap";
-		case WP_M1941:             return "m1941.weap";
+		case WP_M1941:             return "m1941.weap";				// Berthier Carbine
 		case WP_M1941SCOPE:        return "m1941scope.weap";
 		case WP_NONE:
 		case WP_MONSTER_ATTACK1:
