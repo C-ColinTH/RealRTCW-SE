@@ -781,8 +781,8 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	// Rifles
 	{   
 		WP_MAUSER,
-		WEAPON_CLASS_RIFLE | WEAPON_CLASS_SCOPABLE,
-		WP_SNIPERRIFLE,
+		WEAPON_CLASS_RIFLE,
+		WP_NONE,
 		WEAPON_TEAM_AXIS,           
 		0,     
 		0,       
@@ -973,9 +973,9 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 
 	// Semi auto rifles
 	{   
-		WP_M1GARAND,
-		WEAPON_CLASS_RIFLE,
-		WP_M7,
+		WP_M1GARAND,		// M3 Grease
+		WEAPON_CLASS_SMG,
+		WP_NONE,
 		WEAPON_TEAM_ALLIES,         
 		0,    
 		0,       
@@ -1069,9 +1069,9 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	},
 
 	{   
-		WP_M1941,
-		WEAPON_CLASS_RIFLE | WEAPON_CLASS_SCOPABLE,
-		WP_M1941SCOPE,
+		WP_M1941,			// Berthier Carbine
+		WEAPON_CLASS_RIFLE,
+		WP_NONE,
 		WEAPON_TEAM_ALLIES,              
 		0,     
 		0,       
@@ -1214,7 +1214,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 
 	{   
 		WP_BAR,
-		WEAPON_CLASS_ASSAULT_RIFLE,
+		WEAPON_CLASS_MG,
 		WP_NONE,
 		WEAPON_TEAM_ALLIES,              
 		0,    
@@ -2128,7 +2128,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	{   
 		WP_SNIPERRIFLE,
 		WEAPON_CLASS_RIFLE | WEAPON_CLASS_SCOPED,
-		WP_MAUSER,
+		WP_NONE,
 		WEAPON_TEAM_AXIS,      
 		0,     
 		0,       
@@ -2272,7 +2272,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	{   
 		WP_M1941SCOPE,
 		WEAPON_CLASS_RIFLE | WEAPON_CLASS_SCOPED, 
-		WP_M1941,  
+		WP_NONE,  
 		WEAPON_TEAM_ALLIES,  
 		0,         
 		0,       
@@ -2369,7 +2369,7 @@ ammoTable_t ammoTable[WP_NUM_WEAPONS] = {
 	{   
 		WP_M7,
 		WEAPON_CLASS_RIFLENADE,
-		WP_M1GARAND,
+		WP_NONE,
 		WEAPON_TEAM_ALLIES,               
 		0,                   
 		0,       
