@@ -2219,18 +2219,19 @@ static void PM_BeginWeaponReload( int weapon ) {
 		return;
 	}
 
-	if((weapon == WP_M1GARAND) && pm->ps->ammoclip[WP_M1GARAND] != 0) {
-			return;	
-	}
+	// WP_M1GARAND is M3 Grease, WP_M1941 is Berthier Carbine in vendetta3
+	// if((weapon == WP_M1GARAND) && pm->ps->ammoclip[WP_M1GARAND] != 0) {
+	// 		return;	
+	// }
 
-	if (weapon == WP_M1941)
-	{
-		int maxclip = BG_GetMaxClip(pm->ps, WP_M1941);
-		if (pm->ps->ammoclip[WP_M1941] > (0.5f * maxclip))
-		{
-			return;
-		}
-	}
+	// if (weapon == WP_M1941)
+	// {
+	// 	int maxclip = BG_GetMaxClip(pm->ps, WP_M1941);
+	// 	if (pm->ps->ammoclip[WP_M1941] > (0.5f * maxclip))
+	// 	{
+	// 		return;
+	// 	}
+	// }
 
 	// no reload when you've got a chair in your hands
 	if ( pm->ps->eFlags & EF_MELEE_ACTIVE ) {
@@ -2590,9 +2591,10 @@ static void PM_ReloadClip(int weapon) {
 			ammomove = 1;
 		}
 
-		if (weapon == WP_M1941 && ammoclip > 0) {
-			ammomove = 5;
-		}
+		// WP_M1941 is Berthier Carbine in vendetta3
+		// if (weapon == WP_M1941 && ammoclip > 0) {
+		// 	ammomove = 5;
+		// }
 	}
 
 	if (ammoreserve < ammomove) {
