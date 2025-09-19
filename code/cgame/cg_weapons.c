@@ -4546,9 +4546,9 @@ void CG_NextWeap( qboolean switchBanks ) {
 	CG_WeaponIndex( curweap, &bank, &cycle );     // get bank/cycle of current weapon
 
 	switch ( num ) {
-	case WP_M7:
-		curweap = num = WP_M1GARAND;
-		break;
+	// case WP_M7:
+	// 	curweap = num = WP_M1GARAND;
+	// 	break;
 	case WP_SNIPERRIFLE:
 		curweap = num = WP_MAUSER;
 		break;
@@ -4683,9 +4683,9 @@ void CG_PrevWeap( qboolean switchBanks ) {
 	num = curweap = cg.weaponSelect;
 
 	switch ( num ) {
-	case WP_M7:
-		curweap = num = WP_M1GARAND;
-		break;
+	// case WP_M7:
+	// 	curweap = num = WP_M1GARAND;
+	// 	break;
 	case WP_SNIPERRIFLE:
 		curweap = num = WP_MAUSER;
 		break;
