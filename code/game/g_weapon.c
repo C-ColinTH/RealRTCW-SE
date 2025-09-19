@@ -2073,8 +2073,10 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 
 	case WP_M97:
+		float spread = G_GetWeaponSpread(WP_M97, ent) * aimSpreadScale;
+		int damage = G_GetWeaponDamage(WP_M97, ent);
 		for (int i = 0; i < NUM_SHOTGUN_PELLETS; i++) {
-			Bullet_Fire(ent, G_GetWeaponSpread(WP_M97, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M97, ent));
+			Bullet_Fire(ent, spread, damage);
 		}
 
 		if (!ent->aiCharacter) {
@@ -2091,8 +2093,10 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 
 	case WP_AUTO5:
+		float spread = G_GetWeaponSpread(WP_AUTO5, ent) * aimSpreadScale;
+		int damage = G_GetWeaponDamage(WP_AUTO5, ent);
 		for (int i = 0; i < NUM_SHOTGUN_PELLETS; i++) {
-			Bullet_Fire(ent, G_GetWeaponSpread(WP_AUTO5, ent) * aimSpreadScale, G_GetWeaponDamage(WP_AUTO5, ent));
+			Bullet_Fire(ent, spread, damage);
 		}
 
 		if (!ent->aiCharacter) {
@@ -2109,9 +2113,11 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 	
 	case WP_M30:
+		float spread = G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale;
+		int damage = G_GetWeaponDamage(WP_M30, ent);
 		for (int j = ammoTable[WP_M30].uses; j > 0; j--) {
 			for (int i = 0; i < NUM_SHOTGUN_PELLETS; i++) {
-				Bullet_Fire(ent, G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale, G_GetWeaponDamage(WP_M30, ent));
+				Bullet_Fire(ent, spread, damage);
 			}
 		}
 
