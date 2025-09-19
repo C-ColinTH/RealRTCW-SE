@@ -3065,11 +3065,12 @@ void PM_AdjustAimSpreadScale( void ) {
 qboolean PM_AltFire ( void )
 {
 	if ( pm->cmd.wbuttons & WBUTTON_ATTACK2 ) {
-		if ( pm->ps->weapon == WP_KNIFE ||
-		     pm->ps->weapon == WP_BAR   ||
-			 pm->ps->weapon == WP_MP44  ||
-			 pm->ps->weapon == WP_FG42  ) {
-			  return qtrue;
+		if ( pm->ps->weapon == WP_KNIFE
+			// || pm->ps->weapon == WP_BAR
+			// || pm->ps->weapon == WP_FG42
+			|| pm->ps->weapon == WP_MP44
+		) {
+			return qtrue;
 		}
 	}
 	return qfalse;
@@ -3080,11 +3081,12 @@ qboolean PM_AltFiring ( qboolean delayedFire )
 {
 	if ( pm->ps->weaponstate == WEAPON_FIRINGALT ) {
 		if ( pm->ps->weaponDelay > 0 || delayedFire  ) {
-			if ( pm->ps->weapon == WP_KNIFE || 
-			     pm->ps->weapon == WP_BAR || 
-				 pm->ps->weapon == WP_MP44 || 
-				 pm->ps->weapon == WP_FG42 )
-				  return qtrue;
+			if ( pm->ps->weapon == WP_KNIFE
+				// || pm->ps->weapon == WP_BAR
+				// || pm->ps->weapon == WP_FG42
+				|| pm->ps->weapon == WP_MP44
+			)
+				return qtrue;
 		}
 	}
 
@@ -4813,7 +4815,8 @@ void PmoveSingle( pmove_t *pmove ) {
 	if ( !(pm->ps->pm_flags & PMF_RESPAWNED) && pm->ps->pm_type != PM_INTERMISSION && pm->ps->pm_type != PM_NOCLIP ) {
 		// check if zooming
 		if ( !( pm->cmd.wbuttons & WBUTTON_ZOOM ) ) {
-			if ( (pm->cmd.buttons & BUTTON_ATTACK) || ((pm->cmd.wbuttons & WBUTTON_ATTACK2) && ( (pm->ps->weapon == WP_BAR) || (pm->ps->weapon == WP_FG42) || (pm->ps->weapon == WP_MP44))  )) {
+			// if ( (pm->cmd.buttons & BUTTON_ATTACK) || ((pm->cmd.wbuttons & WBUTTON_ATTACK2) && ( (pm->ps->weapon == WP_BAR) || (pm->ps->weapon == WP_FG42) || (pm->ps->weapon == WP_MP44))  )) {
+			if ( (pm->cmd.buttons & BUTTON_ATTACK) || PM_AltFire() ) {
 				// check for ammo
 				if ( PM_WeaponAmmoAvailable( pm->ps->weapon ) ) {
 					// all clear, fire!
