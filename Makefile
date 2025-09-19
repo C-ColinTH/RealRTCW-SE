@@ -269,9 +269,23 @@ endif
 
 
 #############################################################################
+# check STEAM flag parameter
+#############################################################################
+ifdef STEAM
+  ifneq ($(STEAM),0)
+    STEAM_SUFFIX :=
+	else
+    STEAM_SUFFIX := -Standalone
+	endif
+else
+  STEAM_SUFFIX := -Standalone
+endif
 
-BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)
-BR=$(BUILD_DIR)/release-$(PLATFORM)-$(ARCH)
+
+#############################################################################
+
+BD=$(BUILD_DIR)/debug-$(PLATFORM)-$(ARCH)$(STEAM_SUFFIX)
+BR=$(BUILD_DIR)/release-$(PLATFORM)-$(ARCH)$(STEAM_SUFFIX)
 STEAMDIR=$(MOUNT_DIR)/steam
 STEAMSHIMDIR=$(MOUNT_DIR)/steamshim
 CDIR=$(MOUNT_DIR)/client
@@ -1221,8 +1235,10 @@ ifeq ($(USE_MUMBLE),1)
 endif
 
 ifdef STEAM
-  CFLAGS += -DSTEAM
-  CLIENT_CFLAGS += -DSTEAM
+  ifneq ($(STEAM),0)
+    CFLAGS += -DSTEAM
+    CLIENT_CFLAGS += -DSTEAM
+  endif
 endif
 
 ifeq ($(USE_INTERNAL_ZLIB),1)
