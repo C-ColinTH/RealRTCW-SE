@@ -2495,11 +2495,15 @@ static void CG_DrawWeapReticle( void ) {
 
 //----(SA)	added
 		// DM didn't like how bright it gets
+
+		// WP_SNOOPERSCOPE is Lee Enfield MK1 now
+		/*
 		snooperBrightness = Com_Clamp( 0.0f, 1.0f, cg_reticleBrightness.value );
 		snoopercolor[0] *= snooperBrightness;
 		snoopercolor[1] *= snooperBrightness;
 		snoopercolor[2] *= snooperBrightness;
 		trap_R_SetColor( snoopercolor );
+		*/
 //----(SA)	end
 
 		if ( cgs.media.snooperShaderSimple ) {
@@ -3464,14 +3468,14 @@ static void CG_DrawFlashZoomTransition( void ) {
 	if ( frac < fadeTime ) {
 		frac = frac / (float)fadeTime;
 
-		if ( cg.weaponSelect == WP_SNOOPERSCOPE ) {
-//			Vector4Set( color, 0.7f, 0.3f, 0.7f, 1.0f - frac );
-//			Vector4Set( color, 1, 0.5, 1, 1.0f - frac );
-//			Vector4Set( color, 0.5f, 0.3f, 0.5f, 1.0f - frac );
-			Vector4Set( color, 0.7f, 0.6f, 0.7f, 1.0f - frac );
-		} else {
-			Vector4Set( color, 0, 0, 0, 1.0f - frac );
-		}
+		// No color gradient required for vendetta3 sniper rifles
+		// if ( cg.weaponSelect == WP_SNOOPERSCOPE ) {
+		// 	Vector4Set( color, 0.7f, 0.6f, 0.7f, 1.0f - frac );
+		// } else {
+		// 	Vector4Set( color, 0, 0, 0, 1.0f - frac );
+		// }
+
+		Vector4Set( color, 0, 0, 0, 1.0f - frac );
 
 		if ( cg_fixedAspect.integer ) {
 			CG_SetScreenPlacement(PLACE_STRETCH, PLACE_STRETCH);
