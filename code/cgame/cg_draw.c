@@ -2249,8 +2249,8 @@ CG_DrawWeapReticle
 static void CG_DrawWeapReticle( void ) {
 	int weap;
 	vec4_t color = {0, 0, 0, 1};
-	vec4_t snoopercolor = {0.7, .8, 0.7, 0};    // greenish
-	float snooperBrightness;
+	// vec4_t snoopercolor = {0.7, .8, 0.7, 0};    // greenish
+	// float snooperBrightness;
 	float x = 80, y, w = 240, h = 240;
 	float mask = 0, lb = 0;
 
