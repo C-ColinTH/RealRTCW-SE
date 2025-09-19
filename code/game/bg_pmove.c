@@ -3284,14 +3284,18 @@ static void PM_Weapon( void ) {
 	// game is reloading (mission fail/success)
 #ifdef CGAMEDLL
 	if ( cg_reloading.integer )
-#endif
-#ifdef GAMEDLL
-	if ( g_reloading.integer )
-#endif
 		gameReloading = qtrue;
 	else {
 		gameReloading = qfalse;
 	}
+#endif
+#ifdef GAMEDLL
+	if ( g_reloading.integer )
+		gameReloading = qtrue;
+	else {
+		gameReloading = qfalse;
+	}
+#endif
 
 	// ignore if spectator
 	if ( pm->ps->persistant[PERS_TEAM] == TEAM_SPECTATOR ) {
