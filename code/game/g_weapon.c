@@ -1772,6 +1772,8 @@ FireWeapon
 void FireWeapon( gentity_t *ent ) {
 	float aimSpreadScale;
 	vec3_t viewang;  // JPW NERVE
+	float spread;
+	int damage;
 
 	// Rafael mg42
 	if ( ent->client->ps.persistant[PERS_HWEAPON_USE] && ent->active ) {
@@ -2073,8 +2075,8 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 
 	case WP_M97:
-		float spread = G_GetWeaponSpread(WP_M97, ent) * aimSpreadScale;
-		int damage = G_GetWeaponDamage(WP_M97, ent);
+		spread = G_GetWeaponSpread(WP_M97, ent) * aimSpreadScale;
+		damage = G_GetWeaponDamage(WP_M97, ent);
 		for (int i = 0; i < NUM_SHOTGUN_PELLETS; i++) {
 			Bullet_Fire(ent, spread, damage);
 		}
@@ -2093,8 +2095,8 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 
 	case WP_AUTO5:
-		float spread = G_GetWeaponSpread(WP_AUTO5, ent) * aimSpreadScale;
-		int damage = G_GetWeaponDamage(WP_AUTO5, ent);
+		spread = G_GetWeaponSpread(WP_AUTO5, ent) * aimSpreadScale;
+		damage = G_GetWeaponDamage(WP_AUTO5, ent);
 		for (int i = 0; i < NUM_SHOTGUN_PELLETS; i++) {
 			Bullet_Fire(ent, spread, damage);
 		}
@@ -2113,8 +2115,8 @@ void FireWeapon( gentity_t *ent ) {
 		break;
 	
 	case WP_M30:
-		float spread = G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale;
-		int damage = G_GetWeaponDamage(WP_M30, ent);
+		spread = G_GetWeaponSpread(WP_M30, ent) * aimSpreadScale;
+		damage = G_GetWeaponDamage(WP_M30, ent);
 		for (int j = ammoTable[WP_M30].uses; j > 0; j--) {
 			for (int i = 0; i < NUM_SHOTGUN_PELLETS; i++) {
 				Bullet_Fire(ent, spread, damage);
