@@ -645,7 +645,7 @@ Con_DrawSolidConsole
 Draws the console with the solid background
 ================
 */
-#define SPECIAL_INFO "RealRTCW-5.2 (Victors Only) build-" __DATE__
+#define SPECIAL_INFO "RealRTCW-5.3 (Victors Only) build-" __DATE__
 void Con_DrawSolidConsole( float frac ) {
 	int i, x, y;
 	int rows;
