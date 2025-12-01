@@ -3186,7 +3186,7 @@ static qboolean PM_CheckGrenade() {
 
 				if ( pm->ps->grenadeTimeLeft <= 0 ) {   // give two frames advance notice so there's time to launch and detonate
 					PM_WeaponUseAmmo( pm->ps->weapon, 1 ); 
-					if ( !( pm->ps->weapon == WP_POISONGAS) || !( pm->ps->weapon == WP_SMOKE_BOMB) )
+					if ( !( pm->ps->weapon == WP_POISONGAS) && !( pm->ps->weapon == WP_SMOKE_BOMB) )
 					{
 					PM_AddEvent( EV_GRENADE_SUICIDE );      //----(SA)	die, dumbass
 					}
