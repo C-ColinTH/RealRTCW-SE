@@ -3887,7 +3887,7 @@ model="models/weapons2/sp5/sp5.md3"
 		WP_SILENCER,
 		WP_LUGER,
 		WP_SILENCER,
-		WP_SILENCER,			// WP_LUGER
+		WP_SILENCER,
 		"",                 
 		"",                  
 		{0,0,0,0,0,0}
@@ -4525,7 +4525,7 @@ model="models/multiplayer/m1_garand/m1_garand_3rd.md3"
 		IT_WEAPON,
 		WP_M1GARAND,
 		WP_M1GARAND,
-		WP_M1GARAND,					// WP_BAR
+		WP_M1GARAND,
 		WP_M1GARAND,
 		WP_M1GARAND,
 		"",                 
@@ -7841,11 +7841,28 @@ BG_FindItemForAmmo
 */
 gitem_t *BG_FindItemForAmmo( int ammo ) {
 	int i = 0;
+	qboolean survival = qfalse;
+
+	#ifdef GAMEDLL
+		if (g_gametype.integer == GT_SURVIVAL)
+	#endif
+	#ifdef CGAMEDLL
+		if (cg_gameType.integer == GT_SURVIVAL)
+	#endif
+			survival = qtrue;
 
 	for (; i < bg_numItems; i++ )
 	{
-		if ( bg_itemlist[i].giType == IT_AMMO && bg_itemlist[i].giAmmoIndex == ammo ) {
-			return &bg_itemlist[i];
+		if ( bg_itemlist[i].giType == IT_AMMO ) {
+			if (survival) {
+				if ( bg_itemlist[i].giAmmoIndexSurv == ammo ) {
+					return &bg_itemlist[i];
+				}
+			} else {
+				if ( bg_itemlist[i].giAmmoIndex == ammo ) {
+					return &bg_itemlist[i];
+				}
+			}
 		}
 	}
 	Com_Error( ERR_DROP, "Item not found for ammo: %d", ammo );
@@ -8077,6 +8094,15 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 	gitem_t *item;
 	int ammoweap;
 	qboolean multiplayer = qfalse;
+	qboolean survival = qfalse;
+
+		#ifdef GAMEDLL
+			if (g_gametype.integer == GT_SURVIVAL)
+		#endif
+		#ifdef CGAMEDLL
+			if (cg_gameType.integer == GT_SURVIVAL)
+		#endif
+			survival = qtrue;
 
 	if (ent->modelindex < 1 || ent->modelindex >= bg_numItems)
 	{
@@ -8106,18 +8132,38 @@ qboolean    BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *
 				{
 					int maxclip = BG_GetMaxClip(ps, item->giTag);
 
-					if (ps->ammoclip[item->giAmmoIndex] >= maxclip)
+					if (survival)
 					{
-						return qfalse;
+						if (ps->ammoclip[item->giAmmoIndexSurv] >= maxclip)
+						{
+							return qfalse;
+						}
+					}
+					else
+					{
+						if (ps->ammoclip[item->giAmmoIndex] >= maxclip)
+						{
+							return qfalse;
+						}
 					}
 				}
 				else
 				{
 					int maxammo = BG_GetMaxAmmo(ps, item->giTag, 1.5f);
 
-					if (ps->ammo[item->giAmmoIndex] >= maxammo)
+					if (survival)
 					{
-						return qfalse;
+						if (ps->ammo[item->giAmmoIndexSurv] >= maxammo)
+						{
+							return qfalse;
+						}
+					}
+					else
+					{
+						if (ps->ammo[item->giAmmoIndex] >= maxammo)
+						{
+							return qfalse;
+						}
 					}
 				}
 			}

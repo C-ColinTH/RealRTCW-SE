@@ -562,14 +562,15 @@ static void CG_DrawPlayerAmmoValue( rectDef_t *rect, int font, float scale, vec4
 		break;
 	}
 
-	if ( specialWeap > WP_NONE && specialWeap < WP_NUM_WEAPONS ) special = qtrue;
+	if ( specialWeap > WP_NONE && specialWeap < WP_NUM_WEAPONS ) {	// or < WP_DUMMY_MG42 ?
+		special = qtrue;
+	}
 
 	if ( type == 0 ) { // ammo
 		value = cg.snap->ps.ammo[BG_FindAmmoForWeapon( weap )];
 	} else {        // clip
 		value = ps->ammoclip[BG_FindClipForWeapon( weap )];
 		if ( special ) {
-			// value2 = value;
 			value2 = ps->ammoclip[BG_FindClipForWeapon(specialWeap)];
 			if ( ammoTable[weap].weapAlts ) {
 				value = ps->ammoclip[ammoTable[weap].weapAlts];
