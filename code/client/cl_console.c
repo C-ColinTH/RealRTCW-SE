@@ -645,7 +645,7 @@ Con_DrawSolidConsole
 Draws the console with the solid background
 ================
 */
-
+#define SPECIAL_INFO "RealRTCW-5.2 (Victors Only) build-" __DATE__
 void Con_DrawSolidConsole( float frac ) {
 	int i, x, y;
 	int rows;
@@ -696,10 +696,16 @@ void Con_DrawSolidConsole( float frac ) {
 
 	re.SetColor( g_color_table[ColorIndex( COLNSOLE_COLOR )] );
 
+/*
 	i = strlen( Q3_VERSION );
 
 	for ( x = 0 ; x < i ; x++ ) {
 		SCR_DrawSmallChar( cls.glconfig.vidWidth - ( i - x + 1 ) * SMALLCHAR_WIDTH, lines - SMALLCHAR_HEIGHT, Q3_VERSION[x] );
+	}
+*/
+	i = strlen( SPECIAL_INFO );
+	for ( x = 0; x < i; x++ ) {
+		SCR_DrawSmallChar( cls.glconfig.vidWidth - ( i - x + 1 ) * SMALLCHAR_WIDTH, lines - SMALLCHAR_HEIGHT, SPECIAL_INFO[x] );
 	}
 
 
