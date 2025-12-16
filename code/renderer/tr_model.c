@@ -329,11 +329,26 @@ model_t *R_AllocModel( void ) {
 
 	mod = ri.Hunk_Alloc( sizeof( *tr.models[tr.numModels] ), h_low );
 	mod->index = tr.numModels;
+	mod->validLod = -1;		// -1 means it needs to be recalculated
+
 	tr.models[tr.numModels] = mod;
 	tr.numModels++;
 
 	return mod;
 }
+
+void R_ClearModelLodCache( void ) {
+	if ( !tr.numModels ) {
+		return;
+	}
+
+	for ( int i = 0; i < tr.numModels; i++ ) {
+		if ( tr.models[i]->numLods > 1 ) {
+			tr.models[i]->validLod = -1;	// -1 means it needs to be recalculated
+		}
+	}
+}
+
 
 /*
 ====================

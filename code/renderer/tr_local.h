@@ -973,6 +973,7 @@ typedef struct model_s {
 	void	*modelData;		// only if type == (MOD_MDR | MOD_IQM)
 
 	int numLods;
+	int validLod;
 
 // GR - model tessellation capability flag
 	int ATI_tess;
@@ -1556,6 +1557,7 @@ qhandle_t   RE_GetShaderFromModel( qhandle_t modelid, int surfnum, int withlight
 //----(SA) end
 
 model_t     *R_AllocModel( void );
+void        R_ClearModelLodCache( void );
 
 void        R_Init( void );
 image_t     *R_FindImageFile( const char *name, imgType_t type, imgFlags_t flags );

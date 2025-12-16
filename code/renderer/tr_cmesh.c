@@ -194,6 +194,20 @@ static int R_ComputeLOD( trRefEntity_t *ent ) {
 	mdrFrame_t *mdrframe;
 	int lod;
 
+	// these for mantain original feature:
+	// dynamic LOD update effect immediately when chagned r_lodbias in option
+	static int lodBiasUsed = 0;
+	if ( lodBiasUsed != r_lodbias->integer ) {
+		lodBiasUsed = r_lodbias->integer;
+		R_ClearModelLodCache();
+	}
+
+	// optimize: if we had validLod, dont compute it again
+	// because this function is almost called in every frame, for many models
+	if ( tr.currentModel->validLod >= 0 ) {
+		return tr.currentModel->validLod;
+	}
+
 	if ( tr.currentModel->numLods < 2 ) {
 		// model has only 1 LOD level, skip computations and bias
 		lod = 0;
@@ -311,6 +325,8 @@ static int R_ComputeLOD( trRefEntity_t *ent ) {
 		ri.Printf( PRINT_DEVELOPER, "\"R_ComputeLOD:\" \"%s\" index %d for LOD doesn't exist, change to %d\n",
 			tr.currentModel->name, lod_pre, lod);
 	}
+
+	tr.currentModel->validLod = lod;
 
 	return lod;
 }
