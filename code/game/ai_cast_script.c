@@ -605,7 +605,8 @@ cast_script_event_define_t scriptEvents[] =
 	{"wave_start",          0},
 	{"wave_end",          0},
 	{"start_survival",          0},
-
+	{"specialwave_start",            0},
+	{"specialwave_end",          0},
 	{NULL,              0}
 };
 
@@ -748,7 +749,8 @@ void AICast_ScriptLoad( void ) {
 		}
 	}
 
-	level.scriptAI = G_Alloc( len );
+	level.scriptAI = G_Alloc( len + 1 );
+	memset( level.scriptAI, 0 , len + 1 );
 	trap_FS_Read( level.scriptAI, len, f );
 
 	trap_FS_FCloseFile( f );
