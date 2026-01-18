@@ -818,7 +818,11 @@ qboolean AICast_BotEntInvisibleBySmokeBomb( vec3_t start, vec3_t end ) {
 	float smokeRadius;
 
 	// if the target is close enough, vision is not affected by smoke bomb
-	if ( DistanceSquared( start,end ) < UNAFFECTED_BY_SMOKE_DIST ) {
+	// remove the effect for covert ops's smoke bomb
+	// FIXME: if there are two types of smoke bombs at the same time, only the one thrown first will be judged
+	gentity_t *gent = NULL;
+	gent = G_FindSmokeBomb( gent );
+	if ( gent && gent->s.weapon != WP_SMOKE_BOMB_CVOPS && DistanceSquared( start,end ) < UNAFFECTED_BY_SMOKE_DIST ) {
 		return qfalse;
 	}
 

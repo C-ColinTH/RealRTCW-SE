@@ -2215,6 +2215,14 @@ CG_S_AddLoopingSound(cent->currentState.number, cent->lerpOrigin, vec3_origin, w
 			smokeColor[3] = 0.40f;
 			break;
 
+		case WP_SMOKE_BOMB_CVOPS:
+			// more transparent
+			smokeColor[0] = 0.35f;
+			smokeColor[1] = 0.35f;
+			smokeColor[2] = 0.35f;
+			smokeColor[3] = 0.25f;
+			break;
+
 		default:
 			smokeColor[0] = 0.35f;
 			smokeColor[1] = 0.35f;
