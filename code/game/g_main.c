@@ -238,7 +238,7 @@ cvarTable_t gameCvarTable[] = {
 	{&g_aicanheadshot, "g_aicanheadshot", "1", CVAR_ARCHIVE, 0, qfalse},
 	
 	{&g_LTChargeTime, "g_LTChargeTime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
-	{&g_cvopsChargeTime, "g_cvopsChargeTime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
+	{&g_cvopsChargeTime, "g_cvopsChargeTime", "1000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
 	{&g_medicChargeTime, "g_medicChargeTime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
 	{&g_engineerChargeTime, "g_engineerChargeTime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},
 	{&g_soldierChargeTime, "g_soldierChargeTime", "30000", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse},

@@ -233,6 +233,7 @@ qboolean AICast_VisibleFromPos( vec3_t srcpos, int srcnum,
 AICast_CheckVisibility
 ==============
 */
+static qboolean AICast_BotEntInvisibleBySmokeBomb2( vec3_t start, vec3_t end, weapon_t weap );
 qboolean AICast_CheckVisibility( gentity_t *srcent, gentity_t *destent ) {
 	vec3_t dir, entangles, middle, eye, viewangles;
 	cast_state_t        *cs;
@@ -246,7 +247,13 @@ qboolean AICast_CheckVisibility( gentity_t *srcent, gentity_t *destent ) {
     }
 
 	// for smoke bomb
-	if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && AICast_BotEntInvisibleBySmokeBomb( srcent->client->ps.origin, destent->client->ps.origin ) ) {
+	// if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && AICast_BotEntInvisibleBySmokeBomb( srcent->client->ps.origin, destent->client->ps.origin ) ) {
+	// 	return;
+	// }
+	if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && 
+		( AICast_BotEntInvisibleBySmokeBomb2( srcent->client->ps.origin, destent->client->ps.origin, WP_SMOKE_BOMB ) ||
+		AICast_BotEntInvisibleBySmokeBomb2( srcent->client->ps.origin, destent->client->ps.origin, WP_SMOKE_BOMB_CVOPS ) ) )
+	{
 		return qfalse;
 	}
 
@@ -353,7 +360,13 @@ void AICast_UpdateVisibility( gentity_t *srcent, gentity_t *destent, qboolean sh
 	}
 
 	// for smoke bomb
-	if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && AICast_BotEntInvisibleBySmokeBomb( srcent->client->ps.origin, destent->client->ps.origin ) ) {
+	// if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && AICast_BotEntInvisibleBySmokeBomb( srcent->client->ps.origin, destent->client->ps.origin ) ) {
+	// 	return;
+	// }
+	if ( srcent && destent && srcent->client && destent->client && srcent->health > 0 && 
+		( AICast_BotEntInvisibleBySmokeBomb2( srcent->client->ps.origin, destent->client->ps.origin, WP_SMOKE_BOMB ) ||
+		AICast_BotEntInvisibleBySmokeBomb2( srcent->client->ps.origin, destent->client->ps.origin, WP_SMOKE_BOMB_CVOPS ) ) )
+	{
 		return;
 	}
 
@@ -812,17 +825,51 @@ returns whether smoke from smoke bombs blocks vision from start to end
 #define MAX_SMOKE_RADIUS_TIME 10000.0
 #define UNAFFECTED_BY_SMOKE_DIST SQR( 100 )
 
+extern gentity_t* G_FindSpecificSmokeBomb( gentity_t* start, weapon_t weap );
+static qboolean AICast_BotEntInvisibleBySmokeBomb2( vec3_t start, vec3_t end, weapon_t weap ) {
+	gentity_t *ent = NULL;
+	vec3_t smokeCenter;
+	float smokeRadius;
+
+	// if the target is close enough, vision is not affected by smoke bomb (exclude covert ops's smoke bomb)
+	if ( weap != WP_SMOKE_BOMB_CVOPS && DistanceSquared( start,end ) < UNAFFECTED_BY_SMOKE_DIST ) {
+		return qfalse;
+	}
+
+	while ( ( ent = G_FindSpecificSmokeBomb( ent, weap ) ) ) {
+		if ( ent->s.effect1Time == 16 ) {
+			// xkan, the smoke has not really started yet, see weapon_smokeBombExplode
+			// and CG_RenderSmokeGrenadeSmoke
+			continue;
+		}
+		// check the distance
+		VectorCopy( ent->s.pos.trBase, smokeCenter );
+		// raise the center to better match the position of the smoke, see
+		// CG_SpawnSmokeSprite().
+		smokeCenter[2] += 32;
+		// smoke sprite has a maximum radius of 640/2. and it takes a while for it to
+		// reach that size, so adjust the radius accordingly.
+		smokeRadius = MAX_SMOKE_RADIUS *
+					  ( ( level.time - ent->grenadeExplodeTime ) / MAX_SMOKE_RADIUS_TIME );
+		if ( smokeRadius > MAX_SMOKE_RADIUS ) {
+			smokeRadius = MAX_SMOKE_RADIUS;
+		}
+		// if distance from line is short enough, vision is blocked by smoke
+		if ( DistanceFromLineSquared( smokeCenter, start, end ) < smokeRadius * smokeRadius ) {
+			return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
 qboolean AICast_BotEntInvisibleBySmokeBomb( vec3_t start, vec3_t end ) {
 	gentity_t *ent = NULL;
 	vec3_t smokeCenter;
 	float smokeRadius;
 
 	// if the target is close enough, vision is not affected by smoke bomb
-	// remove the effect for covert ops's smoke bomb
-	// FIXME: if there are two types of smoke bombs at the same time, only the one thrown first will be judged
-	gentity_t *gent = NULL;
-	gent = G_FindSmokeBomb( gent );
-	if ( gent && gent->s.weapon != WP_SMOKE_BOMB_CVOPS && DistanceSquared( start,end ) < UNAFFECTED_BY_SMOKE_DIST ) {
+	if ( DistanceSquared( start,end ) < UNAFFECTED_BY_SMOKE_DIST ) {
 		return qfalse;
 	}
 
