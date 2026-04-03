@@ -1967,3 +1967,90 @@ char *Com_SkipTokens( char *s, int numTokens, char *sep )
 		return s;
 }
 
+/*
+==================
+for unicode support (utf8 format)
+==================
+*/
+// for utf8 character first byte, return the whole bytes length
+int Q_utf8bytesLength( const char *utf8 ) {
+	if ( !utf8 || !*utf8 ) return 0;
+
+	unsigned char c = (unsigned char)*utf8;
+	int expected_bytes = 1;
+	
+	if ( (c & 0xE0) == 0xC0 ) {			// 2 bytes UTF-8
+		expected_bytes = 2;
+	} else if ( (c & 0xF0) == 0xE0 ) {	// 3 bytes UTF-8
+		expected_bytes = 3;
+	} else if ( (c & 0xF8) == 0xF0 ) {	// 4 bytes UTF-8
+		expected_bytes = 4;
+	} else {							// default
+		expected_bytes = 1;
+	}
+
+	return expected_bytes;
+}
+
+// is a utf8 character
+qboolean Q_isUtf8Char( const char *c ) {
+	if ( !c || !*c ) return qfalse;
+
+	if ( Q_utf8bytesLength(c) > 1 ) {
+		return qtrue;
+	}
+	
+	return qfalse;
+}
+
+// does a string has utf8 charaters
+qboolean Q_isUtf8String( const char *str ) {
+	if ( !str || !*str ) return qfalse;
+
+	const char *p = str;
+	while ( *p ) {
+		if ( Q_isUtf8Char(p) ) return qtrue;
+		p++;
+	}
+
+	return qfalse;
+}
+
+// utf8 to code point, return 63 ('?') if invalid
+uint32_t Q_utf8ToCodePoint( const char *utf8 ) {
+    if ( !utf8 || !*utf8 ) {
+		return '?';
+	}
+    
+    unsigned char c = (unsigned char)*utf8;
+    int expected_bytes = 0;
+    uint32_t codepoint = 0;
+    
+    if ( c <= 0x7F ) {
+        expected_bytes = 1;
+        codepoint = c;
+    } else if ( (c & 0xE0) == 0xC0 ) {
+        expected_bytes = 2;
+        codepoint = c & 0x1F;
+    } else if ( (c & 0xF0) == 0xE0 ) {
+        expected_bytes = 3;
+        codepoint = c & 0x0F;
+    } else if ( (c & 0xF8) == 0xF0 ) {
+        expected_bytes = 4;
+        codepoint = c & 0x07;
+    } else {
+        return '?';
+    }
+    
+    for ( int i = 1; i < expected_bytes; i++ ) {
+        if ( utf8[i] == '\0' ) {
+            return '?';
+        }
+        if ( (utf8[i] & 0xC0) != 0x80 ) {
+            return '?';
+        }
+        codepoint = (codepoint << 6) | (utf8[i] & 0x3F);
+    }
+    
+    return codepoint;
+}
