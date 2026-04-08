@@ -884,6 +884,7 @@ static void CG_DrawPerks( rectDef_t *rect, int font, float scale, qboolean draw2
     int i, numPerks = 0;
     gitem_t *item;
     float x, y = 20; // Top part of the screen
+    qhandle_t icon;
 
 	if (cg_gameType.integer != GT_SURVIVAL)
 	{
@@ -910,17 +911,15 @@ static void CG_DrawPerks( rectDef_t *rect, int font, float scale, qboolean draw2
 
             if ( item ) {
                 CG_RegisterItemVisuals( item - bg_itemlist );
-                CG_DrawPic( x, y, rect->w, rect->h, cg_items[item - bg_itemlist].icons[0] );
 
-				// PRO overlay (no new assets)
-				if (cg.snap->ps.perks[i] >= 2)
-				{
-					float ts = rect->w * 0.25f;		// compact size
-					float tx = x + rect->w * 0.12f; // move left from right edge
-					float ty = y - 10;				// small top padding
+                icon = cg_items[item - bg_itemlist].icons[0];
 
-					CG_DrawStringExt(tx, ty, "^3PRO", colorWhite, qfalse, qtrue, ts, ts, 0);
+				// PRO icon replacement
+				if ( cg.snap->ps.perks[i] >= 2 && cgs.media.perkProIcons[i] ) {
+					icon = cgs.media.perkProIcons[i];
 				}
+
+                CG_DrawPic( x, y, rect->w, rect->h, icon );
 
 				x += rect->w + 5; // 5 is the space between icons
             }
