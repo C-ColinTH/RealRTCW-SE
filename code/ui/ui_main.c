@@ -317,9 +317,9 @@ static int Text_Width_Utf8( const char *text, int font, float scale, int limit )
 				s += 2;
 				continue;
 			} else {
-				uint32_t utf8_index = Q_utf8ToCodePoint(s);
-				uint32_t glyph_index = utf8_index % (UTF8_GLYPHS_PER_FONT - 1);
-				glyph = &ufnt->glyphs[glyph_index];
+				uint32_t utf8Index = Q_utf8ToCodePoint(s);
+				uint32_t unicode = utf8Index < UTF8_GLYPHS_PER_FONT ? utf8Index : '?';
+				glyph = &ufnt->glyphs[unicode];
 				out += glyph->xSkip;
 				s += Q_utf8bytesLength(s);
 				count++;
@@ -453,11 +453,14 @@ void Text_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, con
 	if ( !ufnt || !ufnt->loaded ) {
 		// ufnt = &utf8Fonts[UFontIndex(FONT_UTF_DEFAULT)];
 		Com_Error( ERR_FATAL, "Text_Paint_Utf8: bad font index %d", font );
+		return;
 	}
 
 	if ( !text || text[0] == '\0' ) {
 		return;
 	}
+
+	useScale = scale * ufnt->glyphScale;
 
 	const char *s = text;
 	trap_R_SetColor( color );
@@ -477,52 +480,50 @@ void Text_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, con
 			continue;
 		}
 		
-		int char_width = Q_utf8bytesLength(s);
-		glyphInfo_t *render_glyph = NULL;
-		uint32_t utf8_index = Q_utf8ToCodePoint(s);
+		int charBytes = Q_utf8bytesLength(s);
+		uint32_t utf8Index = Q_utf8ToCodePoint(s);
 
 		// ensure that it does not exceed the supported range
-		uint32_t glyph_index = utf8_index < UTF8_GLYPHS_PER_FONT ? utf8_index : '?';
-		render_glyph = &ufnt->glyphs[glyph_index];
-		useScale = scale * ufnt->glyphScale;
+		uint32_t unicode = utf8Index < UTF8_GLYPHS_PER_FONT ? utf8Index : '?';
+		glyph = &ufnt->glyphs[unicode];
 		
-		if ( render_glyph ) {
-			float yadj = useScale * render_glyph->top;
+		if ( glyph ) {
+			float yadj = useScale * glyph->top;
 			
 			if ( style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE ) {
 				int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
 				colorBlack[3] = newColor[3];
 				trap_R_SetColor( colorBlack );
 				Text_PaintChar( x + ofs, y - yadj + ofs,
-								render_glyph->imageWidth,
-								render_glyph->imageHeight,
+								glyph->imageWidth,
+								glyph->imageHeight,
 								font,
 								useScale,
-								render_glyph->s,
-								render_glyph->t,
-								render_glyph->s2,
-								render_glyph->t2,
-								render_glyph->glyph );
+								glyph->s,
+								glyph->t,
+								glyph->s2,
+								glyph->t2,
+								glyph->glyph );
 				trap_R_SetColor( newColor );
 				colorBlack[3] = 1.0;
 			}
 			
 			Text_PaintChar( x, y - yadj,
-							render_glyph->imageWidth,
-							render_glyph->imageHeight,
+							glyph->imageWidth,
+							glyph->imageHeight,
 							font,
 							useScale,
-							render_glyph->s,
-							render_glyph->t,
-							render_glyph->s2,
-							render_glyph->t2,
-							render_glyph->glyph );
+							glyph->s,
+							glyph->t,
+							glyph->s2,
+							glyph->t2,
+							glyph->glyph );
 
-			x += ( render_glyph->xSkip * useScale ) + adjust;
+			x += ( glyph->xSkip * useScale ) + adjust;
 		}
 		
 		count++;
-		s += char_width;
+		s += charBytes;
 	}
 
 	trap_R_SetColor( NULL );
