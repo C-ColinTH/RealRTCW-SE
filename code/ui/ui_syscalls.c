@@ -464,3 +464,6 @@ void trap_openURL( const char *s ) {
 	syscall( UI_OPENURL, s );
 }
 
+void trap_R_RegisterUtf8Font( const char *fontName, utf8FontInfo_t *font ) {
+	syscall( UI_R_REGISTERUTF8FONT, fontName, font );
+}

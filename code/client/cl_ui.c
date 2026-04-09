@@ -1127,6 +1127,10 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 		CL_OpenURL((const char *)VMA(1));
 		return 0;
 
+	case UI_R_REGISTERUTF8FONT:
+		re.RegisterUtf8Font( VMA( 1 ), VMA( 2 ) );
+		return 0;
+
 	default:
 		Com_Error( ERR_DROP, "Bad UI system trap: %ld", (long int) args[0] );
 

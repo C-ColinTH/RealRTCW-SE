@@ -3347,6 +3347,8 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 	Item_TextColor( item, &color );
 	Item_SetTextExtents( item, &width, &height, textPtr );
 
+	int textToBorderDist = (int) MIN(item->window.rect.w * 0.1f, 10);	// prevent the small-sized font locate exactly on the boundary line
+
 	y = item->textaligny;
 	len = 0;
 	buff[0] = '\0';
@@ -3358,8 +3360,12 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 			newLine = len;
 			newLinePtr = p + 1;
 			newLineWidth = textWidth;
+		} else if ( Q_isUtf8Char(p) ) {
+			newLine = len;
+			newLinePtr = p;
+			newLineWidth = textWidth;
 		}
-		textWidth = DC->textWidth( buff, item->font, item->textscale, 0 );
+		textWidth = DC->textWidth( buff, item->font, item->textscale, 0 ) + textToBorderDist;
 		if ( ( newLine && textWidth > item->window.rect.w ) || *p == '\n' || *p == '\0' ) {
 			if ( len ) {
 				if ( item->textalignment == ITEM_ALIGN_LEFT ) {
@@ -3372,6 +3378,7 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 				item->textRect.y = y;
 				ToWindowCoords( &item->textRect.x, &item->textRect.y, &item->window );
 				//
+				if ( Q_isUtf8Char(p) ) newLine += Q_utf8bytesLength(p) - 1;
 				buff[newLine] = '\0';
 				DC->drawText( item->textRect.x, item->textRect.y, item->font, item->textscale, color, buff, 0, 0, item->textStyle );
 			}
@@ -3386,7 +3393,11 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 			newLineWidth = 0;
 			continue;
 		}
-		buff[len++] = *p++;
+		// buff[len++] = *p++;
+		// ensure that we don't truncate multi byte characters
+		for ( int i = Q_utf8bytesLength(p); i > 0; i-- ) {
+			buff[len++] = *p++;
+		}
 
 		if ( buff[len - 1] == 13 ) {
 			buff[len - 1] = ' ';
