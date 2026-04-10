@@ -293,7 +293,7 @@ static int Text_Width_Utf8( const char *text, int font, float scale, int limit )
 	float useScale;
 	const char *s = text;
 
-	utf8FontInfo_t *ufnt;
+	utf8FontInfo_t *ufnt = NULL;
 	if ( font == FONT_UTF_DEFAULT ) {
 		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_DEFAULT)];
 	} else if ( font == FONT_UTF_CUSTOM1 ) {
@@ -302,6 +302,12 @@ static int Text_Width_Utf8( const char *text, int font, float scale, int limit )
 		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_CUSTOM2)];
 	} else if ( font == FONT_UTF_CUSTOM3 ) {
 		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_CUSTOM3)];
+	}
+
+	if ( !ufnt || !ufnt->loaded ) {
+		// ufnt = &utf8Fonts[UFontIndex(FONT_UTF_DEFAULT)];
+		Com_Error( ERR_FATAL, "Text_Paint_Utf8: bad font index %d", font );
+		return -1;
 	}
 
 	useScale = scale * ufnt->glyphScale;
@@ -439,7 +445,7 @@ void Text_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, con
 	glyphInfo_t *glyph;
 	float useScale;
 
-	utf8FontInfo_t *ufnt;
+	utf8FontInfo_t *ufnt = NULL;
 	if ( font == FONT_UTF_DEFAULT ) {
 		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_DEFAULT)];
 	} else if ( font == FONT_UTF_CUSTOM1 ) {
