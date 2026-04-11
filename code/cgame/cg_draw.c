@@ -46,11 +46,46 @@ char systemChat[256];
 char teamChat1[256];
 char teamChat2[256];
 
+extern utf8FontInfo_t utf8Font;
+
 ////////////////////////
 ////////////////////////
 ////// new hud stuff
 ///////////////////////
 ///////////////////////
+
+
+static int CG_Text_Width_Utf8( const char *text, int font, float scale, int limit ) {
+	int count,len;
+	float out;
+	glyphInfo_t *glyph;
+	float useScale;
+	const char *s = text;
+
+	useScale = scale * utf8Font.glyphScale;
+	out = 0;
+	if ( text ) {
+		len = strlen( text );
+		if ( limit > 0 && len > limit ) {
+			len = limit;
+		}
+		count = 0;
+		while ( s && *s && count < len ) {
+			if ( Q_IsColorString( s ) ) {
+				s += 2;
+				continue;
+			} else {
+				uint32_t utf8_index = Q_utf8ToCodePoint(s);
+				uint32_t glyph_index = utf8_index % (UTF8_GLYPHS_PER_FONT - 1);
+				glyph = &utf8Font.glyphs[glyph_index];
+				out += glyph->xSkip;
+				s += Q_utf8bytesLength(s);
+				count++;
+			}
+		}
+	}
+	return out * useScale;
+}
 
 int CG_Text_Width( const char *text, int font, float scale, int limit ) {
 	int count,len;
@@ -59,6 +94,10 @@ int CG_Text_Width( const char *text, int font, float scale, int limit ) {
 	float useScale;
 	const char *s = text;
 	fontInfo_t *fnt = &cgDC.Assets.textFont;
+
+	if ( font >= FONT_UTF_DEFAULT ) {
+		return CG_Text_Width_Utf8( text, FONT_UTF_DEFAULT, scale, limit );
+	}
 
 	if ( font == UI_FONT_DEFAULT ) {
 		if ( scale <= cg_smallFont.value ) {
@@ -152,12 +191,102 @@ void CG_Text_PaintChar( float x, float y, float width, float height, float scale
 	trap_R_DrawStretchPic( x, y, w, h, s, t, s2, t2, hShader );
 }
 
+static void CG_Text_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, const char *text, float adjust, int limit, int style ) {
+	int len, count;
+	vec4_t newColor;
+	glyphInfo_t *glyph;
+	float useScale;
+	utf8FontInfo_t *ufnt = &utf8Font;
+
+	if ( !ufnt || !ufnt->loaded ) {
+		Com_Error( ERR_DROP, "CG_Text_Paint_Utf8: bad font index %d", font );
+		return;
+	}
+
+	if ( !text || text[0] == '\0' ) {
+		return;
+	}
+
+	useScale = scale * ufnt->glyphScale;
+
+	color[3] *= cg_hudAlpha.value;  // (SA) adjust for cg_hudalpha
+
+	const char *s = text;
+	trap_R_SetColor( color );
+	memcpy( &newColor[0], &color[0], sizeof( vec4_t ) );
+	len = strlen( text );
+	if ( limit > 0 && len > limit ) {
+		len = limit;
+	}
+	count = 0;
+	
+	while ( s && *s && count < len ) {
+		if ( Q_IsColorString( s ) ) {
+			memcpy( newColor, g_color_table[ColorIndex( *( s + 1 ) )], sizeof( newColor ) );
+			newColor[3] = color[3];
+			trap_R_SetColor( newColor );
+			s += 2;
+			continue;
+		}
+		
+		int charBytes = Q_utf8bytesLength(s);
+		uint32_t utf8Index = Q_utf8ToCodePoint(s);
+
+		// ensure that it does not exceed the supported range
+		uint32_t unicode= utf8Index < UTF8_GLYPHS_PER_FONT ? utf8Index : '?';
+		glyph = &ufnt->glyphs[unicode];
+
+		if ( glyph ) {
+			float yadj = useScale * glyph->top;
+			
+			if ( style == ITEM_TEXTSTYLE_SHADOWED || style == ITEM_TEXTSTYLE_SHADOWEDMORE ) {
+				int ofs = style == ITEM_TEXTSTYLE_SHADOWED ? 1 : 2;
+				colorBlack[3] = newColor[3];
+				trap_R_SetColor( colorBlack );
+				CG_Text_PaintChar( x + ofs, y - yadj + ofs,
+								glyph->imageWidth,
+								glyph->imageHeight,
+								useScale,
+								glyph->s,
+								glyph->t,
+								glyph->s2,
+								glyph->t2,
+								glyph->glyph );
+				trap_R_SetColor( newColor );
+				colorBlack[3] = 1.0;
+			}
+			
+			CG_Text_PaintChar( x, y - yadj,
+							glyph->imageWidth,
+							glyph->imageHeight,
+							useScale,
+							glyph->s,
+							glyph->t,
+							glyph->s2,
+							glyph->t2,
+							glyph->glyph );
+
+			x += ( glyph->xSkip * useScale ) + adjust;
+		}
+		
+		count++;
+		s += charBytes;
+	}
+
+	trap_R_SetColor( NULL );
+}
+
 void CG_Text_Paint( float x, float y, int font, float scale, vec4_t color, const char *text, float adjust, int limit, int style ) {
 	int len, count;
 	vec4_t newColor;
 	glyphInfo_t *glyph;
 	float useScale;
 	fontInfo_t *fnt = &cgDC.Assets.textFont;
+
+	if ( font >= FONT_UTF_DEFAULT ) {
+		CG_Text_Paint_Utf8( x, y, FONT_UTF_DEFAULT, scale, color, text, adjust, limit, style );
+		return;
+	}
 
 	if ( font == UI_FONT_DEFAULT ) {
 		if ( scale <= cg_smallFont.value ) {
@@ -239,6 +368,117 @@ void CG_Text_Paint( float x, float y, int font, float scale, vec4_t color, const
 
 
 
+// return the max height value of utf8 character in this line
+static float CG_Utf8TextLineHeight( const char* text, float scale ) {
+	const char *p = text;
+	float h, maxHeight;
+	int32_t unicode;
+	glyphInfo_t *glyph;
+	utf8FontInfo_t *ufnt = &utf8Font;
+	
+	maxHeight = (float)BIGCHAR_HEIGHT;
+	while ( p && *p ) {
+		if ( Q_isUtf8Char(p) ) {
+			unicode = Q_utf8ToCodePoint(p);
+			glyph = &utf8Font.glyphs[unicode];
+			h = glyph->height * ufnt->glyphScale * scale;
+			if ( h > maxHeight ) {
+				maxHeight = h;
+			}
+			p += Q_utf8bytesLength(p);
+		} else {
+			p++;
+		}
+	}
+	
+	return maxHeight;
+}
+
+void CG_Text_AutoWrapped_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, 
+								 const char *text, float maxLineWidth, int alignType, int style) {
+	const char *p, *textPtr, *newLinePtr;
+	char buff[4096];
+	int len, textWidth, newLine, newLineWidth, textToBorderSkip;
+	float x2, y2, maxLineHeight;
+
+	newLinePtr = NULL;
+	if ( !text || !text[0] ) {
+		return;
+	} else {
+		textPtr = text;
+	}
+
+	if ( !color ) {
+		return;
+	}
+	// Item_TextColor( item, &color );
+	trap_R_SetColor( color );
+	// Item_SetTextExtents( item, &width, &height, textPtr );
+
+	textWidth = 0;
+	maxLineHeight = CG_Utf8TextLineHeight(text, scale);
+	textToBorderSkip = (int) MIN(maxLineWidth * 0.1f, 5.0f);	// prevent the small-sized font locate exactly on the boundary line
+
+	x2 = x;
+	y2 = y;
+	len = 0;
+	buff[0] = '\0';
+	newLine = 0;
+	newLineWidth = 0;
+	p = textPtr;
+	while ( p ) {
+		// TODO // XXX
+		if ( *p == ' ' || *p == '\t' || *p == '\n' || *p == '\0' ) {
+			newLine = len;
+			newLinePtr = p + 1;
+			newLineWidth = textWidth;
+		} else if ( Q_isUtf8Char(p) ) {
+			newLine = len;
+			newLinePtr = p;
+			newLineWidth = textWidth;
+		}
+
+		textWidth = CG_Text_Width_Utf8(buff, FONT_UTF_DEFAULT, scale, 0) + textToBorderSkip;
+		if ( ( newLine && textWidth > maxLineWidth ) || *p == '\n' || *p == '\0' ) {
+			if ( len ) {
+				if ( alignType == TEXT_ALIGN_LEFT ) {
+					x2 = x;
+				} else if ( alignType == TEXT_ALIGN_RIGHT ) {
+					x2 = x + maxLineWidth - newLineWidth;
+				} else if ( alignType == TEXT_ALIGN_CENTER ) {
+					x2 = x + (maxLineWidth - newLineWidth) / 2;
+				}
+				
+				if ( Q_isUtf8Char(p) ) {
+					newLine += Q_utf8bytesLength(p) - 1;
+				}
+
+				buff[newLine] = '\0';
+				CG_Text_Paint_Utf8(x2, y2, FONT_UTF_DEFAULT, scale, color, buff, 0, 0, style);
+			}
+			if ( *p == '\0' ) {
+				break;
+			}
+
+			y2 += maxLineHeight + 1.0f * scale;
+			p = newLinePtr;
+			len = 0;
+			newLine = 0;
+			newLineWidth = 0;
+			continue;
+		}
+		// buff[len++] = *p++;
+		for ( int i = Q_utf8bytesLength(p); i > 0; i-- ) {
+			buff[len++] = *p++;
+		}
+
+		if ( buff[len-1] == 13 ) {
+			buff[len-1] = ' ';
+		}
+
+		buff[len] = '\0';
+	}
+}
 
 
 
@@ -1322,7 +1562,11 @@ static void CG_DrawCheckpointString ( void ) {
 
 	if ( cg_drawCheckpoint.integer == 1 ) 
 	{
-	CG_DrawStringExt2( -25, 100, CG_translateString( "checkpointsaved" ), color, qfalse, qtrue, 10, 10, 0 );
+		if ( !cg_enableUtf8Font.value ) {
+			CG_DrawStringExt2( -25, 100, CG_translateString( "checkpointsaved" ), color, qfalse, qtrue, 10, 10, 0 );
+		} else {
+			CG_DrawStringExt_Utf8( -25, 100, CG_translateString( "checkpointsaved" ), color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+		}
 	}
 
 }
@@ -1343,7 +1587,11 @@ static void CG_DrawGameSavedString ( void ) {
 
 	trap_R_SetColor( color );
 
-	CG_DrawStringExt2( -25, 115, CG_translateString( "gamesaved" ), color, qfalse, qtrue, 10, 10, 0 );
+	if ( !cg_enableUtf8Font.value ) {
+		CG_DrawStringExt2( -25, 115, CG_translateString( "gamesaved" ), color, qfalse, qtrue, 10, 10, 0 );
+	} else {
+		CG_DrawStringExt_Utf8( -25, 100, CG_translateString( "gamesaved" ), color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+	}
 
 }
 
@@ -1389,11 +1637,23 @@ static void CG_DrawPickupItem( void ) {
 
 			color[0] = color[1] = color[2] = 1.0;
 			color[3] = fadeColor[0];
-			w = CG_DrawStrlen( pickupText ) * 10;
+			if ( !cg_enableUtf8Font.integer ) {
+				w = CG_DrawStrlen( pickupText ) * 10;
+			} else {
+				w = CG_DrawStrWidth_Utf8( pickupText, cg_hudUtf8FontScale.value );
+			}
 #ifdef LOCALISATION
-			CG_DrawStringExt2( 640 - ( w / 2 ), 375, CG_TranslateString( pickupText ), color, qfalse, qtrue, 10, 10, 0 );
+			if ( !cg_enableUtf8Font.integer ) {
+				CG_DrawStringExt2( 640 - ( w / 2 ), 375, CG_translateString( pickupText ), color, qfalse, qtrue, 10, 10, 0 );
+			} else {
+				CG_DrawStringExt_Utf8( 640 - ( w / 2 ) - 10, 300, CG_translateString( pickupText ), color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+			}
 #else
-			CG_DrawStringExt2( 320 - ( w / 2 ), 400, pickupText, color, qfalse, qtrue, 10, 10, 0 );
+			if ( !cg_enableUtf8Font.integer ) {
+				CG_DrawStringExt2( 320 - ( w / 2 ), 400, pickupText, color, qfalse, qtrue, 10, 10, 0 );
+			} else {
+				CG_DrawStringExt_Utf8( 640 - ( w / 2 ) - 10, 300, pickupText, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+			}
 #endif
 
 			trap_R_SetColor( NULL );
@@ -1726,7 +1986,12 @@ void CG_CenterPrint( const char *str, int y, int charWidth ) {
 	char   *s;
 
 //----(SA)	added translation lookup
-	Q_strncpyz( cg.centerPrint, CG_translateString( (char*)str ), sizeof( cg.centerPrint ) );
+	// first check in translateStrings, then check in <mapname>.txt
+	if ( strcmp( str, CG_translateString( str ) ) ) {
+		Q_strncpyz( cg.centerPrint, CG_translateString( (char*)str ), sizeof( cg.centerPrint ) );
+	} else {
+		Q_strncpyz( cg.centerPrint, CG_translateTextString3( str ), sizeof( cg.centerPrint ) );
+	}
 //----(SA)	end
 
 
@@ -1946,10 +2211,17 @@ void CG_SubtitlePrint( const char *str, int y, int charWidth ) {
 		}
 		s++;
 	}
+
     // Calculate the number of characters in the message
-    len = CG_DrawStrlen(cg.subtitlePrint);
-	// Calculate the display time based on an average reading speed of 17 characters per second
-    int displayTime = (len / 17.0) * 1000; // Convert to milliseconds
+	int displayTime = 0;
+	if ( Q_isUtf8String(cg.subtitlePrint) ) {
+		len = CG_DrawStrCount(cg.subtitlePrint);
+		displayTime = (len / 8.0) * 1000;
+	} else {
+		len = CG_DrawStrlen(cg.subtitlePrint);
+		// Calculate the display time based on an average reading speed of 17 characters per second
+		displayTime = (len / 17.0) * 1000; // Convert to milliseconds
+	}
 
 	// Ensure the display time is at least a certain minimum value to prevent very short messages from disappearing too quickly
     int minDisplayTime = 2000; // 2 seconds
@@ -1992,21 +2264,37 @@ static void CG_DrawCenterString( void ) {
 	y = cg.centerPrintY - cg.centerPrintLines * BIGCHAR_HEIGHT / 2;
 
 	while ( 1 ) {
-		char linebuffer[1024];
+		char linebuffer[STRING_PRINT_BUFFER];
+		int pos = 0;
 
 		for ( l = 0; l < 50; l++ ) {
-			if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
+			if ( !start[pos] || start[pos] == '\n' || !Q_strncmp( &start[pos], "\\n", 1 ) ) {
 				break;
 			}
-			linebuffer[l] = start[l];
-		}
-		linebuffer[l] = 0;
 
-		w = cg.centerPrintCharWidth * CG_DrawStrlen( linebuffer );
+			int bytesLen = Q_utf8bytesLength( &start[pos] );
+			if ( pos + bytesLen >= STRING_PRINT_BUFFER ) break;
+
+			for (int i = 0; i < bytesLen && start[pos + i]; i++) {
+				linebuffer[pos + i] = start[pos + i];
+			}
+			pos += bytesLen;
+		}
+		linebuffer[pos] = 0;
+
+		if ( !cg_enableUtf8Font.integer ) {
+			w = cg.centerPrintCharWidth * CG_DrawStrlen( linebuffer );
+		} else {
+			w = CG_DrawStrWidth_Utf8( linebuffer, cg_hudUtf8FontScale.value );
+		}
 
 		x = ( SCREEN_WIDTH - w ) / 2;
 
-		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.centerPrintCharWidth, (int)( cg.centerPrintCharWidth * 1.5 ), 0 );
+		if ( !cg_enableUtf8Font.integer ) {
+			CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.centerPrintCharWidth, (int)( cg.centerPrintCharWidth * 1.5 ), 0 );
+		} else {
+			CG_DrawStringExt_Utf8( x, y, linebuffer, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+		}
 
 		y += cg.centerPrintCharWidth * 2;
 
@@ -2057,21 +2345,37 @@ static void CG_DrawBuyString( void ) {
 	y = cg.buyPrintY - cg.buyPrintLines * BIGCHAR_HEIGHT / 2;
 
 	while ( 1 ) {
-		char linebuffer[1024];
+		char linebuffer[STRING_PRINT_BUFFER];
+		int pos = 0;
 
 		for ( l = 0; l < 50; l++ ) {
-			if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
+			if ( !start[pos] || start[pos] == '\n' || !Q_strncmp( &start[pos], "\\n", 1 ) ) {
 				break;
 			}
-			linebuffer[l] = start[l];
-		}
-		linebuffer[l] = 0;
 
-		w = cg.buyPrintCharWidth * CG_DrawStrlen( linebuffer );
+			int bytesLen = Q_utf8bytesLength( &start[pos] );
+			if ( pos + bytesLen >= STRING_PRINT_BUFFER ) break;
+
+			for (int i = 0; i < bytesLen && start[pos + i]; i++) {
+				linebuffer[pos + i] = start[pos + i];
+			}
+			pos += bytesLen;
+		}
+		linebuffer[pos] = 0;
+
+		if ( !cg_enableUtf8Font.integer ) {
+			w = cg.buyPrintCharWidth * CG_DrawStrlen( linebuffer );
+		} else {
+			w = CG_DrawStrWidth_Utf8( linebuffer, cg_hudUtf8FontScale.value );
+		}
 
 		x = ( SCREEN_WIDTH - w ) / 2;
 
-		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.buyPrintCharWidth, (int)( cg.buyPrintCharWidth * 1.5 ), 0 );
+		if ( !cg_enableUtf8Font.integer ) {
+			CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.buyPrintCharWidth, (int)( cg.buyPrintCharWidth * 1.5 ), 0 );
+		} else {
+			CG_DrawStringExt_Utf8( x, y, linebuffer, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+		}
 
 		y += cg.buyPrintCharWidth * 2;
 
@@ -2123,21 +2427,37 @@ static void CG_DrawEgString( void ) {
 	y = cg.egPrintY - cg.egPrintLines * BIGCHAR_HEIGHT / 2;
 
 	while ( 1 ) {
-		char linebuffer[1024];
+		char linebuffer[STRING_PRINT_BUFFER];
+		int pos = 0;
 
 		for ( l = 0; l < 50; l++ ) {
-			if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
+			if ( !start[pos] || start[pos] == '\n' || !Q_strncmp( &start[pos], "\\n", 1 ) ) {
 				break;
 			}
-			linebuffer[l] = start[l];
-		}
-		linebuffer[l] = 0;
 
-		w = cg.egPrintCharWidth * CG_DrawStrlen( linebuffer );
+			int bytesLen = Q_utf8bytesLength( &start[pos] );
+			if ( pos + bytesLen >= STRING_PRINT_BUFFER ) break;
+
+			for (int i = 0; i < bytesLen && start[pos + i]; i++) {
+				linebuffer[pos + i] = start[pos + i];
+			}
+			pos += bytesLen;
+		}
+		linebuffer[pos] = 0;
+
+		if ( !cg_enableUtf8Font.integer ) {
+			w = cg.egPrintCharWidth * CG_DrawStrlen( linebuffer );
+		} else {
+			w = CG_DrawStrWidth_Utf8( linebuffer, cg_hudUtf8FontScale.value );
+		}
 
 		x = ( SCREEN_WIDTH - w ) / 2;
 
-		CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.egPrintCharWidth, (int)( cg.egPrintCharWidth * 1.5 ), 0 );
+		if ( !cg_enableUtf8Font.integer ) {
+			CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue, cg.egPrintCharWidth, (int)( cg.egPrintCharWidth * 1.5 ), 0 );
+		} else {
+			CG_DrawStringExt_Utf8( x, y, linebuffer, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+		}
 
 		y += cg.egPrintCharWidth * 2;
 
@@ -2154,6 +2474,23 @@ static void CG_DrawEgString( void ) {
 		start++;
 	}
 
+	trap_R_SetColor( NULL );
+}
+
+/*
+===================
+CG_DrawUtf8SubtitleString
+===================
+*/
+static void CG_DrawUtf8SubtitleString(char *start, float *color) {
+	int x, y, w;
+
+	y = cg.subtitlePrintY - cg.subtitlePrintLines * BIGCHAR_HEIGHT / 2;
+	w = SCREEN_WIDTH * 0.7f;
+	x = (SCREEN_WIDTH - w) / 2;
+
+	CG_Text_AutoWrapped_Paint_Utf8(x, y, FONT_UTF_DEFAULT, cg_subtitleUtf8FontScale.value, color,
+									start, w, TEXT_ALIGN_CENTER, ITEM_TEXTSTYLE_SHADOWEDMORE);
 	trap_R_SetColor( NULL );
 }
 
@@ -2177,18 +2514,23 @@ static void CG_DrawSubtitleString( void ) {
 		return;
 	}
 
+	start = cg.subtitlePrint;
+
+	if ( cg_enableUtf8Font.integer ) {
+		CG_DrawUtf8SubtitleString( start, color );
+		return;
+	}
+
 	if ( cg_fixedAspect.integer ) {
 		CG_SetScreenPlacement(PLACE_CENTER, PLACE_CENTER);
 	}
 
 	trap_R_SetColor( color );
 
-	start = cg.subtitlePrint;
-
 	y = cg.subtitlePrintY - cg.subtitlePrintLines * BIGCHAR_HEIGHT / 2;
 
 while ( 1 ) {
-    char linebuffer[1024]; // Buffer size
+    char linebuffer[STRING_SBUTITLE_BUFFER]; // Buffer size
 
     for ( l = 0; l < 50; l++ ) { // Line length limit
         if ( !start[l] || start[l] == '\n' || !Q_strncmp( &start[l], "\\n", 1 ) ) {
@@ -3296,10 +3638,15 @@ static void CG_DrawDynamiteStatus( void ) {
 	timeleft /= 1000;
 
 	name = va( "Timer: %d", timeleft );
-	w = CG_DrawStrlen( name ) * BIGCHAR_WIDTH;
-
 	color[3] *= cg_hudAlpha.value;
-	CG_DrawBigStringColor( 300 - w / 2, 170, name, color );
+
+	if ( !cg_enableUtf8Font.integer ) {
+		w = CG_DrawStrlen( name ) * BIGCHAR_WIDTH;
+		CG_DrawBigStringColor( 300 - w / 2, 170, name, color );
+	} else {
+		w = CG_DrawStrWidth_Utf8( name, cg_hudUtf8FontScale.value );
+		CG_DrawStringExt_Utf8( 300 - w / 2, 170, name, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+	}
 
 	trap_R_SetColor( NULL );
 }
@@ -3414,10 +3761,16 @@ static void CG_DrawCrosshairNames( void ) {
 	if ( !s ) {
 		return;
 	}
-	w = CG_DrawStrlen( s ) * SMALLCHAR_WIDTH;
 
-	// draw the name and class
-	CG_DrawSmallStringColor( 370 - w / 2, 190, s, color );
+	if ( !cg_enableUtf8Font.integer ) {
+		w = CG_DrawStrlen( s ) * SMALLCHAR_WIDTH;
+
+		// draw the name and class
+		CG_DrawSmallStringColor( 370 - w / 2, 190, s, color );
+	} else {
+		w = CG_DrawStrWidth_Utf8( s, cg_hudUtf8FontScale.value );
+		CG_DrawStringExt_Utf8( 370 - w / 2, 190, name, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+	}
 
 	trap_R_SetColor( NULL );
 }
@@ -3870,7 +4223,9 @@ CG_DrawObjectiveInfo
 void CG_ObjectivePrint( const char *str, int charWidth, int team ) {
 	char    *s;
 
-	Q_strncpyz( cg.oidPrint, str, sizeof( cg.oidPrint ) );
+	const char *translate = CG_translateTextString3( str );
+	Com_Printf( "\"%s\": \"%s\"\n", str, translate);
+	Q_strncpyz( cg.oidPrint, translate, sizeof( cg.oidPrint ) );
 
 	cg.oidPrintTime = cg.time;
 	cg.oidPrintY = OID_TOP;
@@ -3887,7 +4242,19 @@ void CG_ObjectivePrint( const char *str, int charWidth, int team ) {
 	}
 }
 
-static void CG_DrawObjectiveInfo( void ) {
+static void CG_DrawObjectiveInfo_Utf8_2( char *start, float *color ) {
+	int x, y, w;
+	vec4_t backColor = { 0.2f, 0.2f, 0.2f, 1.f };
+
+	float scale = cg_hudUtf8FontScale.value;
+	y = cg.oidPrintY - cg.oidPrintLines * CG_Utf8TextLineHeight(start, cg_hudUtf8FontScale.value) / 2;
+	w = SCREEN_WIDTH * 0.5f;
+	x = OID_LEFT - 2;
+
+	CG_Text_AutoWrapped_Paint_Utf8(x, y, FONT_UTF_DEFAULT, scale, color, start, w, TEXT_ALIGN_LEFT, ITEM_TEXTSTYLE_SHADOWEDMORE);
+}
+
+static void CG_DrawObjectiveInfo_Utf8( void ) {
 	char    *start;
 	int l;
 	int x, y, w;
@@ -3907,6 +4274,129 @@ static void CG_DrawObjectiveInfo( void ) {
 	trap_R_SetColor( color );
 
 	start = cg.oidPrint;
+
+	y = cg.oidPrintY - cg.oidPrintLines * CG_Utf8TextLineHeight(start, cg_hudUtf8FontScale.value) / 2;
+
+	x1 = OID_LEFT - 2;
+	y1 = y - 2;
+	x2 = 0;
+
+	// first just find the bounding rect
+	while ( 1 ) {
+		char linebuffer[STRING_PRINT_BUFFER];
+
+		for ( l = 0; l < 40; l++ ) {
+			if ( !start[l] || start[l] == '\n' ) {
+				break;
+			}
+
+			int bytesLen = Q_utf8bytesLength( &start[l] );
+			for ( int i = 0; i < bytesLen; i++ ) {
+				linebuffer[l] = start[l];
+				l++;
+			}
+		}
+		linebuffer[l] = 0;
+
+		// w = cg.oidPrintCharWidth * CG_DrawStrlen( linebuffer );
+		w = CG_DrawStrWidth_Utf8( linebuffer, cg_hudUtf8FontScale.value );
+		if ( x1 + w > x2 ) {
+			x2 = x1 + w;
+		}
+
+		y += cg.oidPrintCharWidth * 1.5;
+
+		while ( *start && ( *start != '\n' ) ) {
+			start++;
+		}
+		if ( !*start ) {
+			break;
+		}
+		start++;
+	}
+
+	x2 = x2 + 4;
+	y2 = y - cg.oidPrintCharWidth * 1.5 + 4;
+
+	backColor[3] = color[3];
+	CG_FillRect( x1, y1, x2 - x1, y2 - y1, backColor );
+
+	VectorSet( backColor, 0, 0, 0 );
+	CG_DrawRect( x1, y1, x2 - x1, y2 - y1, 1, backColor );
+
+	//trap_R_SetColor( color );
+
+	// do the actual drawing
+	start = cg.oidPrint;
+	y = cg.oidPrintY - cg.oidPrintLines * BIGCHAR_HEIGHT / 2;
+
+	while ( 1 ) {
+		char linebuffer[STRING_PRINT_BUFFER];
+
+		for ( l = 0; l < 40; l++ ) {
+			if ( !start[l] || start[l] == '\n' ) {
+				break;
+			}
+
+			int bytesLen = Q_utf8bytesLength( &start[l] );
+			for ( int i = 0; i < bytesLen; i++ ) {
+				linebuffer[l] = start[l];
+				l++;
+			}
+		}
+		linebuffer[l] = 0;
+
+		// w = cg.oidPrintCharWidth * CG_DrawStrlen( linebuffer );
+		w = CG_DrawStrWidth_Utf8( linebuffer, cg_hudUtf8FontScale.value );
+		if ( x1 + w > x2 ) {
+			x2 = x1 + w;
+		}
+
+		x = OID_LEFT;
+
+		// CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue,
+		//				  cg.oidPrintCharWidth, (int)( cg.oidPrintCharWidth * 1.5 ), 0 );
+		CG_DrawStringExt_Utf8( x, y, linebuffer, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
+
+		y += cg.oidPrintCharWidth * 1.5;
+
+		while ( *start && ( *start != '\n' ) ) {
+			start++;
+		}
+		if ( !*start ) {
+			break;
+		}
+		start++;
+	}
+
+	trap_R_SetColor( NULL );
+}
+
+static void CG_DrawObjectiveInfo( void ) {
+	char    *start;
+	int l;
+	int x, y, w;
+	int x1, y1, x2, y2;
+	float   *color;
+	vec4_t backColor = { 0.2f, 0.2f, 0.2f, 1.f };
+
+	if ( !cg.oidPrintTime ) {
+		return;
+	}
+
+	color = CG_FadeColor( cg.oidPrintTime, 1000 * 5 );
+	if ( !color ) {
+		return;
+	}
+
+	start = cg.oidPrint;
+
+	if ( cg_enableUtf8Font.integer ) {
+		CG_DrawObjectiveInfo_Utf8_2(start, color);
+		return;
+	}
+
+	trap_R_SetColor( color );
 
 	y = cg.oidPrintY - cg.oidPrintLines * BIGCHAR_HEIGHT / 2;
 

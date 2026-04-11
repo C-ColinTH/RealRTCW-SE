@@ -218,6 +218,8 @@ typedef enum {
 
 	CG_GETMODELINFO,
 
+	CG_R_REGISTERUTF8FONT,
+
 	// New in IORTCW
 	CG_ALLOC = 900
 

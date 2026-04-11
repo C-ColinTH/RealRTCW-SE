@@ -39,6 +39,8 @@ If you have questions concerning this license or the applicable additional terms
 
 displayContextDef_t cgDC;
 
+utf8FontInfo_t utf8Font;
+
 int forceModelModificationCount = -1;
 
 void CG_Init( int serverMessageNum, int serverCommandSequence );
@@ -323,6 +325,10 @@ vmCvar_t cg_gothic;
 vmCvar_t cg_simpleZoomFov;
 vmCvar_t cg_simpleZoomTimeMs;
 
+vmCvar_t cg_enableUtf8Font;
+vmCvar_t cg_hudUtf8FontScale;
+vmCvar_t cg_subtitleUtf8FontScale;
+
 typedef struct {
 	vmCvar_t    *vmCvar;
 	char        *cvarName;
@@ -587,6 +593,10 @@ cvarTable_t cvarTable[] = {
 
 	{&cg_simpleZoomFov, "cg_simpleZoomFov", "60", CVAR_ARCHIVE},
 	{&cg_simpleZoomTimeMs, "cg_simpleZoomTimeMs", "120", CVAR_ARCHIVE},
+
+	{&cg_enableUtf8Font, "cg_enableUtf8Font", "1", CVAR_ARCHIVE},
+	{&cg_hudUtf8FontScale, "cg_hudUtf8FontScale", "0.375", CVAR_ARCHIVE},
+	{&cg_subtitleUtf8FontScale, "cg_subtitleUtf8FontScale", "0.35", CVAR_ARCHIVE},
 
 };
 int cvarTableSize = ARRAY_LEN( cvarTable );
@@ -883,7 +893,7 @@ static void CG_RegisterItemSounds( int itemNum ) {
 CG_LoadPickupNames
 ==============
 */
-#define MAX_BUFFER          20000
+#define MAX_BUFFER          32000
 static void CG_LoadPickupNames( void ) {
 	char buffer[MAX_BUFFER];
 	char *text;
@@ -910,7 +920,7 @@ static void CG_LoadPickupNames( void ) {
 	text = buffer;
 
 	for ( i = 0; i < bg_numItems; i++ ) {
-		token = COM_ParseExt( &text, qtrue );
+		token = COM_ParseExt2( &text, qtrue, qtrue );
 		if ( !token[0] ) {
 			break;
 		}
@@ -921,7 +931,8 @@ static void CG_LoadPickupNames( void ) {
 				cgs.itemPrintNames[i][0] = 0;
 			}
 		} else {
-			Com_sprintf( cgs.itemPrintNames[i], MAX_QPATH, "%s", token );
+			// Com_sprintf( cgs.itemPrintNames[i], MAX_QPATH, "%s", token );
+			Com_sprintf( cgs.itemPrintNames[i], sizeof(cgs.itemPrintNames[0]), "%s", token );
 		}
 	}
 }
@@ -955,7 +966,7 @@ static void CG_LoadTranslationStrings( void ) {
 	numStrings = sizeof( translateStrings ) / sizeof( translateStrings[0] ) - 1;
 
 	for ( i = 0; i < numStrings; i++ ) {
-		token = COM_ParseExt( &text, qtrue );
+		token = COM_ParseExt2( &text, qtrue, qtrue );
 		if ( !token[0] ) {
 			break;
 		}
@@ -997,7 +1008,7 @@ static void CG_LoadbonusStrings( void ) {
 	numStrings = sizeof( bonusStrings ) / sizeof( bonusStrings[0] ) - 1;
 
 	for ( i = 0; i < numStrings; i++ ) {
-		token = COM_ParseExt( &text, qtrue );
+		token = COM_ParseExt2( &text, qtrue, qtrue );
 		if ( !token[0] ) {
 			break;
 		}
@@ -1034,7 +1045,7 @@ static void CG_LoadTranslationTextStrings(const char *file) {
 	trap_FS_FCloseFile(f);
 	// parse the list
 	text = buffer;
-	token = COM_ParseExt(&text, qtrue);
+	token = COM_ParseExt2(&text, qtrue, qfalse);
 	if (token[0] != '{') {
 		CG_Printf("^1WARNING: expecting '{', found '%s' instead in translation file \"text/translate.txt\"\n", token);
 		return;
@@ -1042,7 +1053,7 @@ static void CG_LoadTranslationTextStrings(const char *file) {
 	i = 0;
 	while (1)
 	{
-		token = COM_ParseExt(&text, qtrue);
+		token = COM_ParseExt2(&text, qtrue, qtrue);
 		if (!token[0]) {
 			CG_Printf("^1WARNING: no concluding '}' in translation file \"text/translate.txt\"\n");
 			break;
@@ -1053,7 +1064,7 @@ static void CG_LoadTranslationTextStrings(const char *file) {
 		}
 		translateTextStrings[i].stringname = malloc(strlen(token) + 1);
 		strcpy(translateTextStrings[i].stringname, token);
-		token = COM_ParseExt(&text, qfalse);
+		token = COM_ParseExt2(&text, qfalse, qtrue);
 		translateTextStrings[i].stringtext = malloc(strlen(token) + 1);
 		strcpy(translateTextStrings[i].stringtext, token);
 		i++;
@@ -1157,6 +1168,27 @@ const char *CG_translateTextString2(const char *str) {
 			return str;
 		}
 		if (!strcmp(str, translateTextStrings[i].stringname)) {
+			if (translateTextStrings[i].stringtext && strlen(translateTextStrings[i].stringtext)) {
+				return translateTextStrings[i].stringtext;
+			}
+			break;
+		}
+	}
+	return str;
+}
+
+// this won't check ignored subtitles list
+// for some special string translation, specified in <mapname>.txt files
+const char *CG_translateTextString3(const char *str) {
+	int i, numStrings;
+
+	numStrings = sizeof(cgs.ignoredSubtitles) / sizeof(cgs.ignoredSubtitles[0]) - 1;
+
+	for ( i = 0; i < numStrings; i++ ) {
+		if (!translateTextStrings[i].stringname || !strlen(translateTextStrings[i].stringname)) {
+			return str;
+		}
+		if (!strcasecmp(str, translateTextStrings[i].stringname)) {
 			if (translateTextStrings[i].stringtext && strlen(translateTextStrings[i].stringtext)) {
 				return translateTextStrings[i].stringtext;
 			}
@@ -2905,6 +2937,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence ) {
 
 	CG_AssetCache();
 	CG_LoadHudMenu();      // load new hud stuff
+
+	trap_R_RegisterUtf8Font( "fontImage_utf8_0", &utf8Font );
 
 	cg.loading = qfalse;    // future players will be deferred
 

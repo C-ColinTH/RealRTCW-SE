@@ -871,6 +871,10 @@ intptr_t CL_CgameSystemCalls( intptr_t *args ) {
 			// file for itself. --zturtleman
 			return qfalse;
 		}
+	
+	case CG_R_REGISTERUTF8FONT:
+		re.RegisterUtf8Font( VMA( 1 ), VMA( 2 ) );
+		return 0;
 
 	// New in IORTCW
 	case CG_ALLOC:
