@@ -815,6 +815,243 @@ char *COM_ParseExt( char **data_p, qboolean allowLineBreaks ) {
 
 /*
 ================
+COM_ParseExt2
+
+Add escape character parse support
+
+Note: it only parse escape character in strings with double quotation marks
+================
+*/
+char *COM_ParseExt2( char **data_p, qboolean allowLineBreaks, qboolean allowEscapeChar ) {
+	int c = 0, len;
+	qboolean hasNewLines = qfalse;
+	char *data;
+#ifdef GAMEDLL
+	qboolean ignore = qfalse;     // used for #if statements
+#endif
+
+	data = *data_p;
+	len = 0;
+	com_token[0] = 0;
+	com_tokenline = 0;
+
+	// make sure incoming data is valid
+	if ( !data ) {
+		*data_p = NULL;
+		return com_token;
+	}
+
+	// RF, backup the session data so we can unget easily
+	backup_lines = com_lines;
+	backup_text = *data_p;
+
+	while ( 1 )
+	{
+		// skip whitespace
+		data = SkipWhitespace( data, &hasNewLines );
+		if ( !data ) {
+			*data_p = NULL;
+			return com_token;
+		}
+		if ( hasNewLines && !allowLineBreaks ) {
+			*data_p = data;
+			return com_token;
+		}
+
+		c = *data;
+
+#ifdef GAMEDLL
+		// #if cvar == value #else #endif
+		if ( c == '#' && data[1] == 'i' && data[2] == 'f' ) {
+			char cvarname[256];
+			char value[256];
+			char condition[256];
+			int i = 0;
+
+			data += 3;
+			// skip the witespace
+			while ( *data && *data <= ' ' )
+				data++;
+			// get the cvar name
+			while ( *data && *data > ' ' ) {
+				cvarname[i++] = *data;
+				data++;
+			}
+			cvarname[i] = '\0';
+			//Com_Printf("->%s\n", cvarname);
+			i = 0;
+
+			// skip the witespace
+			while ( *data && *data <= ' ' )
+				data++;
+
+			// get the condition
+			while ( *data && *data > ' ' ) {
+				condition[i++] = *data;
+				data++;
+			}
+			condition[i] = '\0';
+			//Com_Printf("->%s\n", condition);
+			i = 0;
+
+			// skip the witespace
+			while ( *data && *data <= ' ' )
+				data++;
+
+			// get the value
+			while ( *data && *data > ' ' ) {
+				value[i++] = *data;
+				data++;
+			}
+			value[i] = '\0';
+			//Com_Printf("%d %d %d\n", strlen(cvarname), strlen(condition), strlen(value));
+			//Com_Printf("--> #if %s %s %s\n", cvarname, condition, value);
+			//Com_Printf("->%s\n", value);
+
+			// now evaluate these
+			ignore = !COM_Eval( cvarname, condition, value );
+			//ignore = qtrue;
+			continue;
+		} else if ( c == '#' && data[1] == 'e' && data[2] == 'n' && data[3] == 'd' && data[4] == 'i' && data[5] == 'f' )           {
+			data += 6;
+			//Com_Printf("--> #endif\n");
+			ignore = qfalse;
+			continue;
+		} else if ( c == '#' && data[1] == 'e' && data[2] == 'l' && data[3] == 's' && data[4] == 'e' )           {
+			data += 5;
+			//Com_Printf("--> #else\n");
+			ignore = !ignore;
+			continue;
+		}
+
+		// ignore #if / # else section
+		if ( ignore ) {
+			//Com_Printf("%c", c);
+			data++;
+			continue;
+		}
+#endif
+
+		// skip double slash comments
+		if ( c == '/' && data[1] == '/' ) {
+			data += 2;
+			while ( *data && *data != '\n' ) {
+				data++;
+			}
+		}
+
+		// skip /* */ comments
+		else if ( c == '/' && data[1] == '*' ) {
+			data += 2;
+			while ( *data && ( *data != '*' || data[1] != '/' ) )
+			{
+				if ( *data == '\n' )
+				{
+					com_lines++;
+				}
+				data++;
+			}
+			if ( *data ) {
+				data += 2;
+			}
+		} else
+		{
+			break;
+		}
+	}
+
+	// token starts on this line
+	com_tokenline = com_lines;
+
+	// handle quoted strings
+	if ( c == '\"' ) {
+		data++;
+		while ( 1 )
+		{
+			c = *data++;
+
+			// handle escape character
+			if ( allowEscapeChar && c == '\\' ) {
+				char nextChar = *data;
+				if ( nextChar && nextChar >= 32) {
+					switch ( nextChar ) {
+						case 'n':
+							c = '\n';
+							data++;
+							break;
+						case 'r':
+							c = '\r';
+							data++;
+							break;
+						case 't':
+							c = '\t';
+							data++;
+							break;
+						case '\\':
+							c = '\\';
+							data++;
+							break;
+						case '\"':
+							c = '\"';
+							data++;
+							break;
+						case '\'':
+							c = '\'';
+							data++;
+							break;
+						case '0':
+							c = '\0';
+							data++;
+							break;
+						default:
+							c = nextChar;
+							data++;
+							break;
+					}
+
+					if ( len < MAX_TOKEN_CHARS - 1 ) {
+						com_token[len] = c;
+						len++;
+					}
+				}
+				continue;
+			}
+
+			if ( c == '\"' || !c ) {
+				com_token[len] = 0;
+				*data_p = ( char * ) data;
+				return com_token;
+			}
+			if ( c == '\n' )
+			{
+				com_lines++;
+			}
+			if ( len < MAX_TOKEN_CHARS - 1 ) {
+				com_token[len] = c;
+				len++;
+			}
+		}
+	}
+
+	// parse a regular word
+	do
+	{
+		if ( len < MAX_TOKEN_CHARS - 1 ) {
+			com_token[len] = c;
+			len++;
+		}
+		data++;
+		c = *data;
+	} while (c>32);
+
+	com_token[len] = 0;
+
+	*data_p = ( char * ) data;
+	return com_token;
+}
+
+/*
+================
 COM_Parse2
 ================
 */

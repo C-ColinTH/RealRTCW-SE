@@ -842,6 +842,7 @@ void    COM_SetCurrentParseLine( int line );
 int     COM_GetCurrentParseLine( void );
 char    *COM_Parse( char **data_p );
 char    *COM_ParseExt( char **data_p, qboolean allowLineBreak );
+char    *COM_ParseExt2( char **data_p, qboolean allowLineBreaks, qboolean allowEscapeChar );
 int     COM_Compress( char *data_p );
 void	COM_ParseError( char *format, ... ) __attribute__ ((format (printf, 1, 2)));
 void	COM_ParseWarning( char *format, ... ) __attribute__ ((format (printf, 1, 2)));
