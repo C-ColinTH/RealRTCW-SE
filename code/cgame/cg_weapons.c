@@ -5267,84 +5267,17 @@ void CG_OutOfAmmoChange( void ) {
 void CG_UpdateWeaponWheelSelection( float cursorx, float cursory ) {
 
 	int visibleWeapons[MAX_WEAPONS];
-	int numVisible = 0;
-
-	for ( int w = 1; w < MAX_WEAPONS; w++ ) {
-
-		if ( !COM_BitCheck( cg.snap->ps.weapons, w ) )
-			continue;
-
-		int ammoIndex = BG_FindAmmoForWeapon(w);
-		int clipIndex = BG_FindClipForWeapon(w);
-
-		if (ammoIndex < 0 && clipIndex < 0)
-			continue;
-
-		if ((ammoIndex < 0 || cg.snap->ps.ammo[ammoIndex] <= 0) &&
-			(clipIndex < 0 || cg.snap->ps.ammoclip[clipIndex] <= 0))
-			continue;
-
-		switch ( w ) {
-
-		case WP_KNIFE:
-		case WP_LUGER:
-		case WP_SILENCER:
-		case WP_COLT:
-		case WP_AKIMBO:
-		case WP_TT33:
-		case WP_DUAL_TT33:
-		case WP_REVOLVER:
-		case WP_HDM:
-
-		case WP_MP40:
-		case WP_MP34:
-		case WP_STEN:
-		case WP_THOMPSON:
-		case WP_PPSH:
-
-		case WP_MAUSER:
-		case WP_GARAND:
-		case WP_MOSIN:
-		case WP_DELISLE:
-
-		case WP_G43:
-		case WP_M1GARAND:
-		case WP_M1941:
-
-		case WP_FG42:
-		case WP_MP44:
-		case WP_BAR:
-
-		case WP_M97:
-		case WP_AUTO5:
-		case WP_M30:
-
-		case WP_PANZERFAUST:
-		case WP_FLAMETHROWER:
-		case WP_MG42M:
-		case WP_BROWNING:
-
-		case WP_VENOM:
-		case WP_TESLA:
-
-		case WP_GRENADE_LAUNCHER:
-		case WP_POISONGAS:
-		case WP_GRENADE_PINEAPPLE:
-		case WP_DYNAMITE:
-		case WP_DYNAMITE_ENG:
-		case WP_AIRSTRIKE:
-		case WP_SMOKE_BOMB:
-			break;
-
-		default:
-			continue;
-		}
-
-		visibleWeapons[numVisible++] = w;
-	}
+	int numVisible = CG_CollectWeaponWheelWeapons( visibleWeapons, MAX_WEAPONS );
 
 	if ( numVisible <= 0 ) {
 		cg.weaponWheel.hoveredWeapon = 0;
+		return;
+	}
+
+	if ( numVisible == 1 ) {
+		cg.weaponWheel.hoveredWeapon = visibleWeapons[0];
+		cg.weaponWheel.latchedWeapon = visibleWeapons[0];
+		cg.weaponWheel.lastWeapon = visibleWeapons[0];
 		return;
 	}
 
@@ -5366,11 +5299,11 @@ void CG_UpdateWeaponWheelSelection( float cursorx, float cursory ) {
 
 		len = sqrtf( dx * dx + dy * dy );
 
-		if (len < 0.2f)
+		if ( len < 0.2f )
 		{
 
 			// Do NOT clear selection if we already latched one
-			if (cg.weaponWheel.latchedWeapon > 0)
+			if ( cg.weaponWheel.latchedWeapon > 0 )
 			{
 				cg.weaponWheel.hoveredWeapon = cg.weaponWheel.latchedWeapon;
 			}
@@ -5399,38 +5332,63 @@ void CG_UpdateWeaponWheelSelection( float cursorx, float cursory ) {
 		dy /= len;
 	}
 
-	float angle = atan2f( dy, dx );
-	angle += M_PI * 0.5f;
+	int idx = 0;
 
-	if ( angle < 0 ) {
-		angle += 2.0f * M_PI;
-	}
-	if ( angle >= 2.0f * M_PI ) {
-		angle -= 2.0f * M_PI;
-	}
+	if ( numVisible < 5 ) {
 
-	float sectorSize = ( 2.0f * M_PI ) / (float)numVisible;
-	float angleOffset = sectorSize * 0.5f;
+		if ( numVisible == 2 ) {
+			idx = ( dx >= 0.0f ) ? 1 : 0;
+		} else if ( numVisible == 3 ) {
+			if ( dy < -0.45f ) {
+				idx = 0;
+			} else if ( dx >= 0.0f ) {
+				idx = 1;
+			} else {
+				idx = 2;
+			}
+		} else if ( numVisible == 4 ) {
+			if ( fabsf( dx ) > fabsf( dy ) ) {
+				idx = ( dx >= 0.0f ) ? 1 : 3;
+			} else {
+				idx = ( dy >= 0.0f ) ? 2 : 0;
+			}
+		}
 
-	int idx = (int)( ( angle + angleOffset ) / sectorSize );
+	} else {
 
-	if ( idx >= numVisible ) {
-		idx = 0;
+		float angle = atan2f( dy, dx );
+		angle += M_PI * 0.5f;
+
+		if ( angle < 0 ) {
+			angle += 2.0f * M_PI;
+		}
+		if ( angle >= 2.0f * M_PI ) {
+			angle -= 2.0f * M_PI;
+		}
+
+		float sectorSize = ( 2.0f * M_PI ) / (float)numVisible;
+		float angleOffset = sectorSize * 0.5f;
+
+		idx = (int)( ( angle + angleOffset ) / sectorSize );
+
+		if ( idx >= numVisible ) {
+			idx = 0;
+		}
 	}
 
 	int newWeapon = visibleWeapons[idx];
 
-	if (usingStick)
+	if ( usingStick )
 	{
 
 		// if switching too fast between neighbors, resist it
-		if (cg.weaponWheel.lastWeapon != 0 &&
-			newWeapon != cg.weaponWheel.lastWeapon)
+		if ( cg.weaponWheel.lastWeapon != 0 &&
+			newWeapon != cg.weaponWheel.lastWeapon )
 		{
 
 			float threshold = 0.15f; // tune
 
-			if (len < (0.4f + threshold))
+			if ( len < ( 0.4f + threshold ) )
 			{
 				newWeapon = cg.weaponWheel.lastWeapon;
 			}

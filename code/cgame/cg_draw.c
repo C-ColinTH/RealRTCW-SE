@@ -4752,6 +4752,9 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_Draw2D(stereoView);
 }
 
+
+// WEAPON WHEEL ROUTINE HERE //
+
 static qboolean isChargeBased( int weap ) {
 	switch ( weap ) {
 	case WP_AIRSTRIKE:
@@ -4774,6 +4777,92 @@ static qboolean isClipOnly( int weap ) {
 		return qtrue;
 	}
 	return qfalse;
+}
+
+int CG_CollectWeaponWheelWeapons( int *visibleWeapons, int maxWeapons ) {
+	int numVisible = 0;
+
+	for ( int w = 1; w < MAX_WEAPONS; w++ ) {
+
+		if ( !COM_BitCheck( cg.snap->ps.weapons, w ) )
+			continue;
+
+		switch ( w ) {
+
+		case WP_KNIFE:
+		case WP_LUGER:
+		case WP_SILENCER:
+		case WP_COLT:
+		case WP_AKIMBO:
+		case WP_TT33:
+		case WP_DUAL_TT33:
+		case WP_REVOLVER:
+		case WP_HDM:
+
+		case WP_MP40:
+		case WP_MP34:
+		case WP_STEN:
+		case WP_THOMPSON:
+		case WP_PPSH:
+
+		case WP_MAUSER:
+		case WP_GARAND:
+		case WP_MOSIN:
+		case WP_DELISLE:
+
+		case WP_G43:
+		case WP_M1GARAND:
+		case WP_M1941:
+
+		case WP_FG42:
+		case WP_MP44:
+		case WP_BAR:
+
+		case WP_M97:
+		case WP_AUTO5:
+		case WP_M30:
+
+		case WP_PANZERFAUST:
+		case WP_FLAMETHROWER:
+		case WP_MG42M:
+		case WP_BROWNING:
+
+		case WP_VENOM:
+		case WP_TESLA:
+
+		case WP_GRENADE_LAUNCHER:
+		case WP_POISONGAS:
+		case WP_GRENADE_PINEAPPLE:
+		case WP_DYNAMITE:
+		case WP_DYNAMITE_ENG:
+		case WP_AIRSTRIKE:
+		case WP_SMOKE_BOMB:
+			break;
+
+		default:
+			continue;
+		}
+
+		if ( !isChargeBased( w ) ) {
+			int ammoIndex = BG_FindAmmoForWeapon( w );
+			int clipIndex = BG_FindClipForWeapon( w );
+
+			if ( ammoIndex < 0 && clipIndex < 0 )
+				continue;
+
+			if ( ( ammoIndex < 0 || cg.snap->ps.ammo[ammoIndex] <= 0 ) &&
+				( clipIndex < 0 || cg.snap->ps.ammoclip[clipIndex] <= 0 ) )
+				continue;
+		}
+
+		if ( numVisible >= maxWeapons ) {
+			break;
+		}
+
+		visibleWeapons[numVisible++] = w;
+	}
+
+	return numVisible;
 }
 
 static void CG_WeaponWheelAmmoText( int weap, char *buffer, int bufferSize ) {
@@ -4845,90 +4934,15 @@ void CG_DrawWeaponWheel( void ) {
 	cy = SCREEN_HEIGHT * 0.5f;
 
 	int visibleWeapons[MAX_WEAPONS];
-	int numVisible = 0;
-
-	for ( int w = 1; w < MAX_WEAPONS; w++ ) {
-
-		if ( !COM_BitCheck( cg.snap->ps.weapons, w ) )
-			continue;
-
-		int ammoIndex = BG_FindAmmoForWeapon(w);
-		int clipIndex = BG_FindClipForWeapon(w);
-
-		if (ammoIndex < 0 && clipIndex < 0)
-			continue;
-
-		if ((ammoIndex < 0 || cg.snap->ps.ammo[ammoIndex] <= 0) &&
-			(clipIndex < 0 || cg.snap->ps.ammoclip[clipIndex] <= 0))
-			continue;
-
-		// --- WHITELIST ---
-		switch ( w ) {
-
-		case WP_KNIFE:
-		case WP_LUGER:
-		case WP_SILENCER:
-		case WP_COLT:
-		case WP_AKIMBO:
-		case WP_TT33:
-		case WP_DUAL_TT33:
-		case WP_REVOLVER:
-		case WP_HDM:
-
-		case WP_MP40:
-		case WP_MP34:
-		case WP_STEN:
-		case WP_THOMPSON:
-		case WP_PPSH:
-
-		case WP_MAUSER:
-		case WP_GARAND:
-		case WP_MOSIN:
-		case WP_DELISLE:
-
-		case WP_G43:
-		case WP_M1GARAND:
-		case WP_M1941:
-
-		case WP_FG42:
-		case WP_MP44:
-		case WP_BAR:
-
-		case WP_M97:
-		case WP_AUTO5:
-		case WP_M30:
-
-		case WP_PANZERFAUST:
-		case WP_FLAMETHROWER:
-		case WP_MG42M:
-		case WP_BROWNING:
-
-		case WP_VENOM:
-		case WP_TESLA:
-
-		case WP_GRENADE_LAUNCHER:
-		case WP_POISONGAS:
-		case WP_GRENADE_PINEAPPLE:
-		case WP_DYNAMITE:
-		case WP_DYNAMITE_ENG:
-		case WP_AIRSTRIKE:
-		case WP_SMOKE_BOMB:
-			break;
-
-		default:
-			continue;
-		}
-
-		visibleWeapons[numVisible++] = w;
-	}
+	int numVisible = CG_CollectWeaponWheelWeapons( visibleWeapons, MAX_WEAPONS );
 
 	if ( numVisible <= 0 ) {
 		return;
 	}
 
 	// --- dynamic radius ---
-	float t = (cg.time - cg.weaponWheel.openTime) / 150.0f;
-	if (t > 1.0f)
+	float t = ( cg.time - cg.weaponWheel.openTime ) / 150.0f;
+	if ( t > 1.0f )
 		t = 1.0f;
 
 	float baseRadius = 100.0f;
@@ -4936,6 +4950,10 @@ void CG_DrawWeaponWheel( void ) {
 
 	radius = baseRadius + extra;
 	radius *= t;
+
+	if ( numVisible < 5 ) {
+		radius = 85.0f * t;
+	}
 
 	if ( radius > 200.0f ) {
 		radius = 200.0f;
@@ -4950,9 +4968,6 @@ void CG_DrawWeaponWheel( void ) {
 	if ( numVisible > 16 ) {
 		scale = 0.65f;
 	}
-
-	// --- center slices properly ---
-	float angleOffset = ( 2.0f * M_PI ) / (float)numVisible * 0.5f;
 
 	for ( int idx = 0; idx < numVisible; idx++ ) {
 
@@ -4995,17 +5010,59 @@ void CG_DrawWeaponWheel( void ) {
 			break;
 		}
 
-		float selectedScale = (weap == cg.weaponWheel.hoveredWeapon) ? 1.3f : 1.0f;
+		float selectedScale = ( weap == cg.weaponWheel.hoveredWeapon ) ? 1.3f : 1.0f;
 
 		float h = 40.0f * scale * selectedScale;
-		float w = wideweap ? (h * 2.0f) : h;
+		float w = wideweap ? ( h * 2.0f ) : h;
 
-		float angle = ( (float)idx / (float)numVisible ) * 2.0f * M_PI;
-		angle += angleOffset;
-		angle -= M_PI * 0.5f;
+		float x = cx;
+		float y = cy;
 
-		float x = cx + cosf( angle ) * radius;
-		float y = cy + sinf( angle ) * radius;
+		if ( numVisible == 1 ) {
+			x = cx;
+			y = cy - radius;
+		} else if ( numVisible == 2 ) {
+			if ( idx == 0 ) {
+				x = cx - radius;
+				y = cy;
+			} else {
+				x = cx + radius;
+				y = cy;
+			}
+		} else if ( numVisible == 3 ) {
+			if ( idx == 0 ) {
+				x = cx;
+				y = cy - radius;
+			} else if ( idx == 1 ) {
+				x = cx + radius * 0.85f;
+				y = cy + radius * 0.55f;
+			} else {
+				x = cx - radius * 0.85f;
+				y = cy + radius * 0.55f;
+			}
+		} else if ( numVisible == 4 ) {
+			if ( idx == 0 ) {
+				x = cx;
+				y = cy - radius;
+			} else if ( idx == 1 ) {
+				x = cx + radius;
+				y = cy;
+			} else if ( idx == 2 ) {
+				x = cx;
+				y = cy + radius;
+			} else {
+				x = cx - radius;
+				y = cy;
+			}
+		} else {
+			float angleOffset = ( 2.0f * M_PI ) / (float)numVisible * 0.5f;
+			float angle = ( (float)idx / (float)numVisible ) * 2.0f * M_PI;
+			angle += angleOffset;
+			angle -= M_PI * 0.5f;
+
+			x = cx + cosf( angle ) * radius;
+			y = cy + sinf( angle ) * radius;
+		}
 
 		qhandle_t icon;
 
@@ -5093,13 +5150,13 @@ void CG_DrawWeaponWheel( void ) {
 	}
 
 	// --- cursor ---
-	if (fabsf(cg.weaponWheel.stickX) <= 0.2f && fabsf(cg.weaponWheel.stickY) <= 0.2f)
+	if ( fabsf( cg.weaponWheel.stickX ) <= 0.2f && fabsf( cg.weaponWheel.stickY ) <= 0.2f )
 	{
 		CG_DrawPic(
 			cgs.cursorX - 8.0f,
 			cgs.cursorY - 8.0f,
 			16.0f,
 			16.0f,
-			cgs.media.selectCursor);
+			cgs.media.selectCursor );
 	}
 }
