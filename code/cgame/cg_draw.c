@@ -368,32 +368,6 @@ void CG_Text_Paint( float x, float y, int font, float scale, vec4_t color, const
 
 
 
-// return the max height value of utf8 character in this line
-static float CG_Utf8TextLineHeight( const char* text, float scale ) {
-	const char *p = text;
-	float h, maxHeight;
-	int32_t unicode;
-	glyphInfo_t *glyph;
-	utf8FontInfo_t *ufnt = &utf8Font;
-	
-	maxHeight = (float)BIGCHAR_HEIGHT;
-	while ( p && *p ) {
-		if ( Q_isUtf8Char(p) ) {
-			unicode = Q_utf8ToCodePoint(p);
-			glyph = &utf8Font.glyphs[unicode];
-			h = glyph->height * ufnt->glyphScale * scale;
-			if ( h > maxHeight ) {
-				maxHeight = h;
-			}
-			p += Q_utf8bytesLength(p);
-		} else {
-			p++;
-		}
-	}
-	
-	return maxHeight;
-}
-
 void CG_Text_AutoWrapped_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, 
 								 const char *text, float maxLineWidth, int alignType, int style) {
 	const char *p, *textPtr, *newLinePtr;
@@ -416,7 +390,7 @@ void CG_Text_AutoWrapped_Paint_Utf8( float x, float y, int font, float scale, ve
 	// Item_SetTextExtents( item, &width, &height, textPtr );
 
 	textWidth = 0;
-	maxLineHeight = CG_Utf8TextLineHeight(text, scale);
+	maxLineHeight = CG_DrawStrHeight_Utf8(text, scale);
 	textToBorderSkip = (int) MIN(maxLineWidth * 0.1f, 5.0f);	// prevent the small-sized font locate exactly on the boundary line
 
 	x2 = x;
@@ -4224,7 +4198,6 @@ void CG_ObjectivePrint( const char *str, int charWidth, int team ) {
 	char    *s;
 
 	const char *translate = CG_translateTextString3( str );
-	Com_Printf( "\"%s\": \"%s\"\n", str, translate);
 	Q_strncpyz( cg.oidPrint, translate, sizeof( cg.oidPrint ) );
 
 	cg.oidPrintTime = cg.time;
@@ -4242,134 +4215,30 @@ void CG_ObjectivePrint( const char *str, int charWidth, int team ) {
 	}
 }
 
-static void CG_DrawObjectiveInfo_Utf8_2( char *start, float *color ) {
-	int x, y, w;
+static void CG_DrawObjectiveInfo_Utf8( char *start, float *color ) {
+	int x, y, w, h;
+	int maxLineWidth, lines;
 	vec4_t backColor = { 0.2f, 0.2f, 0.2f, 1.f };
-
 	float scale = cg_hudUtf8FontScale.value;
-	y = cg.oidPrintY - cg.oidPrintLines * CG_Utf8TextLineHeight(start, cg_hudUtf8FontScale.value) / 2;
+
+	w = CG_DrawStrWidth_Utf8( start, scale );
+	h = CG_DrawStrHeight_Utf8(start, cg_hudUtf8FontScale.value);
+	
 	x = OID_LEFT - 2;
-	w = SCREEN_WIDTH / 2 - x;
+	maxLineWidth = SCREEN_WIDTH / 2 - x;
+	lines = (w + maxLineWidth - 1) / maxLineWidth + (cg.oidPrintLines - 1);
+	y = cg.oidPrintY - lines * h / 2;
 
-	CG_Text_AutoWrapped_Paint_Utf8(x, y, FONT_UTF_DEFAULT, scale, color, start, w, TEXT_ALIGN_LEFT, ITEM_TEXTSTYLE_SHADOWEDMORE);
-	trap_R_SetColor( NULL );
-}
-
-static void CG_DrawObjectiveInfo_Utf8( void ) {
-	char    *start;
-	int l;
-	int x, y, w;
-	int x1, y1, x2, y2;
-	float   *color;
-	vec4_t backColor = { 0.2f, 0.2f, 0.2f, 1.f };
-
-	if ( !cg.oidPrintTime ) {
-		return;
-	}
-
-	color = CG_FadeColor( cg.oidPrintTime, 1000 * 5 );
-	if ( !color ) {
-		return;
-	}
-
-	trap_R_SetColor( color );
-
-	start = cg.oidPrint;
-
-	y = cg.oidPrintY - cg.oidPrintLines * CG_Utf8TextLineHeight(start, cg_hudUtf8FontScale.value) / 2;
-
-	x1 = OID_LEFT - 2;
-	y1 = y - 2;
-	x2 = 0;
-
-	// first just find the bounding rect
-	while ( 1 ) {
-		char linebuffer[STRING_PRINT_BUFFER];
-
-		for ( l = 0; l < 40; l++ ) {
-			if ( !start[l] || start[l] == '\n' ) {
-				break;
-			}
-
-			int bytesLen = Q_utf8bytesLength( &start[l] );
-			for ( int i = 0; i < bytesLen; i++ ) {
-				linebuffer[l] = start[l];
-				l++;
-			}
-		}
-		linebuffer[l] = 0;
-
-		// w = cg.oidPrintCharWidth * CG_DrawStrlen( linebuffer );
-		w = CG_DrawStrWidth_Utf8( linebuffer, cg_hudUtf8FontScale.value );
-		if ( x1 + w > x2 ) {
-			x2 = x1 + w;
-		}
-
-		y += cg.oidPrintCharWidth * 1.5;
-
-		while ( *start && ( *start != '\n' ) ) {
-			start++;
-		}
-		if ( !*start ) {
-			break;
-		}
-		start++;
-	}
-
-	x2 = x2 + 4;
-	y2 = y - cg.oidPrintCharWidth * 1.5 + 4;
-
+	// background bounding rect
 	backColor[3] = color[3];
-	CG_FillRect( x1, y1, x2 - x1, y2 - y1, backColor );
-
+	CG_FillRect( x - 5, y - h, maxLineWidth + 10, lines * h + 10, backColor );
 	VectorSet( backColor, 0, 0, 0 );
-	CG_DrawRect( x1, y1, x2 - x1, y2 - y1, 1, backColor );
+	CG_DrawRect( x - 5, y - h, maxLineWidth + 10, lines * h + 10, 1, backColor );
 
-	//trap_R_SetColor( color );
-
-	// do the actual drawing
-	start = cg.oidPrint;
-	y = cg.oidPrintY - cg.oidPrintLines * BIGCHAR_HEIGHT / 2;
-
-	while ( 1 ) {
-		char linebuffer[STRING_PRINT_BUFFER];
-
-		for ( l = 0; l < 40; l++ ) {
-			if ( !start[l] || start[l] == '\n' ) {
-				break;
-			}
-
-			int bytesLen = Q_utf8bytesLength( &start[l] );
-			for ( int i = 0; i < bytesLen; i++ ) {
-				linebuffer[l] = start[l];
-				l++;
-			}
-		}
-		linebuffer[l] = 0;
-
-		// w = cg.oidPrintCharWidth * CG_DrawStrlen( linebuffer );
-		w = CG_DrawStrWidth_Utf8( linebuffer, cg_hudUtf8FontScale.value );
-		if ( x1 + w > x2 ) {
-			x2 = x1 + w;
-		}
-
-		x = OID_LEFT;
-
-		// CG_DrawStringExt( x, y, linebuffer, color, qfalse, qtrue,
-		//				  cg.oidPrintCharWidth, (int)( cg.oidPrintCharWidth * 1.5 ), 0 );
-		CG_DrawStringExt_Utf8( x, y, linebuffer, color, qfalse, qtrue, cg_hudUtf8FontScale.value, 0 );
-
-		y += cg.oidPrintCharWidth * 1.5;
-
-		while ( *start && ( *start != '\n' ) ) {
-			start++;
-		}
-		if ( !*start ) {
-			break;
-		}
-		start++;
-	}
-
+	// text
+	CG_Text_AutoWrapped_Paint_Utf8(x, y, FONT_UTF_DEFAULT, scale, color, start,
+									maxLineWidth, TEXT_ALIGN_LEFT, ITEM_TEXTSTYLE_SHADOWEDMORE);
+	
 	trap_R_SetColor( NULL );
 }
 
@@ -4393,7 +4262,7 @@ static void CG_DrawObjectiveInfo( void ) {
 	start = cg.oidPrint;
 
 	if ( cg_enableUtf8Font.integer ) {
-		CG_DrawObjectiveInfo_Utf8_2(start, color);
+		CG_DrawObjectiveInfo_Utf8(start, color);
 		return;
 	}
 

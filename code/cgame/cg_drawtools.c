@@ -888,7 +888,7 @@ CG_DrawStrWidth_Utf8
 Returns full characters width, skiping color escape codes
 =================
 */
-int CG_DrawStrWidth_Utf8( const char *str, float scale ) {
+float CG_DrawStrWidth_Utf8( const char *str, float scale ) {
 	const char *s = str;
 	int count;
 	float out;
@@ -921,6 +921,38 @@ int CG_DrawStrWidth_Utf8( const char *str, float scale ) {
 	}
 
 	return out * useScale;
+}
+
+/*
+=================
+CG_DrawStrWidth_Utf8
+
+Returns the max height value of character in this line string
+=================
+*/
+float CG_DrawStrHeight_Utf8( const char* str, float scale ) {
+	const char *p = str;
+	float h, maxHeight;
+	int32_t unicode;
+	glyphInfo_t *glyph;
+	utf8FontInfo_t *ufnt = &utf8Font;
+	
+	maxHeight = (float)BIGCHAR_HEIGHT;
+	while ( p && *p ) {
+		if ( Q_isUtf8Char(p) ) {
+			unicode = Q_utf8ToCodePoint(p);
+			glyph = &utf8Font.glyphs[unicode];
+			h = glyph->height * ufnt->glyphScale * scale;
+			if ( h > maxHeight ) {
+				maxHeight = h;
+			}
+			p += Q_utf8bytesLength(p);
+		} else {
+			p++;
+		}
+	}
+	
+	return maxHeight;
 }
 
 /*

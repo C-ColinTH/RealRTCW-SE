@@ -2097,7 +2097,8 @@ int CG_DrawStrlen( const char *str );
 
 // utf8 support
 int CG_DrawStrCount( const char *str );
-int CG_DrawStrWidth_Utf8( const char *str, float scale );
+float CG_DrawStrWidth_Utf8( const char *str, float scale );
+float CG_DrawStrHeight_Utf8( const char* str, float scale );
 void CG_Text_AutoWrapped_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, 
 								 const char *text, float maxLineWidth, int alignType, int style);
 void CG_DrawChar_Utf8( int x, int y, float scale, int unicode );
