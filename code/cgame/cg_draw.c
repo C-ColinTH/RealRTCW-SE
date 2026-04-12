@@ -4248,10 +4248,11 @@ static void CG_DrawObjectiveInfo_Utf8_2( char *start, float *color ) {
 
 	float scale = cg_hudUtf8FontScale.value;
 	y = cg.oidPrintY - cg.oidPrintLines * CG_Utf8TextLineHeight(start, cg_hudUtf8FontScale.value) / 2;
-	w = SCREEN_WIDTH * 0.5f;
 	x = OID_LEFT - 2;
+	w = SCREEN_WIDTH / 2 - x;
 
 	CG_Text_AutoWrapped_Paint_Utf8(x, y, FONT_UTF_DEFAULT, scale, color, start, w, TEXT_ALIGN_LEFT, ITEM_TEXTSTYLE_SHADOWEDMORE);
+	trap_R_SetColor( NULL );
 }
 
 static void CG_DrawObjectiveInfo_Utf8( void ) {
