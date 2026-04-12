@@ -5163,32 +5163,46 @@ void CG_DrawWeaponWheel( void ) {
 		color[3] = 1.0f;
 
 		if ( weaponName && weaponName[0] ) {
-			w = CG_DrawStrlen( weaponName ) * 10;
+			if ( !cg_enableUtf8Font.integer ) {
+				w = CG_DrawStrlen( weaponName ) * 10;
+			} else {
+				w = CG_DrawStrWidth_Utf8( weaponName, cg_hudUtf8FontScale.value * 0.8f );	// smaller
+			}
 
 #ifdef LOCALISATION
-			CG_DrawStringExt2(
-				cx - ( w * 0.5f ),
-				cy + 20.0f,
-				CG_TranslateString( weaponName ),
-				color,
-				qfalse,
-				qtrue,
-				10,
-				10,
-				0
-			);
+			if ( !cg_enableUtf8Font.integer ) {
+				CG_DrawStringExt2(
+					cx - ( w * 0.5f ),
+					cy + 20.0f,
+					CG_translateString( weaponName ),
+					color,
+					qfalse,
+					qtrue,
+					10,
+					10,
+					0
+				);
+			} else {
+				CG_DrawStringExt_Utf8( cx - ( w * 0.5f ), cy + 20.0f, CG_translateString( weaponName ), 
+										color, qfalse, qtrue, cg_hudUtf8FontScale.value * 0.8f, 0 );
+			}
 #else
-			CG_DrawStringExt2(
-				cx - ( w * 0.5f ),
-				cy + 20.0f,
-				weaponName,
-				color,
-				qfalse,
-				qtrue,
-				10,
-				10,
-				0
-			);
+			if ( !cg_enableUtf8Font.integer ) {
+				CG_DrawStringExt2(
+					cx - ( w * 0.5f ),
+					cy + 20.0f,
+					weaponName,
+					color,
+					qfalse,
+					qtrue,
+					10,
+					10,
+					0
+				);
+			} else {
+				CG_DrawStringExt_Utf8( cx - ( w * 0.5f ), cy + 20.0f, CG_translateString( weaponName ), 
+										color, qfalse, qtrue, cg_hudUtf8FontScale.value * 0.8f, 0 );
+			}
 #endif
 		}
 
