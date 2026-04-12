@@ -4719,6 +4719,12 @@ static void CG_Draw2D(stereoFrame_t stereoFrame) {
 		CG_DrawWarmup();
 	}
 
+	if (cg.weaponWheel.active)
+	{
+		CG_UpdateWeaponWheelSelection(cgs.cursorX, cgs.cursorY);
+		CG_DrawWeaponWheel();
+	}
+
 	// don't draw center string if scoreboard is up
 	if ( !CG_DrawScoreboard() ) {
 		CG_DrawCenterString();
@@ -4877,3 +4883,340 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	CG_Draw2D(stereoView);
 }
 
+static qboolean isChargeBased( int weap ) {
+	switch ( weap ) {
+	case WP_AIRSTRIKE:
+	case WP_POISONGAS:
+	case WP_DYNAMITE_ENG:
+	case WP_SMOKE_BOMB:
+		return qtrue;
+	}
+	return qfalse;
+}
+
+static qboolean isClipOnly( int weap ) {
+	switch ( weap ) {
+	case WP_GRENADE_LAUNCHER:
+	case WP_GRENADE_PINEAPPLE:
+	case WP_DYNAMITE:
+	case WP_TESLA:
+	case WP_FLAMETHROWER:
+	case WP_KNIFE:
+		return qtrue;
+	}
+	return qfalse;
+}
+
+static void CG_WeaponWheelAmmoText( int weap, char *buffer, int bufferSize ) {
+	int ammoIndex;
+	int clipIndex;
+
+	buffer[0] = '\0';
+
+	if ( isChargeBased( weap ) ) {
+		return;
+	}
+
+	ammoIndex = BG_FindAmmoForWeapon( weap );
+	clipIndex = BG_FindClipForWeapon( weap );
+
+	if ( isClipOnly( weap ) ) {
+		if ( clipIndex >= 0 ) {
+			Com_sprintf( buffer, bufferSize, "%i",
+				cg.snap->ps.ammoclip[clipIndex] );
+		}
+		return;
+	}
+
+	if ( clipIndex >= 0 && ammoIndex >= 0 ) {
+		Com_sprintf( buffer, bufferSize, "%i/%i",
+			cg.snap->ps.ammoclip[clipIndex],
+			cg.snap->ps.ammo[ammoIndex] );
+	} else if ( ammoIndex >= 0 ) {
+		Com_sprintf( buffer, bufferSize, "%i",
+			cg.snap->ps.ammo[ammoIndex] );
+	} else if ( clipIndex >= 0 ) {
+		Com_sprintf( buffer, bufferSize, "%i",
+			cg.snap->ps.ammoclip[clipIndex] );
+	}
+}
+
+
+static const char *CG_WeaponWheelName( int weap ) {
+	gitem_t *item;
+	int itemNum;
+
+	item = BG_FindItemForWeapon( weap );
+	if ( !item ) {
+		return "";
+	}
+
+	itemNum = item - bg_itemlist;
+
+	if ( itemNum <= 0 ) {
+		return "";
+	}
+
+	if ( !cgs.itemPrintNames[itemNum][0] ) {
+		return "";
+	}
+
+	return cgs.itemPrintNames[itemNum];
+}
+
+void CG_DrawWeaponWheel( void ) {
+	float cx, cy;
+	float radius;
+
+	if ( !cg.weaponWheel.active ) {
+		return;
+	}
+
+	cx = SCREEN_WIDTH * 0.35f;
+	cy = SCREEN_HEIGHT * 0.5f;
+
+	int visibleWeapons[MAX_WEAPONS];
+	int numVisible = 0;
+
+	for ( int w = 1; w < MAX_WEAPONS; w++ ) {
+
+		if ( !COM_BitCheck( cg.snap->ps.weapons, w ) )
+			continue;
+
+		int ammoIndex = BG_FindAmmoForWeapon(w);
+		int clipIndex = BG_FindClipForWeapon(w);
+
+		if (ammoIndex < 0 && clipIndex < 0)
+			continue;
+
+		if ((ammoIndex < 0 || cg.snap->ps.ammo[ammoIndex] <= 0) &&
+			(clipIndex < 0 || cg.snap->ps.ammoclip[clipIndex] <= 0))
+			continue;
+
+		// --- WHITELIST ---
+		switch ( w ) {
+
+		case WP_KNIFE:
+		case WP_LUGER:
+		case WP_SILENCER:
+		case WP_COLT:
+		case WP_AKIMBO:
+		case WP_TT33:
+		case WP_DUAL_TT33:
+		case WP_REVOLVER:
+		case WP_HDM:
+
+		case WP_MP40:
+		case WP_MP34:
+		case WP_STEN:
+		case WP_THOMPSON:
+		case WP_PPSH:
+
+		case WP_MAUSER:
+		case WP_GARAND:
+		case WP_MOSIN:
+		case WP_DELISLE:
+
+		case WP_G43:
+		case WP_M1GARAND:
+		case WP_M1941:
+
+		case WP_FG42:
+		case WP_MP44:
+		case WP_BAR:
+
+		case WP_M97:
+		case WP_AUTO5:
+		case WP_M30:
+
+		case WP_PANZERFAUST:
+		case WP_FLAMETHROWER:
+		case WP_MG42M:
+		case WP_BROWNING:
+
+		case WP_VENOM:
+		case WP_TESLA:
+
+		case WP_GRENADE_LAUNCHER:
+		case WP_POISONGAS:
+		case WP_GRENADE_PINEAPPLE:
+		case WP_DYNAMITE:
+		case WP_DYNAMITE_ENG:
+		case WP_AIRSTRIKE:
+		case WP_SMOKE_BOMB:
+			break;
+
+		default:
+			continue;
+		}
+
+		visibleWeapons[numVisible++] = w;
+	}
+
+	if ( numVisible <= 0 ) {
+		return;
+	}
+
+	// --- dynamic radius ---
+	float t = (cg.time - cg.weaponWheel.openTime) / 150.0f;
+	if (t > 1.0f)
+		t = 1.0f;
+
+	float baseRadius = 100.0f;
+	float extra = numVisible * 3.0f;
+
+	radius = baseRadius + extra;
+	radius *= t;
+
+	if ( radius > 200.0f ) {
+		radius = 200.0f;
+	}
+
+	// --- adaptive scale ---
+	float scale = 1.0f;
+
+	if ( numVisible > 10 ) {
+		scale = 0.8f;
+	}
+	if ( numVisible > 16 ) {
+		scale = 0.65f;
+	}
+
+	// --- center slices properly ---
+	float angleOffset = ( 2.0f * M_PI ) / (float)numVisible * 0.5f;
+
+	for ( int idx = 0; idx < numVisible; idx++ ) {
+
+		int weap = visibleWeapons[idx];
+
+		CG_RegisterWeapon( weap, qfalse );
+
+		qboolean wideweap;
+
+		switch ( weap ) {
+		case WP_THOMPSON:
+		case WP_MP40:
+		case WP_MP34:
+		case WP_PPSH:
+		case WP_MOSIN:
+		case WP_G43:
+		case WP_M1GARAND:
+		case WP_BAR:
+		case WP_M30:
+		case WP_MP44:
+		case WP_MG42M:
+		case WP_M97:
+		case WP_AUTO5:
+		case WP_BROWNING:
+		case WP_STEN:
+		case WP_MAUSER:
+		case WP_DELISLE:
+		case WP_GARAND:
+		case WP_VENOM:
+		case WP_TESLA:
+		case WP_PANZERFAUST:
+		case WP_FLAMETHROWER:
+		case WP_FG42:
+		case WP_FG42SCOPE:
+		case WP_M1941:
+			wideweap = qtrue;
+			break;
+		default:
+			wideweap = qfalse;
+			break;
+		}
+
+		float selectedScale = (weap == cg.weaponWheel.hoveredWeapon) ? 1.3f : 1.0f;
+
+		float h = 40.0f * scale * selectedScale;
+		float w = wideweap ? (h * 2.0f) : h;
+
+		float angle = ( (float)idx / (float)numVisible ) * 2.0f * M_PI;
+		angle += angleOffset;
+		angle -= M_PI * 0.5f;
+
+		float x = cx + cosf( angle ) * radius;
+		float y = cy + sinf( angle ) * radius;
+
+		qhandle_t icon;
+
+		if ( weap == cg.weaponWheel.hoveredWeapon ) {
+			icon = cg_weapons[weap].weaponIcon[1];
+		} else {
+			icon = cg_weapons[weap].weaponIcon[0];
+		}
+
+		CG_DrawPic( x - w * 0.5f, y - h * 0.5f, w, h, icon );
+	}
+
+	if ( cg.weaponWheel.hoveredWeapon > 0 ) {
+		const char *weaponName = CG_WeaponWheelName( cg.weaponWheel.hoveredWeapon );
+		char ammoText[32];
+		float color[4];
+		int w;
+
+		CG_WeaponWheelAmmoText( cg.weaponWheel.hoveredWeapon, ammoText, sizeof( ammoText ) );
+
+		color[0] = 1.0f;
+		color[1] = 1.0f;
+		color[2] = 1.0f;
+		color[3] = 1.0f;
+
+		if ( weaponName && weaponName[0] ) {
+			w = CG_DrawStrlen( weaponName ) * 10;
+
+#ifdef LOCALISATION
+			CG_DrawStringExt2(
+				cx - ( w * 0.5f ),
+				cy + 20.0f,
+				CG_TranslateString( weaponName ),
+				color,
+				qfalse,
+				qtrue,
+				10,
+				10,
+				0
+			);
+#else
+			CG_DrawStringExt2(
+				cx - ( w * 0.5f ),
+				cy + 20.0f,
+				weaponName,
+				color,
+				qfalse,
+				qtrue,
+				10,
+				10,
+				0
+			);
+#endif
+		}
+
+		if ( ammoText[0] ) {
+			w = CG_DrawStrlen( ammoText ) * 8;
+
+			CG_DrawStringExt2(
+				cx - ( w * 0.5f ),
+				cy + 34.0f,
+				ammoText,
+				color,
+				qfalse,
+				qtrue,
+				8,
+				8,
+				0
+			);
+		}
+	}
+
+	// --- cursor ---
+	if (fabsf(cg.weaponWheel.stickX) <= 0.2f && fabsf(cg.weaponWheel.stickY) <= 0.2f)
+	{
+		CG_DrawPic(
+			cgs.cursorX - 8.0f,
+			cgs.cursorY - 8.0f,
+			16.0f,
+			16.0f,
+			cgs.media.selectCursor);
+	}
+}

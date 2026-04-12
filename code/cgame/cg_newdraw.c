@@ -2389,6 +2389,38 @@ void CG_OwnerDraw( float x, float y, float w, float h, float text_x, float text_
 void CG_MouseEvent( int x, int y ) {
 	int n;
 
+	if ( cg.weaponWheel.active ) {
+
+		// 1. Apply mouse movement
+		cgs.cursorX += x;
+		cgs.cursorY += y;
+
+		// 2. Clamp to screen (virtual 640x480 space)
+		if ( cgs.cursorX < 0 ) cgs.cursorX = 0;
+		if ( cgs.cursorX > 640 ) cgs.cursorX = 640;
+
+		if ( cgs.cursorY < 0 ) cgs.cursorY = 0;
+		if ( cgs.cursorY > 480 ) cgs.cursorY = 480;
+
+		// 3. Clamp to wheel radius (THIS is the important part)
+		float cx = SCREEN_WIDTH * 0.35f;
+		float cy = SCREEN_HEIGHT * 0.5f;
+
+		float dx = cgs.cursorX - cx;
+		float dy = cgs.cursorY - cy;
+
+		float len = sqrtf( dx * dx + dy * dy );
+		float maxRadius = 120.0f;
+
+		if ( len > maxRadius ) {
+			float scale = maxRadius / len;
+			cgs.cursorX = cx + dx * scale;
+			cgs.cursorY = cy + dy * scale;
+		}
+
+		return;
+	}
+
 	if ( ( cg.predictedPlayerState.pm_type == PM_NORMAL || cg.predictedPlayerState.pm_type == PM_SPECTATOR ) && cg.showScores == qfalse ) {
 		trap_Key_SetCatcher( 0 );
 		return;
@@ -2422,6 +2454,28 @@ void CG_MouseEvent( int x, int y ) {
 		Display_MouseMove( NULL, cgs.cursorX, cgs.cursorY );
 	}
 
+}
+
+#define JOY_AXIS_LOOK_X 2
+#define JOY_AXIS_LOOK_Y 3
+
+void CG_JoystickEvent( int axis, int value ) {
+
+    if ( !cg.weaponWheel.active ) {
+        return;
+    }
+
+    float norm = value / 32767.0f;
+
+    // right stick assumed
+	if (axis == JOY_AXIS_LOOK_X)
+	{
+		cg.weaponWheel.stickX = norm;
+	}
+	else if (axis == JOY_AXIS_LOOK_Y)
+	{
+		cg.weaponWheel.stickY = norm;
+	}
 }
 
 /*

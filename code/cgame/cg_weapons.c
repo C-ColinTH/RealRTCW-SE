@@ -5262,6 +5262,188 @@ void CG_OutOfAmmoChange( void ) {
 
 }
 
+
+
+void CG_UpdateWeaponWheelSelection( float cursorx, float cursory ) {
+
+	int visibleWeapons[MAX_WEAPONS];
+	int numVisible = 0;
+
+	for ( int w = 1; w < MAX_WEAPONS; w++ ) {
+
+		if ( !COM_BitCheck( cg.snap->ps.weapons, w ) )
+			continue;
+
+		int ammoIndex = BG_FindAmmoForWeapon(w);
+		int clipIndex = BG_FindClipForWeapon(w);
+
+		if (ammoIndex < 0 && clipIndex < 0)
+			continue;
+
+		if ((ammoIndex < 0 || cg.snap->ps.ammo[ammoIndex] <= 0) &&
+			(clipIndex < 0 || cg.snap->ps.ammoclip[clipIndex] <= 0))
+			continue;
+
+		switch ( w ) {
+
+		case WP_KNIFE:
+		case WP_LUGER:
+		case WP_SILENCER:
+		case WP_COLT:
+		case WP_AKIMBO:
+		case WP_TT33:
+		case WP_DUAL_TT33:
+		case WP_REVOLVER:
+		case WP_HDM:
+
+		case WP_MP40:
+		case WP_MP34:
+		case WP_STEN:
+		case WP_THOMPSON:
+		case WP_PPSH:
+
+		case WP_MAUSER:
+		case WP_GARAND:
+		case WP_MOSIN:
+		case WP_DELISLE:
+
+		case WP_G43:
+		case WP_M1GARAND:
+		case WP_M1941:
+
+		case WP_FG42:
+		case WP_MP44:
+		case WP_BAR:
+
+		case WP_M97:
+		case WP_AUTO5:
+		case WP_M30:
+
+		case WP_PANZERFAUST:
+		case WP_FLAMETHROWER:
+		case WP_MG42M:
+		case WP_BROWNING:
+
+		case WP_VENOM:
+		case WP_TESLA:
+
+		case WP_GRENADE_LAUNCHER:
+		case WP_POISONGAS:
+		case WP_GRENADE_PINEAPPLE:
+		case WP_DYNAMITE:
+		case WP_DYNAMITE_ENG:
+		case WP_AIRSTRIKE:
+		case WP_SMOKE_BOMB:
+			break;
+
+		default:
+			continue;
+		}
+
+		visibleWeapons[numVisible++] = w;
+	}
+
+	if ( numVisible <= 0 ) {
+		cg.weaponWheel.hoveredWeapon = 0;
+		return;
+	}
+
+	float cx = SCREEN_WIDTH * 0.35f;
+	float cy = SCREEN_HEIGHT * 0.5f;
+
+	float dx, dy;
+	float len;
+
+	qboolean usingStick = qfalse;
+
+	if ( fabsf( cg.weaponWheel.stickX ) > 0.2f || fabsf( cg.weaponWheel.stickY ) > 0.2f ) {
+		usingStick = qtrue;
+	}
+
+	if ( usingStick ) {
+		dx = cg.weaponWheel.stickX;
+		dy = cg.weaponWheel.stickY;
+
+		len = sqrtf( dx * dx + dy * dy );
+
+		if (len < 0.2f)
+		{
+
+			// Do NOT clear selection if we already latched one
+			if (cg.weaponWheel.latchedWeapon > 0)
+			{
+				cg.weaponWheel.hoveredWeapon = cg.weaponWheel.latchedWeapon;
+			}
+			else
+			{
+				cg.weaponWheel.hoveredWeapon = 0;
+			}
+
+			return;
+		}
+
+		dx /= len;
+		dy /= len;
+	} else {
+		dx = cursorx - cx;
+		dy = cursory - cy;
+
+		len = sqrtf( dx * dx + dy * dy );
+
+		if ( len < 30.0f ) {
+			cg.weaponWheel.hoveredWeapon = 0;
+			return;
+		}
+
+		dx /= len;
+		dy /= len;
+	}
+
+	float angle = atan2f( dy, dx );
+	angle += M_PI * 0.5f;
+
+	if ( angle < 0 ) {
+		angle += 2.0f * M_PI;
+	}
+	if ( angle >= 2.0f * M_PI ) {
+		angle -= 2.0f * M_PI;
+	}
+
+	float sectorSize = ( 2.0f * M_PI ) / (float)numVisible;
+	float angleOffset = sectorSize * 0.5f;
+
+	int idx = (int)( ( angle + angleOffset ) / sectorSize );
+
+	if ( idx >= numVisible ) {
+		idx = 0;
+	}
+
+	int newWeapon = visibleWeapons[idx];
+
+	if (usingStick)
+	{
+
+		// if switching too fast between neighbors, resist it
+		if (cg.weaponWheel.lastWeapon != 0 &&
+			newWeapon != cg.weaponWheel.lastWeapon)
+		{
+
+			float threshold = 0.15f; // tune
+
+			if (len < (0.4f + threshold))
+			{
+				newWeapon = cg.weaponWheel.lastWeapon;
+			}
+		}
+
+		cg.weaponWheel.latchedWeapon = newWeapon;
+		cg.weaponWheel.lastWeapon = newWeapon;
+	}
+
+	// Hover is always current frame
+	cg.weaponWheel.hoveredWeapon = newWeapon;
+}
+
 /*
 ===================================================================================================
 
@@ -7005,7 +7187,7 @@ void CG_UpdateAimAssist( void ) {
 
 
 	float coneDeg = 4.5f;
-	if (cg.zoomed)
+	if (cg.zoomed || cg.zoomedScope || cg.simpleZoomed)
 	{					
 		coneDeg = 6.0f; 
 	}
