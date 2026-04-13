@@ -286,7 +286,7 @@ void _UI_DrawRect( float x, float y, float width, float height, float size, cons
 }
 
 
-static int Text_Width_Utf8( const char *text, int font, float scale, int limit ) {
+float Text_Width_Utf8( const char *text, int font, float scale, int limit ) {
 	int count,len;
 	float out;
 	glyphInfo_t *glyph;
@@ -306,7 +306,7 @@ static int Text_Width_Utf8( const char *text, int font, float scale, int limit )
 
 	if ( !ufnt || !ufnt->loaded ) {
 		// ufnt = &utf8Fonts[UFontIndex(FONT_UTF_DEFAULT)];
-		Com_Error( ERR_FATAL, "Text_Paint_Utf8: bad font index %d", font );
+		Com_Error( ERR_FATAL, "Text_Width_Utf8: bad font index %d", font );
 		return -1;
 	}
 
@@ -384,12 +384,55 @@ int Text_Width( const char *text, int font, float scale, int limit ) {
 	return out * useScale;
 }
 
+float Text_Height_Utf8( const char *text, int font, float scale, int limit ) {
+	const char *s = text;
+	float h, maxHeight;
+	int32_t unicode;
+	glyphInfo_t *glyph;
+	float useScale;
+	
+	utf8FontInfo_t *ufnt = NULL;
+	if ( font == FONT_UTF_DEFAULT ) {
+		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_DEFAULT)];
+	} else if ( font == FONT_UTF_CUSTOM1 ) {
+		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_CUSTOM1)];
+	} else if ( font == FONT_UTF_CUSTOM2 ) {
+		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_CUSTOM2)];
+	} else if ( font == FONT_UTF_CUSTOM3 ) {
+		ufnt = &utf8Fonts[UFontIndex(FONT_UTF_CUSTOM3)];
+	}
+
+	if ( !ufnt || !ufnt->loaded ) {
+		// ufnt = &utf8Fonts[UFontIndex(FONT_UTF_DEFAULT)];
+		Com_Error( ERR_FATAL, "Text_Height_Utf8: bad font index %d", font );
+		return -1;
+	}
+
+	useScale = ufnt->glyphScale * scale;
+	maxHeight = 0;
+	while ( s && *s ) {
+		unicode = Q_utf8ToCodePoint(s);
+		glyph = &ufnt->glyphs[unicode];
+		h = glyph->height * useScale;
+		if ( h > maxHeight ) {
+			maxHeight = h;
+		}
+		s += Q_utf8bytesLength(s);
+	}
+	
+	return maxHeight;
+}
+
 int Text_Height( const char *text, int font, float scale, int limit ) {
 	int len, count;
 	float max;
 	glyphInfo_t *glyph;
 	float useScale;
 	const char *s = text;
+
+	if ( font >= FONT_UTF_DEFAULT ) {
+		return Text_Height_Utf8(text, font, scale, limit);
+	}
 
 	fontInfo_t *fnt = &uiInfo.uiDC.Assets.textFont;
 	if ( font == UI_FONT_DEFAULT ) {

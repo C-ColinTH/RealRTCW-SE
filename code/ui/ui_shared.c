@@ -3324,11 +3324,10 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 	char text[1024];
 	const char *p, *textPtr, *newLinePtr;
 	char buff[1024];
-	int width, height, len, textWidth, newLine, newLineWidth;
+	int width, height, len, textWidth, textHeight, newLine, newLineWidth;
 	float y;
 	vec4_t color;
 
-	textWidth = 0;
 	newLinePtr = NULL;
 
 	if ( item->text == NULL ) {
@@ -3347,7 +3346,9 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 	Item_TextColor( item, &color );
 	Item_SetTextExtents( item, &width, &height, textPtr );
 
-	int textToBorderDist = (int) MIN(item->window.rect.w * 0.1f, 10);	// prevent the small-sized font locate exactly on the boundary line
+	textWidth = 0;
+	textHeight = height;
+	int textToBorderDist = (int) MIN(item->window.rect.w * 0.1f, 5.0f);	// prevent the small-sized font locate exactly on the boundary line
 
 	y = item->textaligny;
 	len = 0;
@@ -3366,6 +3367,7 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 			newLineWidth = textWidth;
 		}
 		textWidth = DC->textWidth( buff, item->font, item->textscale, 0 ) + textToBorderDist;
+		textHeight = DC->textHeight( buff, item->font, item->textscale, 0 );
 		if ( ( newLine && textWidth > item->window.rect.w ) || *p == '\n' || *p == '\0' ) {
 			if ( len ) {
 				if ( item->textalignment == ITEM_ALIGN_LEFT ) {
@@ -3386,7 +3388,12 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 				break;
 			}
 			//
-			y += height + 5;
+			if ( item->font < FONT_UTF_DEFAULT ) {
+				y += height + 5;
+			} else {
+				y += textHeight + (int)MIN(textHeight * 0.25f + 1, 5);
+			}
+
 			p = newLinePtr;
 			len = 0;
 			newLine = 0;

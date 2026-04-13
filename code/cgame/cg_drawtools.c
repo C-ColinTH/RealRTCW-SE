@@ -936,20 +936,17 @@ float CG_DrawStrHeight_Utf8( const char* str, float scale ) {
 	int32_t unicode;
 	glyphInfo_t *glyph;
 	utf8FontInfo_t *ufnt = &utf8Font;
+	float useScale = ufnt->glyphScale * scale;
 	
-	maxHeight = (float)BIGCHAR_HEIGHT;
+	maxHeight = 0;
 	while ( p && *p ) {
-		if ( Q_isUtf8Char(p) ) {
-			unicode = Q_utf8ToCodePoint(p);
-			glyph = &utf8Font.glyphs[unicode];
-			h = glyph->height * ufnt->glyphScale * scale;
-			if ( h > maxHeight ) {
-				maxHeight = h;
-			}
-			p += Q_utf8bytesLength(p);
-		} else {
-			p++;
+		unicode = Q_utf8ToCodePoint(p);
+		glyph = &utf8Font.glyphs[unicode];
+		h = glyph->height * useScale;
+		if ( h > maxHeight ) {
+			maxHeight = h;
 		}
+		p += Q_utf8bytesLength(p);
 	}
 	
 	return maxHeight;
