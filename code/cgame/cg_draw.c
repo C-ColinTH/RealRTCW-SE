@@ -2453,18 +2453,25 @@ static void CG_DrawEgString( void ) {
 
 /*
 ===================
-CG_DrawUtf8SubtitleString
+CG_DrawSubtitleString_Utf8
 ===================
 */
-static void CG_DrawUtf8SubtitleString(char *start, float *color) {
+static void CG_DrawSubtitleString_Utf8(char *start, float *color) {
 	int x, y, w;
+	int style;
 
 	y = cg.subtitlePrintY - cg.subtitlePrintLines * BIGCHAR_HEIGHT / 2;
 	w = SCREEN_WIDTH * 0.7f;
 	x = (SCREEN_WIDTH - w) / 2;
 
-	CG_Text_AutoWrapped_Paint_Utf8(x, y, FONT_UTF_DEFAULT, cg_subtitleUtf8FontScale.value, color,
-									start, w, TEXT_ALIGN_CENTER, ITEM_TEXTSTYLE_SHADOWEDMORE);
+	if ( cg_subtitleShadow.integer ) {
+		style = ITEM_TEXTSTYLE_SHADOWEDMORE;
+	} else {
+		style = ITEM_TEXTSTYLE_NORMAL;
+	}
+
+	CG_Text_AutoWrapped_Paint_Utf8( x, y, FONT_UTF_DEFAULT, cg_subtitleUtf8FontScale.value, color,
+									start, w, TEXT_ALIGN_CENTER, style );
 	trap_R_SetColor( NULL );
 }
 
@@ -2491,7 +2498,7 @@ static void CG_DrawSubtitleString( void ) {
 	start = cg.subtitlePrint;
 
 	if ( cg_enableUtf8Font.integer ) {
-		CG_DrawUtf8SubtitleString( start, color );
+		CG_DrawSubtitleString_Utf8( start, color );
 		return;
 	}
 
