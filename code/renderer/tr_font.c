@@ -614,7 +614,7 @@ void RE_RegisterUtf8Font( const char *fontName, utf8FontInfo_t *font ) {
 
 		if ( isNewFormat ) {
 			int unicode;
-			Com_Printf("reading unicode glyphs info from new format DAT...\n");
+			ri.Printf(PRINT_DEVELOPER, "reading unicode glyphs info from sparse data storage format DAT...\n");
 			while ( fdOffset < len - 1 - sizeof(font->glyphScale) - sizeof(font->name) ) {
 				unicode                           = readInt();
 				font->glyphs[unicode].height      = readInt();
@@ -633,7 +633,7 @@ void RE_RegisterUtf8Font( const char *fontName, utf8FontInfo_t *font ) {
 				fdOffset += sizeof(font->glyphs[unicode].shaderName);
 			}
 		} else {
-			Com_Printf("loading unicode glyphs info from DAT...\n");
+			ri.Printf(PRINT_DEVELOPER, "loading unicode glyphs info from DAT...\n");
 			for ( i = 0; i < UTF8_GLYPHS_PER_FONT; i++ ) {
 				font->glyphs[i].height      = readInt();
 				font->glyphs[i].top         = readInt();
@@ -666,7 +666,7 @@ void RE_RegisterUtf8Font( const char *fontName, utf8FontInfo_t *font ) {
 				// Com_Printf("utf8 character %d, shader id: %d\n", i, font->glyphs[i].glyph);
 			}
 		}
-		Com_Printf("\"%s\" loaded: total %d valid glyphs\n", font->name, validNum);
+		Com_Printf("\"%s\" loaded, total %d valid glyphs\n", font->name, validNum);
 		
 		// utf8RegisteredFont[utf8RegisteredFontCount].loaded = qtrue;
 		font->loaded = qtrue;
@@ -678,7 +678,9 @@ void RE_RegisterUtf8Font( const char *fontName, utf8FontInfo_t *font ) {
 #ifndef BUILD_FREETYPE
 	ri.Printf( PRINT_WARNING, "RE_RegisterUtf8Font: FreeType code not available\n" ); // JPW NERVE was PRINT_ALL
 #else
-	return;  // these below won't work for utf8 fonts, so we need to use external tools
+	// these below won't work for utf8 fonts, so we need to use external tools:
+	// https://github.com/C-ColinTH/RTCW-font
+	return;
 
 	if ( ftLibrary == NULL ) {
 		ri.Printf( PRINT_WARNING, "RE_RegisterUtf8Font: FreeType not initialized.\n" ); // JPW NERVE was PRINT_ALL
