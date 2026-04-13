@@ -4217,23 +4217,25 @@ void CG_ObjectivePrint( const char *str, int charWidth, int team ) {
 
 static void CG_DrawObjectiveInfo_Utf8( char *start, float *color ) {
 	int x, y, w, h;
-	int maxLineWidth, lines;
+	int width, height, maxLineWidth, lines;
 	vec4_t backColor = { 0.2f, 0.2f, 0.2f, 1.f };
 	float scale = cg_hudUtf8FontScale.value;
 
-	w = CG_DrawStrWidth_Utf8( start, scale );
-	h = CG_DrawStrHeight_Utf8(start, cg_hudUtf8FontScale.value);
+	width = CG_DrawStrWidth_Utf8( start, scale );
+	height = CG_DrawStrHeight_Utf8(start, cg_hudUtf8FontScale.value);
 	
 	x = OID_LEFT - 2;
 	maxLineWidth = SCREEN_WIDTH / 2 - x;
-	lines = (w + maxLineWidth - 1) / maxLineWidth + (cg.oidPrintLines - 1);
-	y = cg.oidPrintY - lines * h / 2;
+	lines = (width + maxLineWidth - 1) / maxLineWidth + (cg.oidPrintLines - 1);
+	h = lines * height;
+	y = cg.oidPrintY - h / 2;
+	w = lines > 1 ? maxLineWidth : width;
 
 	// background bounding rect
 	backColor[3] = color[3];
-	CG_FillRect( x - 5, y - h, maxLineWidth + 10, lines * h + 10, backColor );
+	CG_FillRect( x - 5, y - h, w + 10, h + 10, backColor );
 	VectorSet( backColor, 0, 0, 0 );
-	CG_DrawRect( x - 5, y - h, maxLineWidth + 10, lines * h + 10, 1, backColor );
+	CG_DrawRect( x - 5, y - h, w + 10, h + 10, 1, backColor );
 
 	// text
 	CG_Text_AutoWrapped_Paint_Utf8(x, y, FONT_UTF_DEFAULT, scale, color, start,
