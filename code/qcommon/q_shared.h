@@ -1849,6 +1849,10 @@ int Q_utf8bytesLength( const char *utf8 );
 qboolean Q_isUtf8Char( const char *c );
 qboolean Q_isUtf8String( const char *str );
 uint32_t Q_utf8ToCodePoint( const char *utf8 );
+qboolean Q_IsUtf8BreakOpportunity( uint32_t unicode );
+qboolean Q_IsUtf8TightSpacing( uint32_t unicode );
+qboolean Q_IsUtf8StringNeedBidi( const char *str );
+void Q_TransToUtf8BidiString( char *str, int maxLen );
 
 #define MAX_UTF8_FONTS 5
 #define UFontIndex( n ) ( n - MAX_FONTS + 1 )

@@ -266,7 +266,11 @@ static void CG_Text_Paint_Utf8( float x, float y, int font, float scale, vec4_t 
 							glyph->t2,
 							glyph->glyph );
 
-			x += ( glyph->xSkip * useScale ) + adjust;
+			if ( Q_IsUtf8TightSpacing(unicode) ) {
+				x += glyph->xSkip * useScale;
+			} else {
+				x += ( glyph->xSkip * useScale ) + adjust;
+			}
 		}
 		
 		count++;
@@ -401,12 +405,12 @@ void CG_Text_AutoWrapped_Paint_Utf8( float x, float y, int font, float scale, ve
 	newLineWidth = 0;
 	p = textPtr;
 	while ( p ) {
-		// TODO // XXX
+		int32_t unicode = Q_utf8ToCodePoint(p);
 		if ( *p == ' ' || *p == '\t' || *p == '\n' || *p == '\0' ) {
 			newLine = len;
 			newLinePtr = p + 1;
 			newLineWidth = textWidth;
-		} else if ( Q_isUtf8Char(p) ) {
+		} else if ( Q_IsUtf8BreakOpportunity(unicode) ) {
 			newLine = len;
 			newLinePtr = p;
 			newLineWidth = textWidth;
@@ -423,11 +427,14 @@ void CG_Text_AutoWrapped_Paint_Utf8( float x, float y, int font, float scale, ve
 					x2 = x + (maxLineWidth - newLineWidth) / 2;
 				}
 				
-				if ( Q_isUtf8Char(p) ) {
+				if ( Q_IsUtf8BreakOpportunity(unicode) ) {
 					newLine += Q_utf8bytesLength(p) - 1;
 				}
 
 				buff[newLine] = '\0';
+				if ( Q_IsUtf8StringNeedBidi( buff ) ) {
+					Q_TransToUtf8BidiString( buff, sizeof(buff) );
+				}
 				CG_Text_Paint_Utf8(x2, y2, FONT_UTF_DEFAULT, scale, color, buff, 0, 0, style);
 			}
 			if ( *p == '\0' ) {

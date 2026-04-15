@@ -35,6 +35,13 @@ If you have questions concerning this license or the applicable additional terms
 #include "../game/g_local.h"
 #endif
 
+#ifdef _WIN32
+  #define USE_FRIBIDI
+  #ifdef USE_FRIBIDI
+    #include "fribidi.h"
+  #endif
+#endif
+
 // ^[0-9a-zA-Z]
 qboolean Q_IsColorString(const char *p) {
 	if (!p)
@@ -2290,4 +2297,190 @@ uint32_t Q_utf8ToCodePoint( const char *utf8 ) {
     }
     
     return codepoint;
+}
+
+// some languages are not separated by spaces like English words
+// uesd to prevent a line of text from always being displayed on one line
+qboolean Q_IsUtf8BreakOpportunity( uint32_t unicode ) {
+	if ( unicode == 0 || unicode == ' ' || unicode == '\t' || unicode == '\r' || unicode == '\n' ) {
+		return qtrue;
+	}
+
+	if ( unicode > 0 && unicode < 0x2000 ) {
+		return qfalse;
+	}
+
+	
+	if ( ( unicode >= 0x0590 && unicode <= 0x05FF ) ||		// Hebrew
+			( unicode >= 0x0600 && unicode <= 0x06FF ) ||	// Arabic
+			( unicode >= 0x0750 && unicode <= 0x077F ) ||	// Arabic Supplement
+			( unicode >= 0x08A0 && unicode <= 0x08FF ) ||	// Arabic Extended-A
+			( unicode >= 0xFB50 && unicode <= 0xFDFF ) ||	// Arabic Presentation Forms-A
+			( unicode >= 0xFE70 && unicode <= 0xFEFF )		// Arabic Presentation Forms-B
+	) {
+		return qfalse;
+	}
+
+	// some languages that can wrap lines anywhere
+	if ( ( unicode >= 0x3040 && unicode <= 0x32FF) ||	// Hiragana, Katakana
+			( unicode >= 0x4E00 && unicode <= 0xFE4F )	// CJK 
+	) {
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+// check if this character require tight spacing behind it
+qboolean Q_IsUtf8TightSpacing( uint32_t unicode ) {
+	if ( ( unicode >= 0x0590 && unicode <= 0x05FF ) ||		// Hebrew
+			( unicode >= 0x0600 && unicode <= 0x06FF ) ||	// Arabic
+			( unicode >= 0x0750 && unicode <= 0x077F ) ||	// Arabic Supplement
+			( unicode >= 0x08A0 && unicode <= 0x08FF ) ||	// Arabic Extended-A
+			( unicode >= 0xFB50 && unicode <= 0xFDFF ) ||	// Arabic Presentation Forms-A
+			( unicode >= 0xFE70 && unicode <= 0xFEFF )		// Arabic Presentation Forms-B
+	) {
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+// check if string require bidirectional text processing
+qboolean Q_IsUtf8StringNeedBidi( const char *str ) {
+	if ( !str || !*str ) return qfalse;
+
+	const char *p = str;
+	while ( *p ) {
+		int bytesLen = Q_utf8bytesLength(p);
+		int32_t unicode = Q_utf8ToCodePoint(p);
+
+		// these ranges may need to be adjusted 
+		// as I am not entirely sure which other languages need to be included within this range
+		if ( ( unicode >= 0x0590 && unicode <= 0x05FF ) ||		// Hebrew
+				( unicode >= 0x0600 && unicode <= 0x06FF ) ||	// Arabic
+				( unicode >= 0x0750 && unicode <= 0x077F ) ||	// Arabic Supplement
+				( unicode >= 0x08A0 && unicode <= 0x08FF ) ||	// Arabic Extended-A
+				( unicode >= 0xFB50 && unicode <= 0xFDFF ) ||	// Arabic Presentation Forms-A
+				( unicode >= 0xFE70 && unicode <= 0xFEFF )		// Arabic Presentation Forms-B
+		) {
+			return qtrue;
+		}
+		p += bytesLen;
+	}
+
+	return qfalse;
+}
+
+// using when the text contains multiple languages and they require bidirectional text processing
+// this will overwrite `char *str`
+void Q_TransToUtf8BidiString( char *str, int maxLen ) {
+#ifndef USE_FRIBIDI
+	// unicode bidirectional algorrithm: https://www.unicode.org/reports/tr9/
+	return;
+#else
+	if (!str || maxLen <= 0) {
+		return;
+	}
+
+	int len = strlen(str);
+	if (len <= 0) {
+		return;
+	}
+
+	// our input string sould be utf-8, Fribidi needs utf-32 format, so convert it 
+	FriBidiChar *text = (FriBidiChar *)malloc((len + 1) * sizeof(FriBidiChar));
+	int unicode_len = 0;
+	for (int i = 0; i < len; ) {
+		unsigned char c = (unsigned char)str[i];
+		
+		if (c < 0x80) {
+			// ascii
+			text[unicode_len++] = c;
+			i++;
+		} else if ((c & 0xE0) == 0xC0 && i + 1 < len) {
+			// 2 bytes utf-8
+			unsigned char c1 = (unsigned char)str[i+1];
+			if ((c1 & 0xC0) == 0x80) {
+				FriBidiChar code = ((c & 0x1F) << 6) | (c1 & 0x3F);
+				text[unicode_len++] = code;
+				i += 2;
+			} else {
+				i++;
+			}
+		} else if ((c & 0xF0) == 0xE0 && i + 2 < len) {
+			// 3 bytes utf-8
+			unsigned char c1 = (unsigned char)str[i+1];
+			unsigned char c2 = (unsigned char)str[i+2];
+			if ((c1 & 0xC0) == 0x80 && (c2 & 0xC0) == 0x80) {
+				FriBidiChar code = ((c & 0x0F) << 12) | ((c1 & 0x3F) << 6) | (c2 & 0x3F);
+				text[unicode_len++] = code;
+				i += 3;
+			} else {
+				i++;
+			}
+		} else if ((c & 0xF8) == 0xF0 && i + 3 < len) {
+			// 4 bytes utf-8
+			unsigned char c1 = (unsigned char)str[i+1];
+			unsigned char c2 = (unsigned char)str[i+2];
+			unsigned char c3 = (unsigned char)str[i+3];
+			if ((c1 & 0xC0) == 0x80 && (c2 & 0xC0) == 0x80 && (c3 & 0xC0) == 0x80) {
+				FriBidiChar code = ((c & 0x07) << 18) | ((c1 & 0x3F) << 12) | ((c2 & 0x3F) << 6) | (c3 & 0x3F);
+				text[unicode_len++] = code;
+				i += 4;
+			} else {
+				i++;
+			}
+		} else {
+			i++;
+		}
+	}
+	text[unicode_len] = 0;
+
+	// using Fribidi for bidirectional processing
+	FriBidiChar *visualText = (FriBidiChar *)malloc((unicode_len + 1) * sizeof(FriBidiChar));
+	if (!visualText) {
+		free(text);
+		return;
+	}
+	FriBidiParType pbase_dir = FRIBIDI_PAR_ON;
+	fribidi_log2vis(text, unicode_len, &pbase_dir, visualText, NULL, NULL, NULL);
+
+	// convert utf-32 to utf-8 back
+	char *output = (char *)malloc(unicode_len * 4 + 1);
+	if (output) {
+		int out_len = 0;
+		
+		for (int i = 0; i < unicode_len; i++) {
+			FriBidiChar ch = visualText[i];
+			
+			if (ch <= 0x7F) {
+				output[out_len++] = (char)ch;
+			} else if (ch <= 0x7FF) {
+				output[out_len++] = 0xC0 | (ch >> 6);
+				output[out_len++] = 0x80 | (ch & 0x3F);
+			} else if (ch <= 0xFFFF) {
+				output[out_len++] = 0xE0 | (ch >> 12);
+				output[out_len++] = 0x80 | ((ch >> 6) & 0x3F);
+				output[out_len++] = 0x80 | (ch & 0x3F);
+			} else if (ch <= 0x10FFFF) {
+				output[out_len++] = 0xF0 | (ch >> 18);
+				output[out_len++] = 0x80 | ((ch >> 12) & 0x3F);
+				output[out_len++] = 0x80 | ((ch >> 6) & 0x3F);
+				output[out_len++] = 0x80 | (ch & 0x3F);
+			}
+		}
+		output[out_len] = '\0';
+		
+		// copy bytes
+		int copy_len = (out_len < maxLen - 1) ? out_len : maxLen - 1;
+		Com_Memcpy(str, output, copy_len);
+		str[copy_len] = '\0';
+		
+		free(output);
+	}
+
+	free(text);
+	free(visualText);
+#endif
 }

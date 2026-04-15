@@ -3357,11 +3357,12 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 	newLineWidth = 0;
 	p = textPtr;
 	while ( p ) {
+		int32_t unicode = Q_utf8ToCodePoint(p);
 		if ( *p == ' ' || *p == '\t' || *p == '\n' || *p == '\0' ) {
 			newLine = len;
 			newLinePtr = p + 1;
 			newLineWidth = textWidth;
-		} else if ( Q_isUtf8Char(p) ) {
+		} else if ( Q_IsUtf8BreakOpportunity(unicode) ) {
 			newLine = len;
 			newLinePtr = p;
 			newLineWidth = textWidth;
@@ -3380,8 +3381,13 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 				item->textRect.y = y;
 				ToWindowCoords( &item->textRect.x, &item->textRect.y, &item->window );
 				//
-				if ( Q_isUtf8Char(p) ) newLine += Q_utf8bytesLength(p) - 1;
+				if ( Q_IsUtf8BreakOpportunity(unicode) ) {
+					newLine += Q_utf8bytesLength(p) - 1;
+				}
 				buff[newLine] = '\0';
+				if ( Q_IsUtf8StringNeedBidi( buff ) ) {
+					Q_TransToUtf8BidiString( buff, sizeof(buff) );
+				}
 				DC->drawText( item->textRect.x, item->textRect.y, item->font, item->textscale, color, buff, 0, 0, item->textStyle );
 			}
 			if ( *p == '\0' ) {

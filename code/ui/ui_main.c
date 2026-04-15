@@ -568,7 +568,11 @@ void Text_Paint_Utf8( float x, float y, int font, float scale, vec4_t color, con
 							glyph->t2,
 							glyph->glyph );
 
-			x += ( glyph->xSkip * useScale ) + adjust;
+			if ( Q_IsUtf8TightSpacing(unicode) ) {
+				x += glyph->xSkip * useScale;
+			} else {
+				x += ( glyph->xSkip * useScale ) + adjust;
+			}
 		}
 		
 		count++;

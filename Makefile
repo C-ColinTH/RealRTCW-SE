@@ -336,6 +336,7 @@ LIBSDIR=$(MOUNT_DIR)/libs
 BSPCDIR=$(MOUNT_DIR)/../sdk/rtcw-bspc-custom/src/bspc
 BSPCBLIBDIR=$(MOUNT_DIR)/../sdk/rtcw-bspc-custom/src/botlib
 BSPCCMDIR=$(MOUNT_DIR)/../sdk/rtcw-bspc-custom/src/qcommon
+FRIBIDI_DIR = $(MOUNT_DIR)/fribidi
 
 bin_path=$(shell which $(1) 2> /dev/null)
 
@@ -737,6 +738,7 @@ ifdef MINGW
   endif
 
   ifeq ($(ARCH),x86_64)
+    BASE_CFLAGS += -I$(FRIBIDI_DIR)/include
     OPTIMIZEVM = -O2
     OPTIMIZE = $(OPTIMIZEVM) -fno-omit-frame-pointer
     FILE_ARCH=x64
@@ -788,12 +790,14 @@ ifdef MINGW
     CLIENT_LIBS += -lavutil.dll
     CLIENT_LIBS += -lswscale.dll
     CLIENT_LIBS += -lswresample.dll
+    LIBS += $(LIBSDIR)/win64/libfribidi64.a
   else
     CLIENT_LIBS += -lavformat.dll
     CLIENT_LIBS += -lavcodec.dll
     CLIENT_LIBS += -lavutil.dll
     CLIENT_LIBS += -lswscale.dll
     CLIENT_LIBS += -lswresample.dll
+    LIBS += $(LIBSDIR)/win64/libfribidi.a
   endif
 
   ifeq ($(USE_FREETYPE),1)
