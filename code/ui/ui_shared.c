@@ -3388,10 +3388,10 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 				break;
 			}
 			//
-			if ( item->font < FONT_UTF_DEFAULT ) {
-				y += height + 5;
+			if ( item->textlinespacing ) {
+				y += (item->font < FONT_UTF_DEFAULT) ? (height + item->textlinespacing) : (textHeight + item->textlinespacing);
 			} else {
-				y += textHeight + (int)MIN(textHeight * 0.25f + 1, 5);
+				y += (item->font < FONT_UTF_DEFAULT) ? (height + 5) : (textHeight + (int)MIN(textHeight * 0.25f + 1, 5));
 			}
 
 			p = newLinePtr;
@@ -5837,6 +5837,14 @@ qboolean ItemParse_hideCvar( itemDef_t *item, int handle ) {
 	return qfalse;
 }
 
+// added for adjust text line spacing
+qboolean ItemParse_textLineSpacing( itemDef_t *item, int handle ) {
+	if ( !PC_Int_Parse( handle, &item->textlinespacing ) ) {
+		return qfalse;
+	}
+	return qtrue;
+}
+
 
 keywordHash_t itemParseKeywords[] = {
 	{"name", ItemParse_name, NULL},
@@ -5876,6 +5884,7 @@ keywordHash_t itemParseKeywords[] = {
 	{"textscale", ItemParse_textscale, NULL},
 	{"textstyle", ItemParse_textstyle, NULL},
 	{"textfont", ItemParse_textfont, NULL},
+	{"textlinespacing", ItemParse_textLineSpacing, NULL},
 	{"backcolor", ItemParse_backcolor, NULL},
 	{"forecolor", ItemParse_forecolor, NULL},
 	{"bordercolor", ItemParse_bordercolor, NULL},
