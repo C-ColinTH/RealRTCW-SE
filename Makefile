@@ -744,6 +744,7 @@ ifdef MINGW
     FILE_ARCH=x64
   endif
   ifeq ($(ARCH),x86)
+    BASE_CFLAGS += -I$(FRIBIDI_DIR)/include
     OPTIMIZEVM = -O2 -march=i586
     OPTIMIZE = $(OPTIMIZEVM) -fno-omit-frame-pointer
   endif
