@@ -1034,8 +1034,6 @@ void SendScoreboardMessageToAllClients( void );
 void QDECL G_Printf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void QDECL G_DPrintf( const char *fmt, ... ) __attribute__ ((format (printf, 1, 2)));
 void QDECL G_Error( const char *fmt, ... ) __attribute__ ((noreturn, format (printf, 1, 2)));
-//----(SA)	added
-void G_EndGame( void );
 int G_SendMissionStats( void );   // return '0' if objectives not met, '1' if met
 void G_ChangeLevel( char *mapName );
 //----(SA)	end
@@ -1180,6 +1178,11 @@ extern vmCvar_t g_ee_skinEliteGuard;
 extern vmCvar_t g_ee_skinMercenary;
 extern vmCvar_t g_ee_skinZombie;
 
+extern vmCvar_t g_ee_earlyWeapons;
+extern vmCvar_t g_ee_endgameSwitch;
+extern vmCvar_t g_ee_progress;
+extern vmCvar_t g_ee_svAgent1;
+
 extern vmCvar_t g_reloading;        //----(SA)	added
 
 extern vmCvar_t g_dedicated;
@@ -1276,9 +1279,6 @@ extern vmCvar_t	g_flushItems;
 extern vmCvar_t g_vanilla_guns;
 extern vmCvar_t g_specialWaves;
 extern vmCvar_t g_survivalAiHealthCap;
-
-// Safe endgame fix
-extern qboolean g_endgameTriggered;
 
 void	trap_Print( const char *text );
 void	trap_Error( const char *text ) __attribute__((noreturn));
@@ -1514,3 +1514,5 @@ typedef enum
 	shard_ceramic,
 	shard_rubble
 } shards_t;
+
+void G_ScheduleEndgame( int delay );

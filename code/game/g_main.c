@@ -50,9 +50,6 @@ gclient_t g_clients[MAX_CLIENTS];
 
 int g_scriptGlobalAccumBuffer[G_MAX_SCRIPT_GLOBAL_ACCUM_BUFFERS];
 
-// Safe endgame fix
-qboolean g_endgameTriggered = qfalse;
-
 gentity_t       *g_camEnt = NULL;   //----(SA)	script camera
 
 // Rafael gameskill
@@ -187,6 +184,10 @@ vmCvar_t g_playerSurvivalClass;
 vmCvar_t g_ee_skinEliteGuard;
 vmCvar_t g_ee_skinMercenary;
 vmCvar_t g_ee_skinZombie;
+vmCvar_t g_ee_earlyWeapons;
+vmCvar_t g_ee_endgameSwitch;
+vmCvar_t g_ee_progress;
+vmCvar_t g_ee_svAgent1;
 
 vmCvar_t g_mapname;
 
@@ -230,6 +231,10 @@ cvarTable_t gameCvarTable[] = {
 	{&g_ee_skinEliteGuard, "g_ee_skinEliteGuard", "0", CVAR_ARCHIVE, 0, qfalse},
 	{&g_ee_skinMercenary, "g_ee_skinMercenary", "0", CVAR_ARCHIVE, 0, qfalse},
 	{&g_ee_skinZombie, "g_ee_skinZombie", "0", CVAR_ARCHIVE, 0, qfalse},
+	{&g_ee_earlyWeapons, "g_ee_earlyWeapons", "1", CVAR_ARCHIVE, 0, qfalse},
+	{&g_ee_endgameSwitch, "g_ee_endgameSwitch", "0", CVAR_ARCHIVE, 0, qfalse},
+	{&g_ee_progress, "g_ee_progress", "0", CVAR_ARCHIVE, 0, qfalse},
+	{&g_ee_svAgent1, "g_ee_svAgent1", "1", CVAR_ARCHIVE, 0, qfalse},
 
 	{&g_playerSurvivalClass, "g_playersurvivalclass", "0", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse},
 	{&g_specialWaves, "g_specialwaves", "1", CVAR_ARCHIVE | CVAR_LATCH, 0, qfalse},
@@ -470,16 +475,6 @@ qboolean G_canStealthStab( int aiChar ) {
 	}
 	return qfalse;
 }
-
-/*
-==============
-G_EndGame
-==============
-*/
-void G_EndGame( void ) {
-	trap_Endgame();
-}
-
 
 #define CH_KNIFE_DIST       48  // from g_weapon.c
 #define CH_LADDER_DIST      100
@@ -2383,12 +2378,15 @@ void CheckReloadStatus( void ) {
 					} 
 				  }
 				}
-				else if (g_reloading.integer == RELOAD_ENDGAME)
+				else if ( g_reloading.integer == RELOAD_ENDGAME )
 				{
-					// defer endgame until it's safe
-					g_endgameTriggered = qtrue;
-					level.reloadDelayTime = 0;
-					trap_Cvar_Set("g_reloading", "0"); // prevent it from looping
+					// clear any staged end-sequence effects from bare "changelevel"
+					trap_SetConfigstring( CS_SCREENFADE, "" );
+					trap_SetConfigstring( CS_MUSIC_QUEUE, "" );
+					trap_SendServerCommand( -1, "snd_fade 1 0" );
+
+					trap_Cvar_Set( "g_reloading", "0" );
+					trap_SendConsoleCommand( EXEC_APPEND, "disconnect\n" );
 				}
 				else
 				{
@@ -2753,10 +2751,22 @@ void G_RunFrame( int levelTime ) {
 
 	// Ridah, check if we are reloading, and times have expired
 	CheckReloadStatus();
+}
 
-	if (g_endgameTriggered)
-	{
-		g_endgameTriggered = qfalse;
-		G_EndGame(); // this will now call trap_Endgame() safely
+/*
+==============
+G_ScheduleEndgame
+==============
+*/
+void G_ScheduleEndgame( int delay ) {
+	if ( g_reloading.integer ) {
+		return;
 	}
+
+	if ( delay < 0 ) {
+		delay = 0;
+	}
+
+	trap_Cvar_Set( "g_reloading", va( "%d", RELOAD_ENDGAME ) );
+	level.reloadDelayTime = level.time + delay;
 }
