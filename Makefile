@@ -798,7 +798,7 @@ ifdef MINGW
     CLIENT_LIBS += -lavutil.dll
     CLIENT_LIBS += -lswscale.dll
     CLIENT_LIBS += -lswresample.dll
-    LIBS += $(LIBSDIR)/win64/libfribidi.a
+    LIBS += $(LIBSDIR)/win32/libfribidi.a
   endif
 
   ifeq ($(USE_FREETYPE),1)
