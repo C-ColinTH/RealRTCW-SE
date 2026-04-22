@@ -3394,6 +3394,10 @@ void Item_Text_AutoWrapped_Paint( itemDef_t *item ) {
 				break;
 			}
 			//
+			if ( strlen(buff) && buff[0] == 32 && textHeight < BIGCHAR_HEIGHT ) {
+				textHeight = height * 0.9f;
+			}
+
 			if ( item->textlinespacing ) {
 				y += (item->font < FONT_UTF_DEFAULT) ? (height + item->textlinespacing) : (textHeight + item->textlinespacing);
 			} else {
