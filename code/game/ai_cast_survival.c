@@ -701,27 +701,43 @@ void AICast_UpdateMaxActiveAI(void)
     }
     }
 
-	if (svParams.waveCount >= svParams.waveHelga) {
-    svParams.maxActiveAI[AICHAR_HELGA] += svParams.helgaIncrease;
-    if (svParams.maxActiveAI[AICHAR_HELGA] > svParams.maxHelga) {
-        svParams.maxActiveAI[AICHAR_HELGA] = svParams.maxHelga;
-    }
-    }
+	// disable bosses completely
+	if (!g_survivalBosses.integer)
+	{
+		svParams.maxActiveAI[AICHAR_HELGA] = 0;
+		svParams.maxActiveAI[AICHAR_SUPERSOLDIER_LAB] = 0;
+		svParams.maxActiveAI[AICHAR_HEINRICH] = 0;
+	}
+	else
+	{
 
-	if (svParams.waveCount >= svParams.wavess) {
-    svParams.maxActiveAI[AICHAR_SUPERSOLDIER_LAB] += svParams.ssIncrease;
-    if (svParams.maxActiveAI[AICHAR_SUPERSOLDIER_LAB] > svParams.maxss) {
-        svParams.maxActiveAI[AICHAR_SUPERSOLDIER_LAB] = svParams.maxss;
-    }
-    }
+		if (svParams.waveCount >= svParams.waveHelga)
+		{
+			svParams.maxActiveAI[AICHAR_HELGA] += svParams.helgaIncrease;
+			if (svParams.maxActiveAI[AICHAR_HELGA] > svParams.maxHelga)
+			{
+				svParams.maxActiveAI[AICHAR_HELGA] = svParams.maxHelga;
+			}
+		}
 
+		if (svParams.waveCount >= svParams.wavess)
+		{
+			svParams.maxActiveAI[AICHAR_SUPERSOLDIER_LAB] += svParams.ssIncrease;
+			if (svParams.maxActiveAI[AICHAR_SUPERSOLDIER_LAB] > svParams.maxss)
+			{
+				svParams.maxActiveAI[AICHAR_SUPERSOLDIER_LAB] = svParams.maxss;
+			}
+		}
 
-	if (svParams.waveCount >= svParams.wavehein) {
-    svParams.maxActiveAI[AICHAR_HEINRICH] += svParams.heinIncrease;
-    if (svParams.maxActiveAI[AICHAR_HEINRICH] > svParams.maxhein) {
-        svParams.maxActiveAI[AICHAR_HEINRICH] = svParams.maxhein;
-    }
-    }
+		if (svParams.waveCount >= svParams.wavehein)
+		{
+			svParams.maxActiveAI[AICHAR_HEINRICH] += svParams.heinIncrease;
+			if (svParams.maxActiveAI[AICHAR_HEINRICH] > svParams.maxhein)
+			{
+				svParams.maxActiveAI[AICHAR_HEINRICH] = svParams.maxhein;
+			}
+		}
+	}
 
 	if (svParams.waveCount >= svParams.wavedog) {
     svParams.maxActiveAI[AICHAR_DOG] += svParams.dogIncrease;
@@ -870,6 +886,11 @@ void AICast_ApplySurvivalAttributes(gentity_t *ent, cast_state_t *cs)
 	case AICHAR_LOPER:
 		waveAppeared = svParams.waveLopers;
 		break;
+	case AICHAR_SOLDIER:
+	case AICHAR_MERCENARY:
+	case AICHAR_ZOMBIE_SURV:
+	case AICHAR_FLESH:
+	    waveAppeared = 1;
 	default:
 		waveAppeared = 0;
 		break;
@@ -878,6 +899,20 @@ void AICast_ApplySurvivalAttributes(gentity_t *ent, cast_state_t *cs)
 	int rawSteps = (svParams.waveCount > 1) ? (svParams.waveCount - waveAppeared) : 0;
 	if (rawSteps < 0)
 		rawSteps = 0;
+
+	if (g_survivalDifficulty.integer == 1)
+	{
+		if (svParams.waveCount < 10)
+		{
+			rawSteps += 2 + rawSteps / 2;
+		}
+		else
+		{
+			rawSteps += 4 + rawSteps / 3;
+		}
+
+	}
+	
 
 	int newHealth = 0;
 	float runSpeedScale = 1.0f;
@@ -937,7 +972,7 @@ void AICast_ApplySurvivalAttributes(gentity_t *ent, cast_state_t *cs)
 		case AICHAR_HELGA:
 			if (svParams.waveCount < 10)
 			{
-				newHealth = 10000 + rawSteps * 14;
+				newHealth = 4000 + rawSteps * 14;
 			}
 			else
 			{
@@ -954,7 +989,7 @@ void AICast_ApplySurvivalAttributes(gentity_t *ent, cast_state_t *cs)
 		case AICHAR_HEINRICH:
 			if (svParams.waveCount < 10)
 			{
-				newHealth = 20000 + rawSteps * 14;
+				newHealth = 8000 + rawSteps * 14;
 			}
 			else
 			{
@@ -970,7 +1005,7 @@ void AICast_ApplySurvivalAttributes(gentity_t *ent, cast_state_t *cs)
 		case AICHAR_SUPERSOLDIER_LAB:
 			if (svParams.waveCount < 10)
 			{
-				newHealth = 15000 + rawSteps * 14;
+				newHealth = 5000 + rawSteps * 14;
 			}
 			else
 			{
@@ -979,7 +1014,7 @@ void AICast_ApplySurvivalAttributes(gentity_t *ent, cast_state_t *cs)
 			}
 			if (g_survivalAiHealthCap.integer == 1)
 			{
-			if (newHealth > 30000) newHealth = 30000;
+			if (newHealth > 20000) newHealth = 20000;
 			}
 			break;
 
@@ -1258,14 +1293,15 @@ void BG_SetBehaviorForSurvival(AICharacters_t characterNum) {
 		case AICHAR_VENOM:        waveAppeared = svParams.waveV; break;
 		case AICHAR_PROTOSOLDIER: waveAppeared = svParams.waveProtos; break;
 		case AICHAR_SUPERSOLDIER_LAB: waveAppeared = svParams.wavess; break;
+		case AICHAR_SOLDIER: waveAppeared = 1; break;
+		case AICHAR_MERCENARY: waveAppeared = 1; break;
 		default:  waveAppeared = 0; break;
 	}
 
 	int rawSteps = (svParams.waveCount > 1) ? (svParams.waveCount - waveAppeared) : 0;
 	if (rawSteps < 0) rawSteps = 0;
 
-	int stepMultiplier = (svParams.waveCount < 10) ? 1 : 2;
-	float delta = rawSteps * 0.05f * stepMultiplier;  // max delta ~0.5-1.0 depending on how long they're alive
+	float delta = rawSteps * 0.05f;
 
 	float aimSkill     = 0.0f;
 	float aimAccuracy  = 0.0f;
@@ -1276,61 +1312,117 @@ void BG_SetBehaviorForSurvival(AICharacters_t characterNum) {
 	switch (characterNum) {
 		case AICHAR_SOLDIER:
 		case AICHAR_MERCENARY:
-			aimSkill     = fminf(0.1f + delta, 0.7f);
-			aimAccuracy  = fminf(0.1f + delta, 0.7f);
-			attackSkill  = fminf(0.1f + delta, 0.7f);
-			aggression   = fminf(0.1f + delta, 1.0f);
-			reactionTime = fmaxf(1.0f - delta, 0.4f);
+			if (g_survivalDifficulty.integer == 1) {
+				aimSkill     = fminf(0.4f + delta, 0.8f);
+				aimAccuracy  = fminf(0.4f + delta, 0.8f);
+				attackSkill  = fminf(0.4f + delta, 0.8f);
+				aggression   = fminf(0.4f + delta, 1.0f);
+				reactionTime = fmaxf(0.8f - delta, 0.4f);
+			} else {
+				aimSkill     = fminf(0.1f + delta, 0.7f);
+				aimAccuracy  = fminf(0.1f + delta, 0.7f);
+				attackSkill  = fminf(0.1f + delta, 0.7f);
+				aggression   = fminf(0.1f + delta, 1.0f);
+				reactionTime = fmaxf(1.0f - delta, 0.4f);
+			}
 			break;
 		case AICHAR_ELITEGUARD:
-			aimSkill     = fminf(0.3f + delta, 0.8f);
-			aimAccuracy  = fminf(0.3f + delta, 0.8f);
-			attackSkill  = fminf(0.3f + delta, 0.8f);
-			aggression   = fminf(0.3f + delta, 1.0f);
-			reactionTime = fmaxf(1.0f - delta, 0.3f);
+			if (g_survivalDifficulty.integer == 1) {
+				aimSkill     = fminf(0.5f + delta, 0.9f);
+				aimAccuracy  = fminf(0.5f + delta, 0.9f);
+				attackSkill  = fminf(0.5f + delta, 0.9f);
+				aggression   = fminf(0.5f + delta, 1.0f);
+				reactionTime = fmaxf(0.6f - delta, 0.2f);
+			} else {
+				aimSkill     = fminf(0.4f + delta, 0.8f);
+				aimAccuracy  = fminf(0.4f + delta, 0.8f);
+				attackSkill  = fminf(0.4f + delta, 0.8f);
+				aggression   = fminf(0.4f + delta, 1.0f);
+				reactionTime = fmaxf(1.0f - delta, 0.3f);
+			}
 			break;
 		case AICHAR_TRENCH:
-			aimSkill     = fminf(0.3f + delta, 0.8f);
-			aimAccuracy  = fminf(0.3f + delta, 0.8f);
-			attackSkill  = fminf(0.3f + delta, 0.8f);
-			aggression   = fminf(0.3f + delta, 1.0f);
-			reactionTime = fmaxf(1.0f - delta, 0.3f);
+			if (g_survivalDifficulty.integer == 1) {
+				aimSkill     = fminf(0.3f + delta, 0.7f);
+				aimAccuracy  = fminf(0.3f + delta, 0.7f);
+				attackSkill  = fminf(0.3f + delta, 0.7f);
+				aggression   = fminf(0.3f + delta, 1.0f);
+				reactionTime = fmaxf(0.8f - delta, 0.3f);
+			} else {
+				aimSkill     = fminf(0.2f + delta, 0.7f);
+				aimAccuracy  = fminf(0.2f + delta, 0.7f);
+				attackSkill  = fminf(0.2f + delta, 0.7f);
+				aggression   = fminf(0.2f + delta, 1.0f);
+				reactionTime = fmaxf(1.0f - delta, 0.3f);
+			}
 			break;
 		case AICHAR_XSHEPHERD:
-			aimSkill     = fminf(0.3f + delta, 0.8f);
-			aimAccuracy  = fminf(0.3f + delta, 0.8f);
-			attackSkill  = fminf(0.3f + delta, 0.8f);
-			aggression   = fminf(0.3f + delta, 1.0f);
-			reactionTime = fmaxf(1.0f - delta, 0.3f);
+			if (g_survivalDifficulty.integer == 1) {
+				aimSkill     = fminf(0.4f + delta, 0.8f);
+				aimAccuracy  = fminf(0.4f + delta, 0.8f);
+				attackSkill  = fminf(0.4f + delta, 0.8f);
+				aggression   = fminf(0.4f + delta, 1.0f);
+				reactionTime = fmaxf(0.7f - delta, 0.3f);
+			} else {
+				aimSkill     = fminf(0.3f + delta, 0.8f);
+				aimAccuracy  = fminf(0.3f + delta, 0.8f);
+				attackSkill  = fminf(0.3f + delta, 0.8f);
+				aggression   = fminf(0.3f + delta, 1.0f);
+				reactionTime = fmaxf(1.0f - delta, 0.3f);
+			}
 			break;
 		case AICHAR_BLACKGUARD:
-			aimSkill     = fminf(0.4f + delta, 0.9f);
-			aimAccuracy  = fminf(0.4f + delta, 0.9f);
-			attackSkill  = fminf(0.4f + delta, 0.9f);
-			aggression   = fminf(0.5f + delta, 1.0f);
-			reactionTime = fmaxf(1.0f - delta, 0.3f);
+			if (g_survivalDifficulty.integer == 1) {
+				aimSkill     = fminf(0.55f + delta, 0.9f);
+				aimAccuracy  = fminf(0.55f + delta, 0.9f);
+				attackSkill  = fminf(0.55f + delta, 0.9f);
+				aggression   = fminf(0.55f + delta, 1.0f);
+				reactionTime = fmaxf(0.7f - delta, 0.3f);
+			} else {
+				aimSkill     = fminf(0.4f + delta, 0.9f);
+				aimAccuracy  = fminf(0.4f + delta, 0.9f);
+				attackSkill  = fminf(0.4f + delta, 0.9f);
+				aggression   = fminf(0.5f + delta, 1.0f);
+				reactionTime = fmaxf(1.0f - delta, 0.3f);
+			}
 			break;
 		case AICHAR_VENOM:
-			aimSkill     = fminf(0.4f + delta, 0.9f);
-			aimAccuracy  = fminf(0.4f + delta, 0.9f);
-			attackSkill  = fminf(0.4f + delta, 0.9f);
-			aggression   = fminf(0.5f + delta, 1.0f);
-			reactionTime = fmaxf(1.0f - delta, 0.3f);
+			if (g_survivalDifficulty.integer == 1) {
+				aimSkill     = fminf(0.5f + delta, 0.8f);
+				aimAccuracy  = fminf(0.5f + delta, 0.8f);
+				attackSkill  = fminf(0.5f + delta, 0.8f);
+				aggression   = fminf(0.6f + delta, 1.0f);
+				reactionTime = fmaxf(0.7f - delta, 0.3f);
+			} else {
+				aimSkill     = fminf(0.4f + delta, 0.8f);
+				aimAccuracy  = fminf(0.4f + delta, 0.8f);
+				attackSkill  = fminf(0.4f + delta, 0.8f);
+				aggression   = fminf(0.5f + delta, 1.0f);
+				reactionTime = fmaxf(1.0f - delta, 0.3f);
+			}
 			break;
 		case AICHAR_PROTOSOLDIER:
 		case AICHAR_SUPERSOLDIER_LAB:
-			aimSkill     = fminf(0.4f + delta, 0.9f);
-			aimAccuracy  = fminf(0.4f + delta, 0.9f);
-			attackSkill  = fminf(0.4f + delta, 0.9f);
-			aggression   = fminf(0.5f + delta, 1.0f);
-			reactionTime = fmaxf(1.0f - delta, 0.2f);
+			if (g_survivalDifficulty.integer == 1) {
+				aimSkill     = fminf(0.6f + delta, 0.9f);
+				aimAccuracy  = fminf(0.6f + delta, 0.9f);
+				attackSkill  = fminf(0.6f + delta, 0.9f);
+				aggression   = fminf(0.6f + delta, 1.0f);
+				reactionTime = fmaxf(0.8f - delta, 0.2f);
+			} else {
+				aimSkill     = fminf(0.4f + delta, 0.9f);
+				aimAccuracy  = fminf(0.4f + delta, 0.9f);
+				attackSkill  = fminf(0.4f + delta, 0.9f);
+				aggression   = fminf(0.5f + delta, 1.0f);
+				reactionTime = fmaxf(1.0f - delta, 0.2f);
+			}
 			break;
 		case AICHAR_PARTISAN:
 			aimSkill     = 0.9f;
 			aimAccuracy  = 0.9f;
 			attackSkill  = 0.9f;
 			aggression   = 0.9f;
-			reactionTime = 0.2f;
+			reactionTime = 0.1f;
 			break;
 		case AICHAR_ZOMBIE_SURV:
 		case AICHAR_ZOMBIE_FLAME:
@@ -1431,14 +1523,20 @@ void AICast_CheckSurvivalProgression(gentity_t *attacker) {
         svParams.wavePending = qtrue;
         svParams.waveChangeTime = level.time + svParams.intermissionTime * 1000;
 
-        if ((svParams.waveCount == 4) && (!g_cheats.integer) && (!attacker->client->hasPurchased)) {
-            steamSetAchievement("ACH_NO_BUY");
-        }
+		if (player && player->client)
+		{
 
-        if ((svParams.waveCount == 9) && (!g_cheats.integer) &&
-            (attacker->client->ps.stats[STAT_PLAYER_CLASS] == PC_NONE)) {
-            steamSetAchievement("ACH_NO_CLASS");
-        }
+			if ((svParams.waveCount == 4) && (!g_cheats.integer) && (!player->client->hasPurchased))
+			{
+				steamSetAchievement("ACH_NO_BUY");
+			}
+
+			if ((svParams.waveCount == 9) && (!g_cheats.integer) &&
+				(player->client->ps.stats[STAT_PLAYER_CLASS] == PC_NONE))
+			{
+				steamSetAchievement("ACH_NO_CLASS");
+			}
+		}
 
 		char endEvtBuf[32];
 		Q_strncpyz(
@@ -1686,6 +1784,23 @@ void AI_LoadSurvivalTable( const char* mapname )
 	if ( !parsedDefault ) {
 		G_Printf( S_COLOR_RED "ERROR: Failed to parse survival block in default.surv\n" );
 		return;
+	}
+
+	if ( g_survivalDifficulty.integer == 1 ) {
+		handle = trap_PC_LoadSource( "maps/default_hardcore.surv" );
+		if ( handle ) {
+			while ( 1 ) {
+				if ( !trap_PC_ReadToken( handle, &token ) ) {
+					break;
+				}
+				if ( !Q_stricmp( token.string, "survival" ) ) {
+					BG_ParseSurvivalTable( handle );
+					break;
+				}
+			}
+
+			trap_PC_FreeSource( handle );
+		}
 	}
 
 	if ( Q_stricmp( mapname, "default" ) ) {

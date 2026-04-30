@@ -157,7 +157,9 @@ typedef enum {
 	UI_CEIL,
 
 	// New in IORTCW
-	UI_ALLOC = 900
+	UI_ALLOC = 900,
+
+	UI_R_REGISTERSMARTSKIN
 
 } uiImport_t;
 

@@ -1182,4 +1182,6 @@ void trap_openURL(const char *url);
 
 int UI_ParseArenaEnemiesType( const char *arenaInfo );
 
+qhandle_t       trap_R_RegisterSmartSkin( const char *name, const char *mapName, qboolean upgraded );
+
 #endif

@@ -1131,6 +1131,9 @@ intptr_t CL_UISystemCalls( intptr_t *args ) {
 		re.RegisterUtf8Font( VMA( 1 ), VMA( 2 ) );
 		return 0;
 
+	case UI_R_REGISTERSMARTSKIN:
+		return re.RegisterSmartSkin( VMA(1), VMA(2), args[3] );
+
 	default:
 		Com_Error( ERR_DROP, "Bad UI system trap: %ld", (long int) args[0] );
 
