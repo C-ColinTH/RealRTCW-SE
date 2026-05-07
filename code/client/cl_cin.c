@@ -102,7 +102,6 @@ typedef struct {
 	int x1, y1;
 } subtitle_t;
 
-extern cvar_t *cl_drawCineSubtitles;
 static int CIN_GetCurrentPlayingTime( int handle );
 static void CIN_LoadCinematicSubtitle( int handle );
 static void CIN_DrawCinematicSubtitle( int handle );
@@ -2963,8 +2962,13 @@ static void CIN_DrawCinematicSubtitle( int handle ) {
 				y = subs[i].y0;
 			}
 
-			SCR_Text_AutoWrapped_Paint( x, y, subs[i].sizeScale, subs[i].lineText,
-										subs[i].width, color, TEXT_ALIGN_CENTER );
+			if ( cl_enableUtf8Font->integer ) {
+				SCR_Text_AutoWrapped_Paint_Utf8( x, y, subs[i].sizeScale * cl_hudUtf8FontScale->value, subs[i].lineText,
+										subs[i].width, color, TEXT_ALIGN_CENTER, qtrue, qtrue );
+			} else {
+				SCR_Text_AutoWrapped_Paint( x, y, subs[i].sizeScale, subs[i].lineText,
+											subs[i].width, color, TEXT_ALIGN_CENTER );
+			}
 		}
 	}
 
