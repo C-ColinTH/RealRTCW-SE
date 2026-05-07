@@ -2877,7 +2877,7 @@ static void CIN_LoadCinematicSubtitle( int handle ) {
 		token = COM_ParseExt(&text, qfalse);
 		cinTable[handle].subtitles[i].endTime = atoi(token);
 
-		token = COM_ParseExt(&text, qfalse);
+		token = COM_ParseExt2(&text, qfalse, qtrue);
 		Q_strncpyz( cinTable[handle].subtitles[i].lineText, token, sizeof(cinTable[handle].subtitles[i].lineText) );
 
 		token = COM_ParseExt(&text, qfalse);
