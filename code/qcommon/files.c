@@ -3616,11 +3616,11 @@ int FS_PathCmp( const char *s1, const char *s2 ) {
 		c1 = *s1++;
 		c2 = *s2++;
 
-		if ( Q_islower( c1 ) ) {
-			c1 -= ( 'a' - 'A' );
+		if ( Q_isupper( c1 ) ) {
+			c1 += ( 'a' - 'A' );
 		}
-		if ( Q_islower( c2 ) ) {
-			c2 -= ( 'a' - 'A' );
+		if ( Q_isupper( c2 ) ) {
+			c2 += ( 'a' - 'A' );
 		}
 
 		if ( c1 == '\\' || c1 == ':' ) {
