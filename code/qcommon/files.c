@@ -3896,9 +3896,14 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 			// JPW NERVE sp_* to _p_* so "sp_pak*" gets alphabetically sorted before "pak*"
 			//----(SA)	SP mod
 			// (SA) sort order to be further clarified later (10/8/01)
+
+// No need to do these below, the behavior of FS-PathCmp is now consistent with that of stricmp
+// The actual sorting is consistent with what we see in the file explorer now
+/*
 			if ( !Q_strncmp( sorted[i],"sp_",3 ) ) { //	sort sp first
 				memcpy( sorted[i],"zz",2 );
 			}
+*/
 		}
 	}
 
@@ -3906,9 +3911,11 @@ void FS_AddGameDirectory( const char *path, const char *dir ) {
 
 for ( i = 0 ; i < numfiles ; i++ ) {
     if ( Q_strncmp( sorted[i],"mp_",3 ) ) {
+/*
         if ( !Q_strncmp( sorted[i],"zz_",3 ) ) {
             memcpy( sorted[i],"sp",2 ); // restore "sp_" name
         }
+*/
 
 		// --- DLC gating begin ---
 		char baseNoExt[MAX_OSPATH];
